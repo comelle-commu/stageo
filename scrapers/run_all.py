@@ -10,11 +10,18 @@ import time
 from pathlib import Path
 
 import ans
+import aywaille
 import floreffe
+import hannut
+import herstal
+import huy
 import neupre
+import oupeye
 import seraing
-import verviers
+import sprimont
 import supabase_client
+import verviers
+import waremme
 from common import write_outputs
 
 SCRAPERS = [
@@ -22,7 +29,15 @@ SCRAPERS = [
     ("Seraing", seraing),
     ("Neupre", neupre),
     ("Verviers", verviers),
+    ("Herstal", herstal),
+    ("Huy", huy),
+    ("Sprimont", sprimont),
 ]
+
+# Modules "en attente" : n'effectuent aucune requête réseau (voir chaque
+# fichier pour la raison), mais apparaissent explicitement dans le résumé
+# plutôt que d'être silencieusement absents.
+EN_ATTENTE = [floreffe, waremme, hannut, oupeye, aywaille]
 
 OUT_DIR = Path(__file__).parent / "output"
 
@@ -46,9 +61,11 @@ def run_scrapers() -> tuple[list, list[tuple[str, int, float, str]]]:
             print(f"  ERREUR après {elapsed:.2f}s : {exc}")
             timings.append((nom, 0, elapsed, f"ERREUR: {exc}"))
 
-    print(f"--- Floreffe ---")
-    print(f"  EN_ATTENTE - {floreffe.RAISON}")
-    timings.append(("Floreffe", 0, 0.0, "EN_ATTENTE"))
+    for module in EN_ATTENTE:
+        nom = module.__name__.capitalize()
+        print(f"--- {nom} ---")
+        print(f"  EN_ATTENTE - {module.RAISON}")
+        timings.append((nom, 0, 0.0, "EN_ATTENTE"))
 
     return all_activites, timings
 

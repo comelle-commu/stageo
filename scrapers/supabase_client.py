@@ -45,6 +45,9 @@ PLATEFORME_SOURCE = {
     "Seraing": "WordPress",
     "Neupre": "Nuxt",
     "Verviers": "Plone",
+    "Herstal": "Plone",
+    "Huy": "Plone",
+    "Sprimont": "Plone",
 }
 
 

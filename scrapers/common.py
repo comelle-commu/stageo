@@ -209,6 +209,58 @@ def check_legal(domain: str, legal_path: str = "/gdpr-view") -> LegalCheck:
     )
 
 
+# --- Extraction PDF (texte natif uniquement, pas d'OCR) --------------------
+#
+# Plusieurs communes iMio renvoient vers un PDF pour le programme détaillé
+# (Herstal confirmé, Waremme probable - voir
+# docs/investigation-technique-elargissement-communes-2026-08-24.md).
+# Choix délibéré : pas d'OCR à ce stade -> un PDF scanné (image) donnera un
+# texte vide ou un tableau vide, pas une erreur - à l'appelant de vérifier.
+def fetch_pdf_bytes(url: str) -> bytes:
+    """Télécharge un PDF via respectful_get (donc avec le même crawl-delay
+    que les pages HTML). ATTENTION : une URL qui *ressemble* à un .pdf n'en
+    est pas forcément un - vu en pratique sur Ans, où le lien "Règlement
+    d'ordre intérieur ... .pdf" sert en réalité un fichier .docx
+    (Content-Type: application/vnd.openxmlformats...). Vérifier le
+    Content-Type ou la signature des bytes (%PDF-) avant de traiter le
+    résultat comme un PDF."""
+    resp = respectful_get(url)
+    return resp.content
+
+
+def is_pdf(content: bytes) -> bool:
+    return content[:5] == b"%PDF-"
+
+
+def extract_pdf_tables(pdf_bytes: bytes) -> list[list[list[Optional[str]]]]:
+    """Extraction de tableaux via pdfplumber (texte natif). Retourne une
+    liste de tableaux (un par tableau détecté, toutes pages confondues),
+    chaque tableau étant une liste de lignes (liste de cellules). Une
+    lecture attentive reste nécessaire : un tableau peut continuer sur la
+    page suivante sans répéter sa ligne d'en-tête (vu sur le PDF Herstal)."""
+    import io
+
+    import pdfplumber
+
+    tables: list[list[list[Optional[str]]]] = []
+    with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+        for page in pdf.pages:
+            tables.extend(page.extract_tables())
+    return tables
+
+
+def extract_pdf_text(pdf_bytes: bytes) -> str:
+    """Extraction de texte brut (pypdf) - pour repérer des mots-clés
+    (prix, âge...) dans un PDF qui n'est pas un tableau (règlement,
+    brochure...)."""
+    import io
+
+    import pypdf
+
+    reader = pypdf.PdfReader(io.BytesIO(pdf_bytes))
+    return "\n".join((page.extract_text() or "") for page in reader.pages)
+
+
 # --- Repérage de zone de contenu (Plone/iMio) -------------------------------
 #
 # Mutualisable avec un niveau de confiance raisonnable : `<main>` (souvent
