@@ -28,6 +28,12 @@ python3 -m venv venv
 debug (`./venv/bin/python3 ans.py`, etc.) — il affiche alors ses résultats
 en JSON sur stdout sans rien écrire sur disque.
 
+Si `scrapers/.env` est configuré (voir `docs/supabase-backend-2026-08-24.md`),
+`run_all.py` upsert aussi automatiquement le résultat dans la table
+`activites` sur Supabase, en plus des fichiers. Sans `.env`, cette étape est
+simplement ignorée (message clair, pas d'erreur). Vérification a posteriori :
+`./venv/bin/python3 verify_supabase.py`.
+
 ## Schéma de sortie
 
 Une ligne par activité : `commune, nom_activite, dates, age_min, age_max,
