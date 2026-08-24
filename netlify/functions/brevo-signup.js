@@ -1,4 +1,4 @@
-// Relais entre le formulaire de stageo-landing.html et l'API Brevo.
+// Relais entre le formulaire de index.html (landing page Trouvéo) et l'API Brevo.
 //
 // Pourquoi ce relais existe : Brevo n'a pas de notion de clé "publique" /
 // "restreinte" comme Stripe ou Supabase - une seule clé API, qui donne un

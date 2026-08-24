@@ -147,10 +147,11 @@ cette partie.
 ## Respect des règles de crawl
 
 - **User-Agent identifiable** envoyé sur chaque requête, avec contact
-  (`StageoScraperBot/0.1 (+contact: murieldelepont@gmail.com; ...)`).
-  ⚠️ Piège rencontré : un accent dans le User-Agent (`Stagéo`) a fait
-  planter le WAF du site d'Ans en 403 côté `requests` (alors que `curl -A`
-  passait avec la même chaîne). Leçon : header HTTP = ASCII pur, toujours.
+  (`TrouveoScraperBot/0.1 (+contact: murieldelepont@gmail.com; ...)`).
+  ⚠️ Piège rencontré : un accent dans le User-Agent (`Stagéo`, nom du
+  projet avant son renommage en Trouvéo) a fait planter le WAF du site
+  d'Ans en 403 côté `requests` (alors que `curl -A` passait avec la même
+  chaîne). Leçon : header HTTP = ASCII pur, toujours.
 - **Crawl-delay** du robots.txt respecté par domaine (`CRAWL_DELAYS` dans
   `common.py` — 120s pour Ans, valeur reprise du robots.txt partagé iMio).
   Sans objet sur ce run (une requête par domaine, pas de requêtes répétées),

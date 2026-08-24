@@ -24,8 +24,8 @@ import requests
 # a déclenché un 403 (WAF) côté serveur avec `requests`, alors que curl -A
 # passait avec la même chaîne. Header HTTP -> rester en ASCII pur.
 USER_AGENT = (
-    "StageoScraperBot/0.1 (+contact: murieldelepont@gmail.com; "
-    "projet Stageo, scraping leger de pages vitrines communales)"
+    "TrouveoScraperBot/0.1 (+contact: murieldelepont@gmail.com; "
+    "projet Trouveo, scraping leger de pages vitrines communales)"
 )
 
 # Crawl-delay (en secondes) déclaré dans le robots.txt de chaque domaine.
