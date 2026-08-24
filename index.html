@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stagéo — On vous prévient avant que la place ne parte</title>
+<title>Trouvéo — On vous prévient avant que la place ne parte</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Grandstander:wght@500;600;700;800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --cream: #FFFDF8;
@@ -34,7 +34,7 @@
     -webkit-font-smoothing:antialiased;
   }
   h1,h2,h3{
-    font-family:'Baloo 2', sans-serif;
+    font-family:'Grandstander', sans-serif;
     font-weight:700;
     letter-spacing:-0.01em;
     margin:0;
@@ -52,12 +52,20 @@
     padding-top:28px;padding-bottom:28px;
   }
   .logo{
-    font-family:'Baloo 2', sans-serif;
+    font-family:'Grandstander', sans-serif;
     font-weight:800;
     font-size:23px;
-    display:flex;align-items:center;gap:9px;
+    display:flex;align-items:center;
     color:var(--ink);
   }
+  .wordmark{display:inline-flex;align-items:center;}
+  .o-face{
+    height:1.05em;width:auto;
+    display:inline-block;
+    margin-left:0.04em;
+    transform:translateY(0.02em);
+  }
+  .o-face.big{height:1.12em;width:auto;margin-left:0.02em;transform:translateY(0.01em);}
   .logo-icon{
     display:inline-flex;align-items:center;justify-content:center;
     width:38px;height:38px;border-radius:50%;
@@ -95,7 +103,17 @@
 
   .hero-grid{
     display:grid;grid-template-columns:1.05fr 0.95fr;gap:30px;align-items:center;
-    padding:36px 0 56px;position:relative;z-index:1;
+    padding:8px 0 56px;position:relative;z-index:1;
+  }
+  .brand-lockup{
+    display:flex;align-items:center;justify-content:center;gap:16px;
+    padding:34px 0 6px;position:relative;z-index:1;
+  }
+  .brand-lockup-icon{width:76px;height:76px;display:block;}
+  .brand-lockup-word{
+    font-size:clamp(38px,5.2vw,58px);
+    color:var(--ink);
+    line-height:1;
   }
   .eyebrow{
     display:inline-flex;align-items:center;gap:8px;
@@ -139,6 +157,7 @@
     white-space:nowrap;
   }
   form.signup button:hover{background:var(--teal-deep);}
+  form.signup.is-loading button{opacity:.7;cursor:default;}
   .form-note{font-size:13px;color:var(--ink-soft);margin-top:14px;}
   .confirm{
     display:none;
@@ -154,7 +173,6 @@
     padding:13px 18px;border-radius:16px;max-width:480px;
     margin-top:10px;
   }
-  form.signup.is-loading button{opacity:.7;cursor:default;}
 
   /* ---- Circle collage (signature) ---- */
   .collage{position:relative;aspect-ratio:1/0.9;}
@@ -175,58 +193,48 @@
   .c6{width:18%;height:18%;top:70%;left:70%;background:linear-gradient(140deg,#CFEAE0,var(--teal));}
 
   /* ---- Problem section ---- */
-  section.problem{padding:74px 0;background:var(--cream);}
-  .problem-head{max-width:56ch;margin-bottom:42px;}
-  .problem-head h2{font-size:clamp(26px,3vw,36px);line-height:1.15;margin-bottom:14px;}
+  section.problem{padding:80px 0;background:var(--cream);}
+  .problem-layout{
+    display:grid;grid-template-columns:0.95fr 1.05fr;gap:52px;align-items:start;
+  }
+  .problem-head h2{font-size:clamp(28px,3.2vw,40px);line-height:1.15;margin-bottom:16px;}
   .problem-head p{color:var(--ink-soft);font-size:17px;line-height:1.6;}
-  .problem-grid{
-    display:grid;grid-template-columns:repeat(3,1fr);gap:22px;
+  .stat-list{display:flex;flex-direction:column;}
+  .stat-row{
+    display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:baseline;
+    padding:22px 0;border-top:1px solid var(--line);
   }
-  .pcard{
-    background:var(--paper);
-    border-radius:24px;
-    padding:30px 26px;
-    box-shadow:0 14px 34px -20px rgba(36,49,60,0.25);
-    border:1px solid var(--line);
+  .stat-row:last-child{border-bottom:1px solid var(--line);}
+  .stat-num{
+    font-family:'Grandstander',sans-serif;font-weight:800;
+    font-size:40px;color:var(--teal);white-space:nowrap;
   }
-  .pcard-icon{
-    width:52px;height:52px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;
-    margin-bottom:18px;
-  }
-  .pcard-icon svg{width:46%;height:46%;}
-  .pcard:nth-child(1) .pcard-icon{background:#FFE7C9;}
-  .pcard:nth-child(2) .pcard-icon{background:#D9EAF6;}
-  .pcard:nth-child(3) .pcard-icon{background:#FBDCE1;}
-  .pcard .stat{
-    font-family:'Baloo 2',sans-serif;font-weight:800;
-    font-size:32px;color:var(--ink);margin-bottom:8px;display:block;
-  }
-  .pcard p{color:var(--ink-soft);font-size:15px;line-height:1.55;}
+  .stat-row p{color:var(--ink-soft);font-size:16px;line-height:1.55;margin:0;}
 
-  /* ---- How it works ---- */
-  section.how{padding:74px 0;background:var(--cream);}
-  .how-head{margin-bottom:42px;max-width:56ch;}
-  .how-head h2{font-size:clamp(26px,3vw,36px);}
-  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
-  .step{
-    background:var(--paper);
-    border-radius:24px;
-    padding:28px 24px;
-    box-shadow:0 14px 34px -22px rgba(36,49,60,0.22);
+  /* ---- How it works (timeline) ---- */
+  section.how{padding:80px 0;background:var(--paper);}
+  .how-head{margin-bottom:44px;max-width:56ch;}
+  .how-head h2{font-size:clamp(28px,3.2vw,40px);}
+  .timeline{max-width:640px;position:relative;}
+  .tstep{display:grid;grid-template-columns:44px 1fr;gap:22px;position:relative;padding-bottom:38px;}
+  .tstep:last-child{padding-bottom:0;}
+  .tstep::before{
+    content:'';position:absolute;left:21px;top:44px;bottom:-6px;width:2px;
+    background:var(--line);
   }
-  .step-index{
-    font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;
-    color:#fff;
-    width:40px;height:40px;border-radius:50%;
+  .tstep:last-child::before{display:none;}
+  .tdot{
+    font-family:'Grandstander',sans-serif;font-weight:800;font-size:16px;
+    color:#fff;width:44px;height:44px;border-radius:50%;
     display:flex;align-items:center;justify-content:center;
-    margin-bottom:16px;
+    z-index:1;
   }
-  .step:nth-child(1) .step-index{background:var(--orange);}
-  .step:nth-child(2) .step-index{background:var(--blue);}
-  .step:nth-child(3) .step-index{background:var(--teal);}
-  .step h3{font-size:19px;margin-bottom:10px;}
-  .step p{color:var(--ink-soft);font-size:15px;line-height:1.55;}
+  .tstep:nth-child(1) .tdot{background:var(--orange);color:var(--ink);}
+  .tstep:nth-child(2) .tdot{background:var(--blue);}
+  .tstep:nth-child(3) .tdot{background:var(--teal);}
+  .tcontent{padding-top:8px;}
+  .tcontent h3{font-size:20px;margin-bottom:8px;}
+  .tcontent p{color:var(--ink-soft);font-size:15px;line-height:1.6;}
 
   /* ---- Scope / pricing ---- */
   section.scope{padding:74px 0;background:var(--cream);}
@@ -270,7 +278,7 @@
   @media (max-width:860px){
     .hero-grid{grid-template-columns:1fr;}
     .collage{max-width:320px;margin:0 auto;aspect-ratio:1/0.85;}
-    .problem-grid, .steps{grid-template-columns:1fr;}
+    .problem-layout{grid-template-columns:1fr;gap:30px;}
     .scope-grid{grid-template-columns:1fr;}
     form.signup{flex-direction:column;border-radius:24px;}
     form.signup button{width:100%;}
@@ -281,8 +289,7 @@
 
 <nav class="wrap">
   <div class="logo">
-    <img src="stageo-icon.png" alt="" width="34" height="34" style="display:block;">
-    Stagéo
+    <span class="wordmark">Trouv<span class="e-accent">é</span><img src="trouveo-icon.png" alt="" class="o-face"></span>
   </div>
   <a href="#top-form" class="nav-cta">Rejoindre la liste d'attente</a>
 </nav>
@@ -290,11 +297,16 @@
 <header class="hero" id="top-form">
   <div class="blob blob1"></div>
   <div class="blob blob2"></div>
+  <div class="wrap">
+    <div class="brand-lockup">
+      <h2 class="brand-lockup-word">Trouv<span class="e-accent">é</span><img src="trouveo-icon.png" alt="" class="o-face big"></h2>
+    </div>
+  </div>
   <div class="wrap hero-grid">
     <div>
       <span class="eyebrow">Bêta · Wallonie &amp; Bruxelles</span>
       <h1 class="headline">Trouvez le <span class="hi">bon stage</span> avant qu'il ne soit complet.</h1>
-      <p class="sub">Stagéo rassemble les stages, plaines et activités des communes, de l'ONE et des organisateurs privés en un seul endroit — et vous alerte dès qu'une place correspond à votre enfant.</p>
+      <p class="sub">Trouvéo rassemble les stages, plaines et activités des communes, de l'ONE et des organisateurs privés en un seul endroit — et vous alerte dès qu'une place correspond à votre enfant.</p>
 
       <form class="signup" id="signupForm" novalidate>
         <input type="email" name="email" placeholder="votre@email.be" required aria-label="Adresse email">
@@ -329,26 +341,23 @@
 </header>
 
 <section class="problem">
-  <div class="wrap">
+  <div class="wrap problem-layout">
     <div class="problem-head">
       <h2>Chaque période de vacances, le même casse-tête.</h2>
       <p>Deux enfants, six périodes de congé par an, et l'information éparpillée sur des dizaines de sites communaux, associatifs et privés. Le tout à réserver en quelques jours, parfois en quelques heures.</p>
     </div>
-    <div class="problem-grid">
-      <div class="pcard">
-        <div class="pcard-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M4 12h16" stroke="var(--orange-deep)" stroke-width="1.8" stroke-linecap="round"/></svg></div>
-        <span class="stat">6×</span>
-        <p>Le nombre de fois par an où il faut relancer cette recherche de zéro — Toussaint, Noël, Carnaval, Pâques, été, automne.</p>
+    <div class="stat-list">
+      <div class="stat-row">
+        <span class="stat-num">6×</span>
+        <p>par an, il faut relancer cette recherche de zéro — Toussaint, Noël, Carnaval, Pâques, été, automne.</p>
       </div>
-      <div class="pcard">
-        <div class="pcard-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="var(--blue)" stroke-width="1.8"/><path d="M12 8v4l3 2" stroke="var(--blue)" stroke-width="1.8" stroke-linecap="round"/></svg></div>
-        <span class="stat">30+</span>
-        <p>Sites différents à surveiller pour couvrir communes, ONE, ASBL et organisateurs privés d'une seule région.</p>
+      <div class="stat-row">
+        <span class="stat-num">30+</span>
+        <p>sites différents à surveiller pour couvrir communes, ONE, ASBL et organisateurs privés d'une seule région.</p>
       </div>
-      <div class="pcard">
-        <div class="pcard-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 10-13h-6l1-7Z" fill="var(--pink)"/></svg></div>
-        <span class="stat">48h</span>
-        <p>Le temps que mettent souvent les meilleures places à disparaître une fois les inscriptions ouvertes.</p>
+      <div class="stat-row">
+        <span class="stat-num">48h</span>
+        <p>c'est souvent le temps que mettent les meilleures places à disparaître une fois les inscriptions ouvertes.</p>
       </div>
     </div>
   </div>
@@ -359,21 +368,27 @@
     <div class="how-head">
       <h2>Comment ça marche</h2>
     </div>
-    <div class="steps">
-      <div class="step">
-        <div class="step-index">1</div>
-        <h3>Dites-nous qui vous cherchez</h3>
-        <p>Âge de l'enfant, commune ou rayon de recherche, périodes de vacances, centres d'intérêt.</p>
+    <div class="timeline">
+      <div class="tstep">
+        <div class="tdot">1</div>
+        <div class="tcontent">
+          <h3>Dites-nous qui vous cherchez</h3>
+          <p>Âge de l'enfant, commune ou rayon de recherche, périodes de vacances, centres d'intérêt.</p>
+        </div>
       </div>
-      <div class="step">
-        <div class="step-index">2</div>
-        <h3>On scanne pour vous</h3>
-        <p>Communes, my.ONE.be, ASBL et organisateurs privés — rassemblés et mis à jour en continu.</p>
+      <div class="tstep">
+        <div class="tdot">2</div>
+        <div class="tcontent">
+          <h3>On scanne pour vous</h3>
+          <p>Communes, my.ONE.be, ASBL et organisateurs privés — rassemblés et mis à jour en continu.</p>
+        </div>
       </div>
-      <div class="step">
-        <div class="step-index">3</div>
-        <h3>Vous êtes alerté·e</h3>
-        <p>Par email dès qu'une offre correspond à vos critères, avant l'ouverture officielle des inscriptions quand c'est possible.</p>
+      <div class="tstep">
+        <div class="tdot">3</div>
+        <div class="tcontent">
+          <h3>Vous êtes alerté·e</h3>
+          <p>Par email dès qu'une offre correspond à vos critères, avant l'ouverture officielle des inscriptions quand c'est possible.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -396,7 +411,7 @@
         <h3>Vous organisez des activités ?</h3>
         <p>Communes, ASBL, clubs : gagnez en visibilité auprès des parents de votre région dès l'ouverture de la bêta.</p>
       </div>
-      <a class="pro-link" href="mailto:bonjour@stageo.be">Nous contacter →</a>
+      <a class="pro-link" href="mailto:hello@trouveo.be">Nous contacter →</a>
     </div>
   </div>
 </section>
@@ -416,8 +431,8 @@
 
 <footer>
   <div class="wrap">
-    <p>Stagéo — service indépendant, non affilié à l'ONE ni aux communes référencées. Contact : bonjour@stageo.be</p>
-    <p>© 2026 Stagéo</p>
+    <p>Trouvéo — service indépendant, non affilié à l'ONE ni aux communes référencées. Contact : hello@trouveo.be</p>
+    <p>© 2026 Trouvéo</p>
   </div>
 </footer>
 
