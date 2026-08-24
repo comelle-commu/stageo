@@ -29,6 +29,24 @@ contacts, l'envoi d'emails...). Contrairement à Supabase, Brevo n'a pas de
 notion de clé "publique" à droits restreints — c'est justement pour ça
 qu'on ne la met jamais dans le HTML/JS (voir Tâche 2).
 
+### ⚠️ Désactiver la restriction par IP (sinon la fonction Netlify sera bloquée)
+
+Testé en tentant un appel `GET /v3/account` depuis cet environnement : Brevo
+a renvoyé `401 unauthorized` avec le message *"We have detected you are
+using an unrecognised IP address"*. Brevo propose par défaut (ou sur
+certains comptes) de restreindre l'usage de la clé API à une liste d'IP
+autorisées.
+
+**Incompatible avec une fonction Netlify** : les fonctions Netlify tournent
+sur une infrastructure serverless (AWS Lambda) à IP dynamique, impossible à
+lister à l'avance. Sans corriger ça, `brevo-signup.js` échouera exactement
+comme le test ci-dessus, une fois déployée.
+
+**Correction** : profil Brevo → **Security** → **Authorised IPs** →
+désactiver la restriction ("Restrict access by IP address" ou équivalent).
+Pas de perte de sécurité réelle : la clé ne quitte de toute façon jamais le
+serveur (variable d'environnement Netlify), c'est déjà la bonne protection.
+
 ## Tâche 2 — Formulaire branché via une fonction Netlify (relais sécurisé)
 
 **Brevo nécessite bien un relais côté serveur** — confirmé en tâche 1 : une
@@ -110,24 +128,32 @@ Brevo → **Contacts** → **Lists** → clique sur **"Stagéo - liste d'attente
 CSV depuis cette même page (bouton **Export**) si besoin de la récupérer
 ailleurs.
 
-## Point de vigilance : le déploiement Netlify
+## Connexion Netlify ↔ GitHub (résolu)
 
-Ce fichier n'a été retrouvé nulle part dans un dépôt Git accessible à cette
-session — récupéré directement depuis `https://stageo.netlify.app/` (voir
-commit associé). **Comment ce site Netlify est-il actuellement connecté à
-son code source ?** Deux cas possibles, avec une action différente selon
-lequel s'applique :
+Confirmé : le site était déployé par glisser-déposer manuel, sans dépôt Git
+derrière. Décision : connecter le site Netlify à `comelle-commu/stageo`
+pour que les futurs déploiements (dont les fonctions) se fassent
+automatiquement à chaque push. Checklist pour la connexion (Site
+configuration → Build & deploy → Link repository, ou en recréant le site
+depuis "Import from Git") :
 
-- **Le site Netlify est lié à un dépôt GitHub** (le plus probable, vu le
-  script `data-netlify-site-id` détecté sur la page) : si ce dépôt n'est
-  pas `comelle-commu/stageo`, il faut soit y répliquer ces changements soit
-  reconnecter le site Netlify pour qu'il pointe vers `comelle-commu/stageo`
-  (Site configuration → Build & deploy → Link a different repository).
-- **Le site a été déployé par glisser-déposer** (pas de dépôt Git derrière) :
-  il faudra redéployer manuellement le contenu de ce dépôt (dossier racine,
-  qui contient maintenant `stageo-landing.html`, `netlify.toml` et
-  `netlify/functions/`) via le dashboard Netlify ou la CLI (`netlify deploy`).
+- **Dossier à publier : la racine du dépôt** (`.`), pas un sous-dossier —
+  `stageo-landing.html` est directement à la racine.
+- **`netlify.toml` : déjà présent et correct**, committé à la racine :
+  ```toml
+  [build]
+    publish = "."
+    functions = "netlify/functions"
+  ```
+- **Build command : vide** (site statique, rien à compiler).
+- **`stageo-icon.png`** : confirmé présent au même endroit que
+  `stageo-landing.html` (racine) — manquait initialement (seul le HTML
+  avait été récupéré depuis le site live, pas les assets), corrigé et
+  committé.
 
-Sans savoir laquelle de ces deux situations s'applique, je ne peux pas
-garantir que les changements de cette session sont déjà live sur
-`stageo.netlify.app` — à vérifier après déploiement.
+## Variables d'environnement Brevo - état
+
+| Variable | Valeur | Statut |
+|---|---|---|
+| `BREVO_LIST_ID` | `13` | Fourni par l'utilisateur, à confirmer une fois la restriction IP levée (vérification directe bloquée par Brevo - voir ci-dessus) |
+| `BREVO_API_KEY` | (reçue, non stockée dans le dépôt) | Idem - à re-tester une fois "Authorised IPs" désactivé, puis à coller directement dans Netlify (jamais dans un fichier commité) |
