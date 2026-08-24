@@ -33,9 +33,56 @@ en JSON sur stdout sans rien écrire sur disque.
 
 Si `scrapers/.env` est configuré (voir `docs/supabase-backend-2026-08-24.md`),
 `run_all.py` upsert aussi automatiquement le résultat dans la table
-`activites` sur Supabase, en plus des fichiers. Sans `.env`, cette étape est
-simplement ignorée (message clair, pas d'erreur). Vérification a posteriori :
-`./venv/bin/python3 verify_supabase.py`.
+`activites` sur Supabase, en plus des fichiers, puis journalise le run dans
+`scrape_runs` et compare le nombre d'activités récupérées au dernier run
+sain (voir "Contrôle qualité" plus bas). Sans `.env`, l'import et le
+contrôle qualité sont simplement ignorés (message clair, pas d'erreur).
+Vérification a posteriori : `./venv/bin/python3 verify_supabase.py`.
+
+`run_all.py` retourne un code de sortie non nul si l'import Supabase échoue
+ou si le contrôle qualité détecte une chute anormale — c'est ce code qui
+fait apparaître un run rouge dans GitHub Actions (voir plus bas).
+
+## Exécution automatique (GitHub Actions)
+
+`.github/workflows/scrape.yml` relance `run_all.py` automatiquement chaque
+semaine (voir `docs/automatisation-github-actions-2026-08-24.md` pour le
+détail complet). En bref :
+
+- **Secrets à configurer une fois** (Settings → Secrets and variables →
+  Actions → New repository secret, sur le dépôt GitHub) :
+  `SUPABASE_URL` et `SUPABASE_SECRET_KEY` (mêmes valeurs que dans
+  `scrapers/.env` en local).
+- **Historique des runs** : onglet **Actions** du dépôt GitHub → workflow
+  "Scraper Stagéo" → chaque ligne = un run passé, ✅ ou ❌, avec les logs et
+  les fichiers de sortie téléchargeables en pièce jointe.
+- **Lancer un run manuellement** : onglet Actions → "Scraper Stagéo” →
+  bouton "Run workflow" (pas besoin d'attendre le cron).
+
+### Ajuster la fréquence du scraper
+
+Une seule ligne à changer dans `.github/workflows/scrape.yml`, la valeur de
+`cron:` sous `schedule:`. Format standard (minute heure jour-du-mois mois
+jour-de-la-semaine, en UTC) :
+
+```yaml
+schedule:
+  - cron: "0 6 * * 1" # hebdomadaire, tous les lundis 06h00 UTC (par défaut)
+```
+
+En période préparatoire aux vacances, pour resserrer la fréquence :
+
+```yaml
+schedule:
+  - cron: "0 6 * * 1,4" # tous les 3-4 jours (lundi ET jeudi)
+  # ou : - cron: "0 6 */2 * *"  # tous les 2 jours
+```
+
+Puis relâcher à une fois par semaine une fois la période passée, en
+remettant la ligne d'origine. Aucun autre changement nécessaire — le reste
+du workflow (secrets, étapes, contrôle qualité) ne dépend pas de la
+fréquence. Un simple commit sur cette ligne suffit ; le nouveau cron
+s'applique au prochain déclenchement programmé.
 
 ## Schéma de sortie
 

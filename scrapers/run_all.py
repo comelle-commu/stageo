@@ -6,6 +6,7 @@ Usage: venv/bin/python3 run_all.py
 """
 from __future__ import annotations
 
+import sys
 import time
 from pathlib import Path
 
@@ -70,8 +71,12 @@ def run_scrapers() -> tuple[list, list[tuple[str, int, float, str]]]:
     return all_activites, timings
 
 
-def main() -> None:
+def main() -> int:
+    """Retourne un code de sortie (0 = tout va bien, 1 = à examiner) - utilisé
+    par le workflow GitHub Actions pour afficher un run rouge en cas de
+    problème réel (erreur d'import, ou chute anormale du nombre d'activités)."""
     all_activites, timings = run_scrapers()
+    exit_code = 0
 
     json_path, csv_path = write_outputs(all_activites, OUT_DIR)
 
@@ -79,6 +84,8 @@ def main() -> None:
     print(f"Total activités : {len(all_activites)}")
     for nom, n, elapsed, statut in timings:
         print(f"  {nom:10s} {n:3d} activités  {elapsed:6.2f}s  [{statut}]")
+        if statut.startswith("ERREUR"):
+            exit_code = 1
     print(f"\nSorties fichiers : {json_path} / {csv_path}")
 
     timing_path = OUT_DIR / "timings.txt"
@@ -89,8 +96,8 @@ def main() -> None:
 
     print()
     if not supabase_client.is_configured():
-        print("Supabase : scrapers/.env absent ou incomplet -> import ignoré (fichiers JSON/CSV seuls).")
-        return
+        print("Supabase : scrapers/.env absent ou incomplet -> import et contrôle qualité ignorés (fichiers JSON/CSV seuls).")
+        return exit_code
 
     print("--- Import Supabase ---")
     start = time.monotonic()
@@ -101,7 +108,20 @@ def main() -> None:
     except Exception as exc:  # noqa: BLE001
         elapsed = time.monotonic() - start
         print(f"  ERREUR après {elapsed:.2f}s : {exc}")
+        exit_code = 1
+
+    print("\n--- Contrôle qualité ---")
+    try:
+        healthy, message = supabase_client.log_run_and_check_quality(len(all_activites))
+        print(f"  {message}")
+        if not healthy:
+            exit_code = 1
+    except Exception as exc:  # noqa: BLE001
+        print(f"  ERREUR pendant le contrôle qualité : {exc}")
+        exit_code = 1
+
+    return exit_code
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

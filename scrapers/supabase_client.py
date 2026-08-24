@@ -123,3 +123,62 @@ def fetch_all() -> list[dict]:
     resp = requests.get(url, headers=_headers("count=exact"), timeout=30)
     resp.raise_for_status()
     return resp.json()
+
+
+# --- Contrôle qualité (historique des runs) --------------------------------
+#
+# Référence de départ demandée explicitement : 82 activités (le total en
+# base au moment où cette fonctionnalité a été ajoutée). Utilisée seulement
+# tant qu'aucun run "OK" n'a encore été journalisé dans `scrape_runs`
+# (premier run après la migration).
+BOOTSTRAP_REFERENCE = 82
+DROP_THRESHOLD = 0.5  # 50%
+RUNS_TABLE = "scrape_runs"
+
+
+def _fetch_last_ok_total() -> int:
+    url = (
+        f"{SUPABASE_URL}/rest/v1/{RUNS_TABLE}"
+        "?select=total_activites&statut=eq.OK&order=ran_at.desc&limit=1"
+    )
+    resp = requests.get(url, headers=_headers("count=none"), timeout=15)
+    resp.raise_for_status()
+    rows = resp.json()
+    return rows[0]["total_activites"] if rows else BOOTSTRAP_REFERENCE
+
+
+def log_run_and_check_quality(total_activites: int) -> tuple[bool, str]:
+    """Compare `total_activites` (nombre d'activités récupérées par CE run,
+    avant dédoublonnage Supabase) au dernier run considéré sain (statut=OK),
+    journalise ce run dans `scrape_runs`, et retourne (sain, message).
+
+    Comparaison volontairement faite contre le dernier run OK plutôt que le
+    run immédiatement précédent : sinon une panne durable (plusieurs runs en
+    échec d'affilée) finirait par sembler "normale" puisque chaque run en
+    échec deviendrait la nouvelle référence basse pour le suivant."""
+    if not is_configured():
+        raise RuntimeError("SUPABASE_URL / SUPABASE_SECRET_KEY manquants - voir scrapers/.env")
+
+    reference = _fetch_last_ok_total()
+    drop_ratio = (reference - total_activites) / reference if reference > 0 else 0.0
+    healthy = drop_ratio < DROP_THRESHOLD
+    statut = "OK" if healthy else "ALERTE_BAISSE"
+    details = f"reference={reference} total={total_activites} baisse={drop_ratio:.0%}"
+
+    resp = requests.post(
+        f"{SUPABASE_URL}/rest/v1/{RUNS_TABLE}",
+        headers=_headers("return=minimal"),
+        json=[{"total_activites": total_activites, "statut": statut, "details": details}],
+        timeout=15,
+    )
+    resp.raise_for_status()
+
+    if healthy:
+        message = f"{total_activites} activités (référence : {reference}) - OK"
+    else:
+        message = (
+            f"ALERTE : {total_activites} activités récupérées contre {reference} "
+            f"au dernier run sain (baisse de {drop_ratio:.0%}, seuil {DROP_THRESHOLD:.0%}) "
+            "- un site a probablement changé de structure, le scraper ne lit peut-être plus rien."
+        )
+    return healthy, message

@@ -1,0 +1,50 @@
+name: Scraper Stagéo
+
+# Fréquence : voir scrapers/README.md ("Ajuster la fréquence") pour comment
+# resserrer/relâcher le cron sans toucher au reste du workflow.
+on:
+  schedule:
+    # Tous les lundis à 06h00 UTC (07h/08h heure belge selon l'heure d'été).
+    - cron: "0 6 * * 1"
+  workflow_dispatch: {} # bouton "Run workflow" dans l'onglet Actions, pour tester sans attendre le cron
+
+permissions:
+  contents: read
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15 # Herstal + Huy consomment ~4 min à eux seuls (Crawl-delay iMio 120s) - large marge
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installer les dépendances
+        run: pip install -r scrapers/requirements.txt
+
+      - name: Lancer le scraper (+ import Supabase + contrôle qualité)
+        working-directory: scrapers
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: python run_all.py
+        # Code de sortie non nul (erreur d'import Supabase OU chute de plus
+        # de 50% du nombre d'activités par rapport au dernier run sain) ->
+        # ce step échoue -> le job est rouge dans l'onglet Actions.
+
+      - name: Conserver la sortie du run (debug)
+        if: always() # même si le step précédent a échoué - c'est justement quand on veut inspecter la sortie
+        uses: actions/upload-artifact@v4
+        with:
+          name: scrape-output
+          path: |
+            scrapers/output/activites.json
+            scrapers/output/activites.csv
+            scrapers/output/timings.txt
+          retention-days: 30
