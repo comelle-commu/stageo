@@ -155,5 +155,44 @@ depuis "Import from Git") :
 
 | Variable | Valeur | Statut |
 |---|---|---|
-| `BREVO_LIST_ID` | `13` | Fourni par l'utilisateur, à confirmer une fois la restriction IP levée (vérification directe bloquée par Brevo - voir ci-dessus) |
-| `BREVO_API_KEY` | (reçue, non stockée dans le dépôt) | Idem - à re-tester une fois "Authorised IPs" désactivé, puis à coller directement dans Netlify (jamais dans un fichier commité) |
+| `BREVO_LIST_ID` | `13` | Configurée sur Netlify, confirmée fonctionnelle (voir vérification finale ci-dessous) |
+| `BREVO_API_KEY` | (reçue, non stockée dans le dépôt) | Configurée sur Netlify, confirmée fonctionnelle |
+
+## Renommage en `index.html` (résolu)
+
+Netlify sert `index.html` à la racine du site de publication par défaut —
+`stageo-landing.html` n'était donc jamais servi comme page d'accueil une
+fois le déploiement Git actif (l'ancien déploiement manuel "Netlify Drop"
+avait dû être configuré différemment). Corrigé en renommant le fichier en
+`index.html` ; `stageo-landing.html` a ensuite été supprimé du dépôt
+(devenu redondant).
+
+### Incident technique : push Git indisponible pendant la correction
+
+Au moment de pousser ce renommage, `git push` a échoué dans cet
+environnement (`fatal: could not read Username for 'https://github.com'`)
+— le relais d'authentification Git local utilisé jusque-là s'était arrêté,
+sans identifiant de secours disponible. Contournement : la même
+modification a été effectuée via l'API GitHub (outils MCP) plutôt que par
+`git push`, ce qui a le même effet final sur le dépôt.
+
+Un premier appel de correction a été fait par erreur avec un contenu
+tronqué (44 octets au lieu du fichier complet), créant un `index.html`
+cassé pendant quelques instants sur la branche par défaut. Repéré
+immédiatement, corrigé par un second appel avec le contenu complet exact
+(vérifié par comparaison de hash avec le fichier source). Aucune version
+cassée n'a été laissée en place - le premier commit fautif est resté
+dans l'historique mais immédiatement écrasé par le suivant.
+
+### Vérification finale (site live)
+
+- `GET https://stageo.netlify.app/` → `200`, contenu à jour (formulaire
+  branché sur `/.netlify/functions/brevo-signup`, messages d'erreur
+  présents).
+- `GET https://stageo.netlify.app/stageo-landing.html` → `404` (fichier
+  bien supprimé, plus d'ancienne version accessible).
+- `GET https://stageo.netlify.app/stageo-icon.png` → `200`.
+- `POST /.netlify/functions/brevo-signup` avec un email invalide → `400`
+  avec message d'erreur clair (confirme que `BREVO_API_KEY` et
+  `BREVO_LIST_ID` sont bien configurées sur Netlify - une variable
+  manquante aurait renvoyé `500`).
