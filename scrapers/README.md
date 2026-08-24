@@ -1,13 +1,16 @@
 # Scrapers Stagéo — sites communaux (MVP)
 
 Scraper fonctionnel, limité à la zone de test (province de Liège) :
-**Ans**, **Seraing**, **Neupré**, **Verviers**. Floreffe est volontairement
-laissé de côté (voir plus bas). Contexte complet des vérifications
-légales/techniques :
+**Ans**, **Seraing**, **Neupré**, **Verviers**, **Herstal**, **Huy**,
+**Sprimont**. Floreffe, Waremme, Hannut, Oupeye et Aywaille sont
+volontairement en attente (voir plus bas, chacun avec sa raison précise).
+Contexte complet des vérifications légales/techniques :
 `docs/investigation-technique-sites-communaux-2026-08-24.md` (Ans/Neupré/
-Seraing) et
+Seraing),
 `docs/investigation-technique-elargissement-communes-2026-08-24.md`
-(passage à l'échelle iMio/Plone, Verviers).
+(passage à l'échelle iMio/Plone, Verviers), et
+`docs/scraper-cas-difficiles-2026-08-24.md` (extraction PDF, pages hub :
+Herstal/Waremme/Huy/Sprimont/Hannut).
 
 ## Installation
 
@@ -59,6 +62,9 @@ un socle mutualisé pour cette famille de sites (voir
 |---|---|---|---|
 | Ans | Plone (iMio) | HTML statique | `ans.py` |
 | Verviers | Plone (iMio) | HTML statique | `verviers.py` |
+| Herstal | Plone (iMio) | Page HTML sans données + **PDF** (tableau propre, export Word) | `herstal.py` |
+| Huy | Plone (iMio) | Page "hub" → sous-page HTML par période | `huy.py` |
+| Sprimont | Plone (iMio, thème Sunburst) | HTML statique (planning daté en image, non extrait) | `sprimont.py` |
 | Seraing | WordPress | HTML statique | `seraing.py` |
 | Neupré | Nuxt.js | **SSR** — HTML déjà complet dans la réponse HTTP brute, malgré l'apparence de SPA JS (vérifié : pas besoin de navigateur headless) | `neupre.py` |
 
@@ -105,14 +111,15 @@ cette partie.
 - Pas de boucle sur un grand nombre de pages : une URL connue à l'avance
   par commune, une requête chacune.
 
-## Floreffe : EN ATTENTE, pas ignoré silencieusement
+## Communes EN ATTENTE : pas ignorées silencieusement
 
-`floreffe.py` existe mais **ne fait aucune requête réseau**. Le
-`robots.txt` de floreffe.be renvoie un 403 Forbidden reproductible (curl et
-navigateur complet, même résultat) — impossible de confirmer une politique
-de crawl. `run_all.py` l'affiche explicitement comme `EN_ATTENTE` dans le
-résumé plutôt que de l'omettre. À débloquer : contact direct avec la
-commune, ou nouvelle vérification du robots.txt à une date ultérieure.
+Cinq modules (`floreffe.py`, `waremme.py`, `hannut.py`, `oupeye.py`,
+`aywaille.py`) **ne font aucune requête réseau** et exposent une constante
+`RAISON` expliquant pourquoi. `run_all.py` les affiche explicitement comme
+`EN_ATTENTE` dans le résumé plutôt que de les omettre. Détail de chaque
+raison (403 robots.txt, PDF sans structure exploitable, page pas encore
+publiée, image nécessitant de l'OCR, plateforme tierce non vérifiée
+légalement) : `docs/scraper-cas-difficiles-2026-08-24.md`.
 
 ## Verviers : plus simple qu'Ans, mais avec un écart par rapport à l'attendu
 
@@ -180,19 +187,24 @@ non explorés cette session.
 ## Résultats du run (référence)
 
 Voir `output/timings.txt` après exécution. Dernier run mesuré (session du
-24/08/2026, une requête par commune, pas de charge réseau significative) :
+24/08/2026) :
 
 | Commune | Activités extraites | Durée |
 |---|---|---|
-| Ans | 6 | ~0,8 s |
-| Seraing | 9 | ~1,0 s |
+| Ans | 6 | ~1,6 s |
+| Seraing | 9 | ~1,1 s |
 | Neupré | 5 | ~1,1 s |
-| Verviers | 5 | ~1,0 s |
-| Floreffe | — | EN_ATTENTE |
+| Verviers | 5 | ~0,9 s |
+| Herstal | 57 | ~126,0 s (2 requêtes, dont le PDF → Crawl-delay iMio 120s) |
+| Huy | 1 | ~122,1 s (2 requêtes : hub + sous-page → Crawl-delay iMio 120s) |
+| Sprimont | 1 | ~1,8 s |
+| Floreffe / Waremme / Hannut / Oupeye / Aywaille | — | EN_ATTENTE |
 
-**Total : 25 activités en ~3,9 s** pour 4 pages. Ajouter Verviers n'a
-quasiment rien coûté en temps (le socle iMio partagé, déjà valide pour Ans,
-a été réutilisé tel quel) - confirme que le goulot d'étranglement pour
-passer à l'échelle reste l'écriture d'un parseur par commune (ou son
-adaptation pour les cas iMio non couverts : PDF, page hub, image), pas le
-temps d'exécution.
+**Total : 84 activités extraites, 82 upsertées dans Supabase** (2 doublons
+littéraux dans le PDF source Herstal, dédupliqués côté client — voir
+`docs/scraper-cas-difficiles-2026-08-24.md`) en un peu plus de 4 minutes,
+l'essentiel du temps venant du Crawl-delay iMio de 120s appliqué aux
+communes nécessitant 2 requêtes (page + PDF, ou hub + sous-page). Le temps
+d'exécution reste dominé par la politesse envers les serveurs, pas par le
+traitement lui-même (extraction quasi instantanée une fois les pages
+téléchargées).

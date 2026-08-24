@@ -77,6 +77,21 @@ def to_row(activite: "Activite") -> dict:
     return row
 
 
+def _dedupe_rows(rows: list[dict]) -> list[dict]:
+    """PostgreSQL refuse un batch INSERT ... ON CONFLICT DO UPDATE qui
+    toucherait deux fois la même ligne (erreur 500 "ON CONFLICT DO UPDATE
+    command cannot affect row a second time") - rencontré en pratique avec
+    le PDF Herstal, qui contient deux entrées strictement identiques
+    (même thème/organisme/semaine, doublon dans le PDF source lui-même).
+    On déduplique donc côté client sur la même clé que la contrainte
+    unique en base avant l'envoi."""
+    seen: dict[tuple, dict] = {}
+    for row in rows:
+        key = (row["commune_slug"], row["nom_activite"], row["dates"])
+        seen[key] = row  # la dernière occurrence gagne (elles sont identiques en pratique)
+    return list(seen.values())
+
+
 def upsert_activites(activites: list["Activite"]) -> list[dict]:
     """Upsert (insert ou update) sur la clé (commune_slug, nom_activite,
     dates) définie par la contrainte unique `activites_dedup_key` - relancer
@@ -88,7 +103,7 @@ def upsert_activites(activites: list["Activite"]) -> list[dict]:
             "SUPABASE_URL / SUPABASE_SECRET_KEY manquants - voir scrapers/.env "
             "(non committé, à créer à partir des credentials du projet Supabase)."
         )
-    rows = [to_row(a) for a in activites]
+    rows = _dedupe_rows([to_row(a) for a in activites])
     url = f"{SUPABASE_URL}/rest/v1/{TABLE}?on_conflict=commune_slug,nom_activite,dates"
     resp = requests.post(
         url,
