@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stagéo — On vous prévient avant que la place ne parte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream: #FFFDF8;
+    --peach: #FDF1E1;
+    --mint: #E7F4EE;
+    --blush: #FCEAE7;
+    --paper: #FFFFFF;
+    --ink: #015380;
+    --ink-soft: #5C7A8C;
+    --teal: #0197AF;
+    --teal-deep: #017089;
+    --orange: #FDBA18;
+    --orange-deep: #E2A20E;
+    --blue: #017CCA;
+    --pink: #FD6258;
+    --line: rgba(1,83,128,0.1);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    margin:0;
+  }
+  p{margin:0;}
+  .wrap{max-width:1140px;margin:0 auto;padding:0 28px;}
+  a{color:inherit;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;}
+  }
+
+  /* ---- Nav ---- */
+  nav.wrap{
+    display:flex;align-items:center;justify-content:space-between;
+    padding-top:28px;padding-bottom:28px;
+  }
+  .logo{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:800;
+    font-size:23px;
+    display:flex;align-items:center;gap:9px;
+    color:var(--ink);
+  }
+  .logo-icon{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:38px;height:38px;border-radius:50%;
+    background:linear-gradient(135deg, var(--teal), var(--blue));
+  }
+  .nav-cta{
+    font-family:'Work Sans',sans-serif;
+    font-size:14px;font-weight:700;
+    padding:13px 24px;border-radius:100px;
+    background:var(--teal);
+    color:#fff;
+    text-decoration:none;
+    box-shadow:0 10px 24px -8px rgba(1,151,175,0.5);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .nav-cta:hover{transform:translateY(-1px);box-shadow:0 12px 28px -8px rgba(1,151,175,0.55);background:var(--teal-deep);}
+  .nav-cta:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible{
+    outline:3px solid var(--blue);outline-offset:2px;
+  }
+
+  /* ---- Hero ---- */
+  header.hero{
+    background:var(--cream);
+    padding-bottom:10px;
+    position:relative;
+    overflow:hidden;
+  }
+  .blob{
+    position:absolute;border-radius:50%;
+    opacity:.4;filter:blur(2px);
+    pointer-events:none;
+  }
+  .blob1{width:200px;height:200px;background:var(--mint);top:-60px;right:8%;}
+  .blob2{width:120px;height:120px;background:var(--blush);bottom:20px;left:2%;}
+
+  .hero-grid{
+    display:grid;grid-template-columns:1.05fr 0.95fr;gap:30px;align-items:center;
+    padding:36px 0 56px;position:relative;z-index:1;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;
+    font-size:13px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+    color:var(--teal-deep);
+    background:var(--paper);
+    padding:8px 16px;border-radius:100px;
+    margin-bottom:24px;
+    box-shadow:0 4px 14px -6px rgba(36,49,60,0.15);
+  }
+  h1.headline{
+    font-size:clamp(34px,4.3vw,52px);
+    line-height:1.1;
+    margin-bottom:20px;
+    max-width:15ch;
+    color:var(--ink);
+  }
+  h1.headline .hi{color:var(--orange);}
+  .sub{
+    font-size:18px;line-height:1.6;color:var(--ink-soft);
+    max-width:44ch;margin-bottom:30px;
+  }
+
+  form.signup{
+    display:flex;gap:8px;max-width:480px;
+    background:var(--paper);
+    padding:7px;border-radius:100px;
+    box-shadow:0 16px 40px -18px rgba(36,49,60,0.35);
+  }
+  form.signup input[type=email]{
+    flex:1;border:none;background:transparent;
+    padding:13px 18px;font-size:15px;font-family:'Work Sans',sans-serif;
+    outline:none;color:var(--ink);min-width:0;
+  }
+  form.signup input::placeholder{color:#9aa5ac;}
+  form.signup button{
+    border:none;background:var(--teal);color:#fff;
+    font-family:'Work Sans',sans-serif;font-weight:700;font-size:15px;
+    padding:13px 24px;border-radius:100px;cursor:pointer;
+    transition:background .15s ease;
+    white-space:nowrap;
+  }
+  form.signup button:hover{background:var(--teal-deep);}
+  .form-note{font-size:13px;color:var(--ink-soft);margin-top:14px;}
+  .confirm{
+    display:none;
+    font-size:15px;font-weight:700;color:var(--teal-deep);
+    background:var(--paper);
+    padding:16px 20px;border-radius:18px;max-width:480px;
+    box-shadow:0 10px 30px -14px rgba(36,49,60,0.3);
+  }
+  .error{
+    display:none;
+    font-size:14px;font-weight:600;color:var(--pink);
+    background:var(--blush);
+    padding:13px 18px;border-radius:16px;max-width:480px;
+    margin-top:10px;
+  }
+  form.signup.is-loading button{opacity:.7;cursor:default;}
+
+  /* ---- Circle collage (signature) ---- */
+  .collage{position:relative;aspect-ratio:1/0.9;}
+  .circ{
+    position:absolute;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 18px 30px -14px rgba(36,49,60,0.28);
+    border:5px solid var(--paper);
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  }
+  .circ:hover{transform:scale(1.06);}
+  .circ svg{width:42%;height:42%;}
+  .c1{width:38%;height:38%;top:0;left:14%;background:linear-gradient(140deg,#FFD9A8,var(--orange));z-index:2;}
+  .c2{width:24%;height:24%;top:6%;left:62%;background:linear-gradient(140deg,#BFE3F0,var(--blue));}
+  .c3{width:28%;height:28%;top:40%;left:0;background:linear-gradient(140deg,#F7C6CF,var(--pink));}
+  .c4{width:22%;height:22%;top:66%;left:30%;background:linear-gradient(140deg,#BEE8DB,var(--teal));}
+  .c5{width:26%;height:26%;top:34%;left:68%;background:linear-gradient(140deg,#FFE2A8,var(--orange));}
+  .c6{width:18%;height:18%;top:70%;left:70%;background:linear-gradient(140deg,#CFEAE0,var(--teal));}
+
+  /* ---- Problem section ---- */
+  section.problem{padding:74px 0;background:var(--cream);}
+  .problem-head{max-width:56ch;margin-bottom:42px;}
+  .problem-head h2{font-size:clamp(26px,3vw,36px);line-height:1.15;margin-bottom:14px;}
+  .problem-head p{color:var(--ink-soft);font-size:17px;line-height:1.6;}
+  .problem-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:22px;
+  }
+  .pcard{
+    background:var(--paper);
+    border-radius:24px;
+    padding:30px 26px;
+    box-shadow:0 14px 34px -20px rgba(36,49,60,0.25);
+    border:1px solid var(--line);
+  }
+  .pcard-icon{
+    width:52px;height:52px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:18px;
+  }
+  .pcard-icon svg{width:46%;height:46%;}
+  .pcard:nth-child(1) .pcard-icon{background:#FFE7C9;}
+  .pcard:nth-child(2) .pcard-icon{background:#D9EAF6;}
+  .pcard:nth-child(3) .pcard-icon{background:#FBDCE1;}
+  .pcard .stat{
+    font-family:'Baloo 2',sans-serif;font-weight:800;
+    font-size:32px;color:var(--ink);margin-bottom:8px;display:block;
+  }
+  .pcard p{color:var(--ink-soft);font-size:15px;line-height:1.55;}
+
+  /* ---- How it works ---- */
+  section.how{padding:74px 0;background:var(--cream);}
+  .how-head{margin-bottom:42px;max-width:56ch;}
+  .how-head h2{font-size:clamp(26px,3vw,36px);}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+  .step{
+    background:var(--paper);
+    border-radius:24px;
+    padding:28px 24px;
+    box-shadow:0 14px 34px -22px rgba(36,49,60,0.22);
+  }
+  .step-index{
+    font-family:'Baloo 2',sans-serif;font-weight:800;font-size:16px;
+    color:#fff;
+    width:40px;height:40px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:16px;
+  }
+  .step:nth-child(1) .step-index{background:var(--orange);}
+  .step:nth-child(2) .step-index{background:var(--blue);}
+  .step:nth-child(3) .step-index{background:var(--teal);}
+  .step h3{font-size:19px;margin-bottom:10px;}
+  .step p{color:var(--ink-soft);font-size:15px;line-height:1.55;}
+
+  /* ---- Scope / pricing ---- */
+  section.scope{padding:74px 0;background:var(--cream);}
+  .scope-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:22px;}
+  .scope-card{
+    background:var(--teal-deep);color:var(--cream);
+    border-radius:28px;padding:40px;
+  }
+  .scope-card h2{font-size:clamp(24px,2.6vw,30px);color:#fff;margin-bottom:16px;}
+  .scope-card p{color:rgba(255,253,248,0.82);font-size:16px;line-height:1.6;max-width:48ch;}
+  .tag-row{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px;}
+  .tag{font-size:13px;font-weight:700;padding:9px 16px;border-radius:100px;background:rgba(255,253,248,0.14);color:#fff;}
+  .pro-card{
+    background:var(--paper);
+    border-radius:28px;padding:36px;display:flex;flex-direction:column;
+    justify-content:space-between;
+    box-shadow:0 14px 34px -20px rgba(36,49,60,0.2);
+    border:1px solid var(--line);
+  }
+  .pro-card h3{font-size:21px;margin-bottom:12px;}
+  .pro-card p{color:var(--ink-soft);font-size:15px;line-height:1.55;margin-bottom:22px;}
+  .pro-link{
+    font-size:14px;font-weight:800;color:var(--teal-deep);text-decoration:none;
+    display:inline-flex;align-items:center;gap:6px;
+  }
+
+  /* ---- Final CTA ---- */
+  section.final{padding:80px 0 64px;text-align:center;background:var(--cream);}
+  section.final h2{font-size:clamp(28px,3.6vw,42px);margin-bottom:16px;}
+  section.final p{color:var(--ink-soft);font-size:17px;margin-bottom:30px;}
+  section.final form.signup{margin:0 auto;}
+  section.final .confirm{margin:0 auto;}
+  section.final .error{margin:10px auto 0;}
+
+  footer{padding:30px 0 40px;background:var(--cream);border-top:1px solid var(--line);}
+  footer .wrap{
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
+  }
+  footer p{font-size:13px;color:var(--ink-soft);}
+
+  @media (max-width:860px){
+    .hero-grid{grid-template-columns:1fr;}
+    .collage{max-width:320px;margin:0 auto;aspect-ratio:1/0.85;}
+    .problem-grid, .steps{grid-template-columns:1fr;}
+    .scope-grid{grid-template-columns:1fr;}
+    form.signup{flex-direction:column;border-radius:24px;}
+    form.signup button{width:100%;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="wrap">
+  <div class="logo">
+    <img src="stageo-icon.png" alt="" width="34" height="34" style="display:block;">
+    Stagéo
+  </div>
+  <a href="#top-form" class="nav-cta">Rejoindre la liste d'attente</a>
+</nav>
+
+<header class="hero" id="top-form">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Bêta · Wallonie &amp; Bruxelles</span>
+      <h1 class="headline">Trouvez le <span class="hi">bon stage</span> avant qu'il ne soit complet.</h1>
+      <p class="sub">Stagéo rassemble les stages, plaines et activités des communes, de l'ONE et des organisateurs privés en un seul endroit — et vous alerte dès qu'une place correspond à votre enfant.</p>
+
+      <form class="signup" id="signupForm" novalidate>
+        <input type="email" name="email" placeholder="votre@email.be" required aria-label="Adresse email">
+        <button type="submit">Je m'inscris</button>
+      </form>
+      <div class="confirm" id="confirmMsg" role="status">C'est noté ! Vous serez parmi les premiers prévenus à l'ouverture de la bêta.</div>
+      <div class="error" id="errorMsg" role="alert"></div>
+      <p class="form-note">Accès prioritaire et gratuit à la bêta. Un email à l'ouverture, pas de spam, désinscription en un clic.</p>
+    </div>
+
+    <div class="collage" aria-hidden="true">
+      <div class="circ c1">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 18c3-8 6-12 9-14 1 3-1 7-4 10-2 2-3 3-5 4Z" fill="#fff"/></svg>
+      </div>
+      <div class="circ c2">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3 15q4-6 9-6t9 6" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/><path d="M3 19q4-6 9-6t9 6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" opacity=".6"/></svg>
+      </div>
+      <div class="circ c3">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="6" r="3" stroke="#fff" stroke-width="1.6"/><path d="M5 20c1-4 4-6 7-6s6 2 7 6" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </div>
+      <div class="circ c4">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 12c2-3 4-3 6 0s4 3 6 0 4-3 4 0" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
+      <div class="circ c5">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3v6M12 15l-3 6h6l-3-6Z" fill="#fff"/><circle cx="12" cy="10" r="4.2" fill="#fff" opacity=".9"/></svg>
+      </div>
+      <div class="circ c6">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 3 8l9 5 9-5-9-5Z" fill="#fff"/></svg>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="problem">
+  <div class="wrap">
+    <div class="problem-head">
+      <h2>Chaque période de vacances, le même casse-tête.</h2>
+      <p>Deux enfants, six périodes de congé par an, et l'information éparpillée sur des dizaines de sites communaux, associatifs et privés. Le tout à réserver en quelques jours, parfois en quelques heures.</p>
+    </div>
+    <div class="problem-grid">
+      <div class="pcard">
+        <div class="pcard-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M12 3v18M4 12h16" stroke="var(--orange-deep)" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <span class="stat">6×</span>
+        <p>Le nombre de fois par an où il faut relancer cette recherche de zéro — Toussaint, Noël, Carnaval, Pâques, été, automne.</p>
+      </div>
+      <div class="pcard">
+        <div class="pcard-icon"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8" stroke="var(--blue)" stroke-width="1.8"/><path d="M12 8v4l3 2" stroke="var(--blue)" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+        <span class="stat">30+</span>
+        <p>Sites différents à surveiller pour couvrir communes, ONE, ASBL et organisateurs privés d'une seule région.</p>
+      </div>
+      <div class="pcard">
+        <div class="pcard-icon"><svg viewBox="0 0 24 24" fill="none"><path d="M13 2 4 14h6l-1 8 10-13h-6l1-7Z" fill="var(--pink)"/></svg></div>
+        <span class="stat">48h</span>
+        <p>Le temps que mettent souvent les meilleures places à disparaître une fois les inscriptions ouvertes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="how">
+  <div class="wrap">
+    <div class="how-head">
+      <h2>Comment ça marche</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-index">1</div>
+        <h3>Dites-nous qui vous cherchez</h3>
+        <p>Âge de l'enfant, commune ou rayon de recherche, périodes de vacances, centres d'intérêt.</p>
+      </div>
+      <div class="step">
+        <div class="step-index">2</div>
+        <h3>On scanne pour vous</h3>
+        <p>Communes, my.ONE.be, ASBL et organisateurs privés — rassemblés et mis à jour en continu.</p>
+      </div>
+      <div class="step">
+        <div class="step-index">3</div>
+        <h3>Vous êtes alerté·e</h3>
+        <p>Par email dès qu'une offre correspond à vos critères, avant l'ouverture officielle des inscriptions quand c'est possible.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="scope">
+  <div class="wrap scope-grid">
+    <div class="scope-card">
+      <h2>Ce que couvre la bêta</h2>
+      <p>On démarre concentré, pour bien faire les choses avant d'élargir : Wallonie et Bruxelles, toutes périodes de vacances scolaires, enfants de 2,5 à 15 ans.</p>
+      <div class="tag-row">
+        <span class="tag">Plaines &amp; stages ONE</span>
+        <span class="tag">Activités communales</span>
+        <span class="tag">Organisateurs privés</span>
+        <span class="tag">Sport, art, nature, langues</span>
+      </div>
+    </div>
+    <div class="pro-card">
+      <div>
+        <h3>Vous organisez des activités ?</h3>
+        <p>Communes, ASBL, clubs : gagnez en visibilité auprès des parents de votre région dès l'ouverture de la bêta.</p>
+      </div>
+      <a class="pro-link" href="mailto:bonjour@stageo.be">Nous contacter →</a>
+    </div>
+  </div>
+</section>
+
+<section class="final">
+  <div class="wrap">
+    <h2>Ne ratez plus la prochaine ouverture des inscriptions.</h2>
+    <p>Rejoignez la liste d'attente — c'est gratuit et ça prend dix secondes.</p>
+    <form class="signup" id="signupForm2" novalidate>
+      <input type="email" name="email" placeholder="votre@email.be" required aria-label="Adresse email">
+      <button type="submit">Je m'inscris</button>
+    </form>
+    <div class="confirm" id="confirmMsg2" role="status">C'est noté ! Vous serez parmi les premiers prévenus à l'ouverture de la bêta.</div>
+    <div class="error" id="errorMsg2" role="alert"></div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Stagéo — service indépendant, non affilié à l'ONE ni aux communes référencées. Contact : bonjour@stageo.be</p>
+    <p>© 2026 Stagéo</p>
+  </div>
+</footer>
+
+<script>
+  // Envoie l'email à la fonction Netlify (jamais directement à Brevo depuis le
+  // navigateur : ça exposerait la clé API secrète). Voir
+  // netlify/functions/brevo-signup.js et docs/brevo-signup-2026-08-24.md.
+  function handleSignup(formId, confirmId, errorId){
+    const form = document.getElementById(formId);
+    const confirm = document.getElementById(confirmId);
+    const error = document.getElementById(errorId);
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      error.style.display = 'none';
+
+      const input = form.querySelector('input[type=email]');
+      const email = input.value.trim();
+      if (!emailRe.test(email)) {
+        error.textContent = "Cette adresse email ne semble pas valide.";
+        error.style.display = 'block';
+        input.focus();
+        return;
+      }
+
+      const button = form.querySelector('button');
+      const originalLabel = button.textContent;
+      form.classList.add('is-loading');
+      button.disabled = true;
+      button.textContent = 'Envoi...';
+
+      fetch('/.netlify/functions/brevo-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email })
+      })
+        .then(function(res){
+          return res.json().catch(function(){ return {}; }).then(function(data){
+            return { ok: res.ok, data: data };
+          });
+        })
+        .then(function(result){
+          if (!result.ok) {
+            throw new Error((result.data && result.data.error) || "L'inscription a échoué, réessayez dans un instant.");
+          }
+          form.style.display = 'none';
+          confirm.style.display = 'block';
+        })
+        .catch(function(err){
+          error.textContent = err.message || "L'inscription a échoué, réessayez dans un instant.";
+          error.style.display = 'block';
+        })
+        .finally(function(){
+          form.classList.remove('is-loading');
+          button.disabled = false;
+          button.textContent = originalLabel;
+        });
+    });
+  }
+  handleSignup('signupForm','confirmMsg','errorMsg');
+  handleSignup('signupForm2','confirmMsg2','errorMsg2');
+</script>
+
+</body>
+</html>
