@@ -1,149 +1,228 @@
 # Stagéo — Investigation technique (24/08/2026)
 
-## ⚠️ Limite de cette session
+## Mise à jour — inspection réseau réelle effectuée
 
-L'environnement d'exécution cloud utilisé pour cette session bloque tout accès
-réseau sortant vers des domaines externes (proxy d'égression : `my.one.be`,
-`wikipedia.org`, `odwb.be`, `neupre.be`, etc. tous rejetés — y compris pour
-un navigateur headless Playwright). Seul l'outil de recherche web indexée a
-fonctionné. Il n'a donc **pas été possible d'ouvrir un vrai navigateur sur
-my.one.be ou APSCHOOL pour inspecter les requêtes réseau en direct** comme
-prévu initialement.
+Cette session dispose d'un accès réseau sortant complet. L'accès a été
+confirmé (`https://www.wikipedia.org` → HTTP 200) et une vraie inspection
+réseau via un navigateur Playwright/Chromium a été menée sur my.one.be et
+APSCHOOL. Les constats ci-dessous remplacent les hypothèses non vérifiées de
+la version précédente de ce document pour les tâches 1 et 2.
 
-Les constats ci-dessous viennent de recherches web (pages publiques indexées,
-PDF de communes, articles ONE/pro.one.be) et non d'une inspection live du
-trafic réseau. **Ils doivent être re-vérifiés avec un accès réseau réel**
-(nouvel environnement avec accès internet complet, ou session locale) avant
-de coder quoi que ce soit dessus. C'est la première étape à refaire.
+**Note technique (pour rejouer cette investigation) :** le proxy de sortie de
+cet environnement (`HTTPS_PROXY=http://127.0.0.1:35553`) fait un
+MITM/re-terminaison TLS. Chromium récent envoie par défaut un ClientHello
+TLS 1.3 volumineux (GREASE ECH + post-quantum key share), que ce proxy gère
+mal (`net::ERR_CONNECTION_RESET` systématique, y compris sur des sites aussi
+simples que example.com ou wikipedia.org, alors que curl/Python passaient
+sans problème). Contournement qui fonctionne de manière fiable : lancer
+Chromium avec l'argument `--ssl-version-max=tls1.2` (en plus de
+`--proxy-server=http://127.0.0.1:35553 --ignore-certificate-errors`). À
+retenir pour toute future session Playwright dans cet environnement.
 
 ---
 
 ## Tâche 1 — my.one.be
 
-**Fonctionnement observé (via doc/articles publics) :**
-- Recherche par sujet ("Plaines et stages" entre autres), puis un champ
-  "Localisation" (code postal / adresse), résultats affichés sur carte +
-  liste à gauche, avec filtres additionnels ("Filtrer les résultats").
-- Fiche détail par activité : adresse, horaires, contact, personne de
-  contact.
-- Les données proviennent de **pro.one.be** (portail professionnel) : les
-  organisateurs y encodent leurs activités (plaines et stages, sous forme
-  résidentielle "séjours" ou non-résidentielle "plaines"), publication sur
-  my.one.be depuis février (année non précisée dans les sources trouvées).
-  Les deux portails partagent la même donnée centrale ("feeding three
-  portals" selon le guide pro.one.be).
+### API confirmée
 
-**Ce qui reste à vérifier en live (non confirmé) :**
-- Si my.one.be charge les résultats via un **appel JSON/XHR** en arrière-plan
-  (très probable vu l'UX carte+liste+filtres dynamiques, mais aucune preuve
-  technique trouvée — aucune mention d'Algolia/Elasticsearch/API publique
-  dans les sources indexées).
-- L'URL exacte de cette API, son schéma de réponse (places restantes ?
-  contact direct ? âge exact ou tranche ?).
-- Si l'API nécessite une clé/session ou est librement interrogeable.
-- Le contenu du `robots.txt` et des CGU de my.one.be (à lire avant tout
-  scraping, même léger).
+En reproduisant le parcours réel (page d'accueil → lien "Trouver une plaine
+ou un stage" = `/?theme=PLAINE` → saisie de "4430" dans le champ
+Localisation → sélection de la suggestion "4430 - Ans" → la page navigue
+vers `/search?theme=PLAINE&criteres=...`), le navigateur déclenche cet appel
+réseau, qui est bien la source des données affichées :
 
-**Conclusion Tâche 1 :** hypothèse raisonnable qu'une API JSON existe
-derrière le formulaire de recherche, mais **non confirmée** — nécessite une
-vraie session de navigation avec inspection réseau (DevTools ou Playwright)
-avant de décider de l'approche technique.
+```
+GET https://my.one.be/gw/microservice-my/activite-vacances/plaine/search/zone
+    ?latitudeOrigine={lat}&longitudeOrigine={lon}
+    &latitudeMin={latMin}&latitudeMax={latMax}
+    &longitudeMin={lonMin}&longitudeMax={lonMax}
+```
+
+- C'est une recherche **par zone géographique (bounding box)**, pas par
+  rayon autour d'un code postal. Le front calcule la bbox à partir du niveau
+  de zoom de la carte après géolocalisation de "4430 - Ans" (via un service
+  d'autocomplétion d'adresse séparé, `/gw/microservice-my/adresse/...`, qui
+  ressemble à un proxy vers l'API Google Places — utilise un `sessionToken`).
+- **Aucune authentification requise.** Vérifié en rejouant l'URL exacte avec
+  une requête Python `urllib` totalement anonyme (aucun cookie, aucun
+  header d'auth, nouvelle session) depuis cet environnement : réponse
+  `200 OK` avec le JSON complet, identique à ce que le navigateur reçoit.
+- Le endpoint ne prend **pas** de paramètre "période de vacances" ou "âge" —
+  il retourne toutes les activités dans la zone géographique, tous congés et
+  tous âges confondus. Le filtrage par période ("prochaine période de
+  vacances") et par âge se fait côté client (ou via des filtres UI
+  supplémentaires sur la page de résultats, non testés en détail).
+
+### Structure de la réponse (exemple réel, zone Ans/Liège, 4 résultats)
+
+```json
+[
+  {
+    "activiteId": "18745280",
+    "denomination": "Plaines de vacances",
+    "description": "<p>...html...</p>",
+    "conge": "AUTOMNE",
+    "publicCible": { "ageMinimal": 2.5, "ageMaximal": 10.0, "libelle": null },
+    "horaire": { "heureDebut": "08:00:00", "heureFin": "17:30:00" },
+    "periode": { "dateDebut": "2026-10-19", "dateFin": "2026-10-30" },
+    "pouvoirOrganisateur": { "denomination": "CENTRE DE JEUNESSE - LIEGE", "id": "137966" },
+    "pfp": { "pfpMin": 70, "pfpMax": 70 },
+    "prestationsIncluses": ["ACCUEIL_MATIN", "ACCUEIL_SOIR", "COLLATIONS", "ACTIVITES"],
+    "thematiques": ["LECTURE_ET_CONTES", "MUSIQUE_ET_CHANTS", "CUISINE", "..."],
+    "adresse": {
+      "pays": "BE", "localite": "Ans", "codePostal": "4430",
+      "rue": "Rue du Président Wilson", "numeroRue": "5",
+      "province": "LIEGE", "municipalite": "Ans",
+      "localisation": { "latitude": 50.6526, "longitude": 5.538698 }
+    },
+    "distance": 1763.95,
+    "inscriptionInformation": {
+      "denominationContact": "Secrétariat / Michelle BONNET",
+      "donneesContact": [
+        { "contactType": "EMAIL", "value": "info@cjlg.be" },
+        { "contactType": "PHONE", "value": "042471436" },
+        { "contactType": "WEBSITE", "value": "www.cjlg.be" }
+      ]
+    },
+    "dateDebutInscription": "2026-08-04",
+    "disponibilite": "PLACES_DISPONIBLES",
+    "couverturePFP": "SEMAINE"
+  }
+]
+```
+
+C'est un schéma **très riche** — exactement ce qu'un outil d'alerte de
+places voudrait : dates précises, tranche d'âge, organisateur, contact
+direct, et surtout un champ **`disponibilite`** (`PLACES_DISPONIBLES` dans
+cet exemple) qui semble indiquer directement si des places restent. Aucune
+pagination observée sur ce petit échantillon (4 résultats) ; à re-vérifier
+sur une zone plus dense (ex. Bruxelles) avant de conclure sur l'absence de
+pagination.
+
+### ⚠️ Blocage contractuel — CGU de my.one.be
+
+En lisant les CGU réelles (`/information/conditions`, rendu et lu via
+navigateur — page 100% Angular, illisible en HTTP brut) :
+
+> « En utilisant ce site, vous vous engagez à ne pas développer, prendre en
+> charge ou utiliser des logiciels, des dispositifs, des scripts, des robots
+> ou tout autre moyen ou processus visant à effectuer du **« web scraping »**
+> du contenu ou à copier par ailleurs des profils et d'autres données des
+> services. **Toute extraction et/ou réutilisation du contenu est
+> interdite.** »
+
+Et le `robots.txt` de my.one.be contient `Disallow: /*?` — soit toute URL
+avec une chaîne de requête, ce qui couvre à la fois la page de résultats
+(`/search?theme=...`) et l'API elle-même
+(`/gw/.../zone?latitudeOrigine=...`).
+
+**Conclusion Tâche 1 :** l'API JSON existe, est confirmée, ne nécessite
+aucune authentification, et a un schéma de réponse très exploitable
+(y compris un champ de disponibilité). **Techniquement**, un scraper serait
+trivial à écrire. **Contractuellement**, les CGU interdisent explicitement
+le scraping/l'extraction de contenu, et le `robots.txt` désautorise
+explicitement les URL avec paramètres (donc l'API elle-même). C'est un
+blocage clair, pas une zone grise — automatiser cette source sans
+autorisation écrite de l'ONE serait une violation directe des CGU.
 
 ---
 
 ## Tâche 2 — APSCHOOL
 
-**Structure d'URL confirmée et répétée sur plusieurs communes** (trouvé pour
-au moins 4 communes différentes) :
+### Confirmation en navigation privée (contexte navigateur neuf, sans cookies)
 
-```
-https://plateforme.apschool.be/authentication/extrascolaireInscription/accueil/{ID}
-https://plateforme.apschool.be/authentication/plaineinscription/accueil/{ID}
-https://portail.apschool.be/authentication/plaineinscription/accueil/{ID}
-```
+Les deux URLs communales ont été ouvertes dans un contexte Playwright neuf
+(équivalent navigation privée — aucun cookie, aucune session préexistante) :
 
-Exemples trouvés :
-- Neupré → `.../extrascolaireInscription/accueil/211`
-- Chaumont-Gistoux → `.../plaineinscription/accueil/39`
-- Une autre commune (non identifiée) → `.../extrascolaireInscription/accueil/181`
-- Saint-Ghislain → `portail.apschool.be/.../plaineinscription/accueil/129`
+- `https://plateforme.apschool.be/authentication/extrascolaireInscription/accueil/211`
+  (Neupré) → page "Welcome to the school's APSCHOOL platform — Commune de
+  Neupré", texte : *"In order to have access to the various extracurricular
+  activities offered, a registration is necessary."*, un seul bouton
+  **"I register"**. Aucun catalogue, aucune liste d'activités visible.
+- `https://plateforme.apschool.be/authentication/plaineinscription/accueil/39`
+  (Chaumont-Gistoux) → page identique, "Commune de Chaumont-Gistoux".
 
-C'est une **bonne nouvelle structurelle** : la plateforme est bien
-multi-tenant avec un identifiant numérique de commune/organisme dans l'URL,
-ce qui rendrait un scraper générique réutilisable *si* le contenu est
-accessible publiquement. Deux nuances à vérifier en live :
-- Deux sous-domaines coexistent (`plateforme.` et `portail.apschool.be`) —
-  pas un seul point d'entrée.
-- Deux types de parcours (`extrascolaireInscription` vs `plaineinscription`)
-  qui ne couvrent peut-être pas exactement les mêmes données.
+Seul appel JSON observé sur ces pages (public, sans auth) :
+`GET https://api.plateforme.apschool.be/plaine/nomEcole?ecoleId={id}` →
+`{"nom": "Commune de Neupré"}` — juste le nom de la commune, aucune donnée
+d'activité.
 
-**Accès public vs compte parent — non confirmé avec certitude :**
-Le chemin `/authentication/...` suggère une porte d'authentification dès
-l'entrée. Les guides d'utilisation trouvés (Oupeye, Saint-Stanislas,
-Remicourt) décrivent le parcours **après connexion** : création de compte,
-saisie des données de l'enfant, des parents, des données médicales, avant
-même d'arriver au catalogue des stages. Rien dans les sources indexées ne
-confirme un catalogue consultable *sans* compte. Cela pointe plutôt vers un
-mur d'authentification pour voir les places disponibles — mais à vérifier
-en ouvrant réellement une de ces URLs sans se connecter.
+### Un cran plus loin : clic sur "I register"
 
-**Conclusion Tâche 2 :** structure d'URL prévisible et couvrant plusieurs
-communes (bon signe pour la couverture), mais **accès public au catalogue
-probablement bloqué par compte** (mauvais signe pour l'automatisation sans
-créer de comptes — ce qui est exclu par la contrainte du projet). À
-confirmer en ouvrant une URL de commune en navigation privée, sans se
-connecter.
+En cliquant sur "I register" (toujours sans compte, navigation privée), la
+page mène directement à un **formulaire d'inscription complet** :
+identité de l'enfant, **numéro de registre national**, informations
+médicales, données des parents, choix d'établissement/section/niveau
+scolaire, contact d'urgence — avant même d'arriver à un quelconque choix de
+plaine ou stage. Aucun catalogue d'activités n'est visible à aucune étape
+sans avoir rempli ces données personnelles sensibles.
+
+**Conclusion Tâche 2 :** confirmé de manière définitive et en direct — il
+n'existe **aucun catalogue public consultable sans compte** sur APSCHOOL.
+L'accès est verrouillé dès la première étape derrière un formulaire
+d'inscription exigeant des données personnelles sensibles (dont le numéro
+de registre national de l'enfant). Un scraper sans création de compte est
+**techniquement impossible** ici (pas un problème de CGU comme pour
+my.one.be — il n'y a simplement rien à scraper avant identification), et
+créer des comptes automatiquement est de toute façon exclu par la
+contrainte du projet.
 
 ---
 
 ## Tâche 3 — Open data (ODWB / opendata.brussels.be)
+
+*(non re-testée cette session — résultats de la session précédente, issus de
+recherche web indexée, inchangés)*
 
 **odwb.be :**
 - Aucun jeu de données trouvé avec places disponibles / dates en temps réel
   pour les plaines ou stages.
 - Un jeu de données pertinent en tant que **répertoire d'organisateurs**,
   pas de disponibilités : *"Les associations de jeunesse de la Fédération
-  Wallonie-Bruxelles"* (centres de jeunes, coordinations, opérateurs de
-  formation, mouvements de jeunesse) —
+  Wallonie-Bruxelles"* —
   https://www.odwb.be/explore/dataset/les-associations-de-jeunesse-de-la-federation-wallonie-bruxelles/
-  Utile potentiellement pour constituer une liste de cibles à couvrir, pas
-  pour alimenter des alertes de places.
 
 **opendata.brussels.be :**
-- *"Maisons des Enfants"* (accueil 6-12 ans après l'école et pendant les
-  vacances, Ville de Bruxelles) — dataset de localisation, pas de
-  places/dates en temps réel.
-- Rien trouvé de plus proche d'un catalogue de plaines/stages avec
-  disponibilités.
+- *"Maisons des Enfants"* — dataset de localisation, pas de places/dates en
+  temps réel.
 
 **Conclusion Tâche 3 :** pas de source open data "prête à l'emploi" pour les
-disponibilités en temps réel. Les jeux de données trouvés sont utiles en
-appoint (répertoires d'organisateurs / lieux), pas comme source principale.
+disponibilités en temps réel.
 
 ---
 
 ## Synthèse — ce qui est automatisable
 
-| Piste | Statut | Effort estimé |
+| Piste | Statut | Détail |
 |---|---|---|
-| ODWB — répertoire d'associations de jeunesse | **Facile** : dataset ouvert, structuré, exportable (CSV/JSON via l'explorateur ODWB) | Faible — bon pour constituer une liste de cibles/organisateurs, pas pour les disponibilités |
-| opendata.brussels.be — Maisons des Enfants | **Facile** mais périmètre limité (localisation, pas dispo) | Faible |
-| my.one.be | **Effort modéré, à confirmer** — si une API JSON existe bien derrière la recherche (probable mais non vérifié), ce serait la source la plus riche (âge, dates, lieu, contact). Sinon scraping HTML classique, plus fragile | Modéré, conditionné à une vraie inspection réseau |
-| APSCHOOL (Neupré, Chaumont-Gistoux, autres communes) | **Probablement bloqué** sans compte — structure d'URL prévisible (bon pour la couverture multi-communes) mais catalogue vraisemblablement caché derrière l'authentification (mauvais pour l'automatisation sans compte, ce qui est exclu) | Bloqué / à confirmer en priorité |
+| ODWB — répertoire d'associations de jeunesse | **Facile**, légal | Dataset ouvert exportable — bon pour une liste de cibles, pas pour les disponibilités |
+| opendata.brussels.be — Maisons des Enfants | **Facile**, légal | Périmètre limité (localisation, pas dispo) |
+| **my.one.be** | **Techniquement trivial, mais interdit contractuellement** | API JSON confirmée, sans auth, schéma riche (dates, âge, contact, dispo). **CGU interdisent explicitement le web scraping** + `robots.txt` désautorise les URL à paramètres (couvre l'API). Nécessite un accord/partenariat avec l'ONE avant tout usage automatisé. |
+| **APSCHOOL** (Neupré, Chaumont-Gistoux, et probablement les autres communes sur la même structure d'URL) | **Bloqué techniquement**, confirmé en direct | Aucun catalogue accessible sans compte ; le formulaire d'inscription (avec numéro de registre national) est la première chose affichée. Pas de scraping possible sans créer de comptes, ce qui est exclu. |
 | Sites communaux "faits maison" (hors ONE/APSCHOOL) | Inconnu | Non exploré cette session |
 
-## Prochaine étape recommandée
+## Verdict
 
-Avant d'écrire le moindre script définitif :
-1. **Refaire cette investigation avec un vrai accès réseau** (nouvel
-   environnement cloud avec accès internet complet choisi à la création, ou
-   session locale Claude Code) pour :
-   - Confirmer/infirmer l'API JSON de my.one.be (DevTools → onglet Réseau
-     pendant une recherche) et documenter son schéma exact.
-   - Ouvrir une URL APSCHOOL de commune **sans se connecter** pour confirmer
-     si le catalogue est visible ou non avant authentification.
-   - Lire les CGU / robots.txt de my.one.be avant toute automatisation.
-2. Selon ces résultats, décider ensemble par quelle source commencer (my.one.be
-   semble le meilleur candidat si l'API existe ; APSCHOOL nécessitera
-   probablement un partenariat/accord avec les communes plutôt qu'un scraper,
-   vu le mur de connexion).
+**Aucune des deux sources principales (my.one.be, APSCHOOL) n'est
+exploitable par un scraper non autorisé dans l'état actuel :**
+
+- **my.one.be** a la meilleure donnée (et de loin — schéma détaillé avec
+  disponibilité en temps réel), mais l'utiliser sans autorisation
+  violerait explicitement ses CGU. La voie viable ici n'est **pas
+  technique mais relationnelle** : contacter l'ONE (ou pro.one.be, qui
+  alimente la même donnée) pour discuter d'un accès API officiel ou d'un
+  partenariat. Si un accord est obtenu, l'implémentation technique côté
+  Stagéo serait rapide (API REST simple, JSON propre, pas d'auth à gérer
+  côté client si l'ONE l'autorise telle quelle).
+- **APSCHOOL** n'a tout simplement rien à offrir sans création de compte
+  (et donc sans données personnelles d'enfants réels) — cette piste doit
+  être abandonnée en l'état, ou remplacée par un partenariat direct avec
+  les communes/organisateurs (ex. obtenir un export manuel ou un accès API
+  dédié de leur part), pas par un scraper.
+
+**Recommandation :** ne pas coder de scraper contre ces deux sources.
+Prochaine étape utile : prise de contact avec l'ONE/pro.one.be pour évaluer
+un partenariat de données (la richesse du schéma my.one.be vaut largement la
+démarche), et en parallèle continuer à explorer des sources alternatives
+(sites communaux indépendants, autres plateformes d'inscription que
+APSCHOOL) qui n'ont pas ce double verrou technique + contractuel.
