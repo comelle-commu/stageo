@@ -39,7 +39,9 @@ SUPABASE_SECRET_KEY = os.environ.get("SUPABASE_SECRET_KEY", "")
 TABLE = "activites"
 
 # Un scraper = une plateforme connue (voir scrapers/README.md) -> pas besoin
-# de le redétecter à l'exécution, on le sait déjà pour chaque commune.
+# de le redétecter à l'exécution, on le sait déjà pour chaque commune/
+# organisme. Clé = `organisateur` pour les scrapers non-communaux (ADEPS,
+# Cap Sciences...), sinon `commune` - voir to_row() ci-dessous.
 PLATEFORME_SOURCE = {
     "Ans": "Plone",
     "Seraing": "WordPress",
@@ -48,12 +50,15 @@ PLATEFORME_SOURCE = {
     "Herstal": "Plone",
     "Huy": "Plone",
     "Sprimont": "Plone",
+    "ADEPS": "Drupal",
+    "Cap Sciences": "WordPress",
 }
 
 
 def slugify(commune: str) -> str:
     """ex. "Neupre" -> "neupre". Volontairement simple (accents déjà absents
-    des noms de commune utilisés dans le code - voir neupre.py)."""
+    des noms de commune utilisés dans le code - voir neupre.py). Chaîne vide
+    -> chaîne vide (cas des activités d'organisme sans commune déductible)."""
     return commune.strip().lower().replace(" ", "-")
 
 
@@ -73,7 +78,8 @@ def _headers(prefer: str) -> dict:
 def to_row(activite: "Activite") -> dict:
     row = asdict(activite)
     row["commune_slug"] = slugify(activite.commune)
-    row["plateforme_source"] = PLATEFORME_SOURCE.get(activite.commune, "Inconnue")
+    source_key = activite.organisateur or activite.commune
+    row["plateforme_source"] = PLATEFORME_SOURCE.get(source_key, "Inconnue")
     return row
 
 

@@ -10,8 +10,10 @@ import sys
 import time
 from pathlib import Path
 
+import adeps
 import ans
 import aywaille
+import capsciences
 import floreffe
 import hannut
 import herstal
@@ -33,6 +35,8 @@ SCRAPERS = [
     ("Herstal", herstal),
     ("Huy", huy),
     ("Sprimont", sprimont),
+    ("ADEPS", adeps),
+    ("Cap Sciences", capsciences),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque

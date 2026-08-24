@@ -54,6 +54,10 @@ IMIO_DOMAINS = {
     "www.oupeye.be",
 }
 CRAWL_DELAYS = {domain: IMIO_CRAWL_DELAY for domain in IMIO_DOMAINS}
+# Organismes hors socle communal (voir
+# docs/investigation-technique-organismes-2026-08-24.md) : Crawl-delay
+# propre à chaque domaine, déclaré explicitement dans son robots.txt.
+CRAWL_DELAYS["www.capsciences.be"] = 10
 DEFAULT_MIN_DELAY = 2  # pause minimale de courtoisie entre requêtes, même sans Crawl-delay déclaré
 
 _last_request_at: dict[str, float] = {}
@@ -291,6 +295,11 @@ def find_plone_content(soup) -> object:
 
 @dataclass
 class Activite:
+    # `commune` = la commune belge concernee quand elle est identifiable
+    # (deductible du lieu pour un organisme, ou la commune elle-meme pour un
+    # scraper communal). Laisser "" (pas None - voir supabase_client.to_row)
+    # quand ce n'est pas deductible (ex. stage ADEPS a l'etranger) : la
+    # vraie localisation reste dans `lieu` dans tous les cas.
     commune: str
     nom_activite: str
     dates: str
@@ -302,10 +311,15 @@ class Activite:
     disponibilite: str
     lien_source: str
     date_verification: str = field(default_factory=lambda: date.today().isoformat())
+    # Nom de l'organisme source pour les scrapers non-communaux (ADEPS, Cap
+    # Sciences...). None pour les scrapers communaux (source = la commune
+    # elle-meme, deja dans `commune`).
+    organisateur: Optional[str] = None
 
 
 FIELDNAMES = [
     "commune",
+    "organisateur",
     "nom_activite",
     "dates",
     "age_min",
