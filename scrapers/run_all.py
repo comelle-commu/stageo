@@ -12,12 +12,14 @@ import ans
 import floreffe
 import neupre
 import seraing
+import verviers
 from common import write_outputs
 
 SCRAPERS = [
     ("Ans", ans),
     ("Seraing", seraing),
     ("Neupre", neupre),
+    ("Verviers", verviers),
 ]
 
 OUT_DIR = Path(__file__).parent / "output"

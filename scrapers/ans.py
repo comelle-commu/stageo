@@ -11,7 +11,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from common import Activite, extract_disponibilite, respectful_get
+from common import Activite, extract_disponibilite, find_plone_content, respectful_get
 
 URL = (
     "https://www.ans-ville.be/que-faire/stages-plaines-activites/"
@@ -36,7 +36,7 @@ def _to_iso_year(yy: str) -> str:
 def scrape() -> list[Activite]:
     resp = respectful_get(URL)
     soup = BeautifulSoup(resp.text, "lxml")
-    main = soup.find("main") or soup
+    main = find_plone_content(soup)
 
     full_text = main.get_text(" ", strip=True)
     disponibilite = extract_disponibilite(full_text) or "Non communiqué sur cette page"

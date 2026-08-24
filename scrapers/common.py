@@ -29,13 +29,31 @@ USER_AGENT = (
 )
 
 # Crawl-delay (en secondes) déclaré dans le robots.txt de chaque domaine.
-# Voir docs/investigation-technique-sites-communaux-2026-08-24.md pour le détail.
-# Domaines absents du dict = pas de Crawl-delay déclaré (WordPress standard,
-# aucune restriction notable) -> on applique quand même un minimum poli.
-CRAWL_DELAYS = {
-    "www.ans-ville.be": 120,
-    "www.eghezee.be": 120,  # même plateforme iMio, non utilisé cette session
+# Voir docs/investigation-technique-sites-communaux-2026-08-24.md et
+# docs/investigation-technique-elargissement-communes-2026-08-24.md.
+#
+# Tous les sites iMio/Plone partagent EXACTEMENT le même robots.txt (194
+# lignes, Crawl-delay 120) - confirmé par diff direct entre plusieurs paires
+# de domaines (Liège/Herstal, Liège/Oupeye) pendant l'investigation
+# d'élargissement. IMIO_CRAWL_DELAY centralise cette valeur ; IMIO_DOMAINS
+# liste les domaines confirmés iMio à ce jour (robots.txt identique
+# vérifié, ou plateforme identifiée via <meta generator="Plone"> + structure
+# @@site-logo/@@download typique). Domaines absents du dict = pas de
+# Crawl-delay déclaré -> on applique quand même un minimum poli.
+IMIO_CRAWL_DELAY = 120
+IMIO_DOMAINS = {
+    "www.ans-ville.be",
+    "www.eghezee.be",
+    "www.liege.be",
+    "www.verviers.be",
+    "www.herstal.be",
+    "www.huy.be",
+    "www.waremme.be",
+    "www.aywaille.be",
+    "www.sprimont.be",
+    "www.oupeye.be",
 }
+CRAWL_DELAYS = {domain: IMIO_CRAWL_DELAY for domain in IMIO_DOMAINS}
 DEFAULT_MIN_DELAY = 2  # pause minimale de courtoisie entre requêtes, même sans Crawl-delay déclaré
 
 _last_request_at: dict[str, float] = {}
@@ -86,6 +104,137 @@ def extract_disponibilite(text: str) -> Optional[str]:
         if pattern.search(text):
             return label
     return None
+
+
+# --- Vérification légale réutilisable (robots.txt + CGU) -------------------
+#
+# Référence : le robots.txt iMio confirmé (194 lignes, Crawl-delay 120,
+# disallow limité aux chemins dynamiques - recherche, login, calendrier...).
+# Un nouveau domaine qui matche cette empreinte peut être considéré comme
+# faisant partie du même réseau sans tout relire à la main.
+_IMIO_ROBOTS_SIGNATURE_LINES = {"User-agent: *", "Crawl-delay: 120"}
+
+# Mots-clés à chercher dans le texte VISIBLE d'une page légale (CGU/mentions
+# légales/gdpr-view). Piège rencontré et déjà corrigé une fois : chercher
+# sur le HTML brut remonte des faux positifs (classe CSS "fa-robot" de
+# Font Awesome, "décision automatisée" du RGPD qui n'a rien à voir) -> on
+# ne cherche que dans le texte visible, après avoir retiré <script>/<style>.
+_CGU_WARNING_KEYWORDS = [
+    "scraping",
+    "extraction automatis",
+    "robot",
+    "crawl",
+    "moissonnage",
+]
+
+
+@dataclass
+class LegalCheck:
+    domain: str
+    robots_status: Optional[int]
+    robots_matches_imio_signature: bool
+    crawl_delay: Optional[int]
+    legal_page_url: Optional[str]
+    legal_page_status: Optional[int]
+    warnings: list[tuple[str, str]]  # (mot-clé, contexte) trouvés dans le texte visible
+    notes: list[str]
+
+    @property
+    def verdict(self) -> str:
+        if self.warnings:
+            return "À VÉRIFIER MANUELLEMENT (mot-clé suspect trouvé)"
+        if self.robots_status == 200:
+            return "GO"
+        return "À VÉRIFIER MANUELLEMENT (robots.txt non lisible)"
+
+
+def check_legal(domain: str, legal_path: str = "/gdpr-view") -> LegalCheck:
+    """Vérification légale d'un nouveau domaine : robots.txt + page légale.
+
+    Coûte 2 requêtes HTTP - à appeler UNE FOIS manuellement en onboardant une
+    nouvelle commune (ex. dans un terminal Python), jamais depuis scrape()
+    ni dans une boucle. Les sites iMio utilisent tous /gdpr-view pour leurs
+    mentions légales (confirmé sur Ans, Eghezée, Liège, Herstal, Sprimont) ;
+    passer un autre `legal_path` pour une plateforme différente (WordPress,
+    Nuxt...).
+    """
+    from bs4 import BeautifulSoup  # import local : common.py reste utilisable sans bs4 pour le reste
+
+    notes: list[str] = []
+    warnings: list[tuple[str, str]] = []
+
+    robots_status = None
+    matches_signature = False
+    crawl_delay = None
+    try:
+        r = requests.get(f"https://{domain}/robots.txt", headers={"User-Agent": USER_AGENT}, timeout=15)
+        robots_status = r.status_code
+        if r.status_code == 200:
+            lines = {line.strip() for line in r.text.splitlines()}
+            matches_signature = _IMIO_ROBOTS_SIGNATURE_LINES.issubset(lines)
+            m = re.search(r"Crawl-delay:\s*(\d+)", r.text, re.I)
+            crawl_delay = int(m.group(1)) if m else None
+            if not matches_signature:
+                notes.append("robots.txt lisible mais ne matche pas la signature iMio connue - à relire à la main")
+    except requests.RequestException as exc:
+        notes.append(f"robots.txt inaccessible : {exc}")
+
+    legal_url = f"https://{domain}{legal_path}"
+    legal_status = None
+    try:
+        r = requests.get(legal_url, headers={"User-Agent": USER_AGENT}, timeout=15)
+        legal_status = r.status_code
+        if r.status_code == 200:
+            soup = BeautifulSoup(r.text, "lxml")
+            for tag in soup.find_all(["script", "style"]):
+                tag.decompose()
+            visible_text = soup.get_text(" ")
+            for kw in _CGU_WARNING_KEYWORDS:
+                for m in re.finditer(kw, visible_text, re.I):
+                    start, end = m.span()
+                    context = re.sub(r"\s+", " ", visible_text[max(0, start - 80):end + 80]).strip()
+                    warnings.append((kw, context))
+    except requests.RequestException as exc:
+        notes.append(f"page légale inaccessible : {exc}")
+
+    return LegalCheck(
+        domain=domain,
+        robots_status=robots_status,
+        robots_matches_imio_signature=matches_signature,
+        crawl_delay=crawl_delay,
+        legal_page_url=legal_url,
+        legal_page_status=legal_status,
+        warnings=warnings,
+        notes=notes,
+    )
+
+
+# --- Repérage de zone de contenu (Plone/iMio) -------------------------------
+#
+# Mutualisable avec un niveau de confiance raisonnable : `<main>` (souvent
+# id="main-container") a été vérifié présent sur 9 sites iMio différents
+# (Ans et Verviers inspectés en détail pour construire un vrai parseur ;
+# Liège, Herstal, Huy, Waremme, Aywaille, Sprimont, Oupeye confirmés lors du
+# passage en revue structurel - <main> systématiquement trouvé, contenu non
+# vide). Un repli sur l'ancien thème Plone "Sunburst" (#content-core, vu sur
+# Eghezée lors de l'investigation initiale mais jamais scrapé pour de vrai)
+# est ajouté par prudence, non garanti.
+#
+# Ce qui N'EST PAS mutualisable pour l'instant (voir
+# docs/investigation-technique-elargissement-communes-2026-08-24.md) : la
+# façon dont chaque commune publie ses données À L'INTÉRIEUR de cette zone
+# varie (HTML direct, PDF joint, page hub, image intégrée) - cette fonction
+# ne fait que trouver la bonne zone à lire, pas l'extraction elle-même.
+def find_plone_content(soup) -> object:
+    """Retourne l'élément BeautifulSoup contenant le contenu principal d'une
+    page Plone/iMio, avec repli si la structure diffère de celle observée."""
+    return (
+        soup.find("main", id="main-container")
+        or soup.find("main")
+        or soup.find(id="content-core")
+        or soup.find(id="content")
+        or soup
+    )
 
 
 @dataclass

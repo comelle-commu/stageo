@@ -1,9 +1,13 @@
 # Scrapers Stagéo — sites communaux (MVP)
 
-Premier scraper fonctionnel, limité à la zone de test (province de Liège) :
-**Ans**, **Seraing**, **Neupré**. Floreffe est volontairement laissé de côté
-(voir plus bas). Contexte complet des vérifications légales/techniques :
-`docs/investigation-technique-sites-communaux-2026-08-24.md`.
+Scraper fonctionnel, limité à la zone de test (province de Liège) :
+**Ans**, **Seraing**, **Neupré**, **Verviers**. Floreffe est volontairement
+laissé de côté (voir plus bas). Contexte complet des vérifications
+légales/techniques :
+`docs/investigation-technique-sites-communaux-2026-08-24.md` (Ans/Neupré/
+Seraing) et
+`docs/investigation-technique-elargissement-communes-2026-08-24.md`
+(passage à l'échelle iMio/Plone, Verviers).
 
 ## Installation
 
@@ -34,21 +38,52 @@ date_verification`.
 `null`). Tous les autres champs sont du texte libre — voir les limites
 ci-dessous, notamment pour `disponibilite`.
 
-## Architecture : un parseur par plateforme
+## Architecture : un parseur par plateforme, un socle commun pour iMio/Plone
 
 Contrairement à l'hypothèse de départ, **Ans et Seraing n'utilisent pas la
 même plateforme** (Ans = Plone/iMio, Seraing = WordPress) — vérifié en
-récupérant le HTML réel des deux sites. Les 3 communes de cette session
-utilisent donc 3 plateformes différentes, d'où 3 parseurs séparés :
+récupérant le HTML réel des deux sites. En revanche, l'investigation
+d'élargissement (10 communes supplémentaires testées) a montré qu'**iMio/
+Plone équipe 9 communes sur 13 examinées en province de Liège (69 %)**, avec
+un `robots.txt` identique au bit près sur tout le réseau — ce qui justifie
+un socle mutualisé pour cette famille de sites (voir
+`docs/investigation-technique-elargissement-communes-2026-08-24.md`).
 
 | Commune | Plateforme | Rendu | Module |
 |---|---|---|---|
 | Ans | Plone (iMio) | HTML statique | `ans.py` |
+| Verviers | Plone (iMio) | HTML statique | `verviers.py` |
 | Seraing | WordPress | HTML statique | `seraing.py` |
 | Neupré | Nuxt.js | **SSR** — HTML déjà complet dans la réponse HTTP brute, malgré l'apparence de SPA JS (vérifié : pas besoin de navigateur headless) | `neupre.py` |
 
 `common.py` porte la logique partagée : requêtes HTTP respectueuses,
-détection de disponibilité en texte libre, écriture JSON/CSV.
+détection de disponibilité en texte libre, écriture JSON/CSV, **et depuis
+cette session le socle iMio/Plone** :
+
+- `IMIO_DOMAINS` / `IMIO_CRAWL_DELAY` : la liste des domaines iMio confirmés
+  (10 à ce jour) et leur Crawl-delay commun (120s), utilisés automatiquement
+  par `respectful_get()`.
+- `check_legal(domain)` : vérification légale réutilisable pour onboarder
+  une nouvelle commune sans tout relire à la main - fetch le `robots.txt` et
+  la page légale (`/gdpr-view` par défaut sur iMio), compare le robots.txt à
+  la signature iMio connue, et cherche des mots-clés anti-scraping dans le
+  texte **visible** de la page légale (script/style retirés avant recherche,
+  pour éviter les faux positifs type classe CSS `fa-robot`). Coûte 2
+  requêtes HTTP - à appeler une fois à la main pour une nouvelle commune,
+  jamais en boucle ni depuis `scrape()`.
+- `find_plone_content(soup)` : repérage générique de la zone de contenu
+  (`<main id="main-container">`, avec repli sur l'ancien thème Plone
+  Sunburst). Confirmé mutualisable : présent et non-vide sur les 9 sites
+  iMio inspectés (Ans et Verviers via un vrai parseur, les 7 autres lors du
+  passage en revue structurel). Utilisé par `ans.py` et `verviers.py`.
+
+**Ce qui n'est PAS mutualisé** (documenté en détail dans le rapport
+d'élargissement) : l'extraction fine des dates/âges/prix à l'intérieur de
+cette zone. Même entre deux sites iMio, la donnée est parfois en HTML
+direct (Ans, Verviers), parfois renvoyée vers un PDF joint (Herstal,
+probablement Waremme), parfois en page "hub" (Huy, Sprimont), parfois en
+image intégrée (Oupeye) - un parseur par commune reste nécessaire pour
+cette partie.
 
 ## Respect des règles de crawl
 
@@ -72,6 +107,22 @@ navigateur complet, même résultat) — impossible de confirmer une politique
 de crawl. `run_all.py` l'affiche explicitement comme `EN_ATTENTE` dans le
 résumé plutôt que de l'omettre. À débloquer : contact direct avec la
 commune, ou nouvelle vérification du robots.txt à une date ultérieure.
+
+## Verviers : plus simple qu'Ans, mais avec un écart par rapport à l'attendu
+
+Comme annoncé par l'investigation d'élargissement, `verviers.py` a été le
+parseur le plus rapide à écrire (structure `<h3>` propre, dates ET âges
+donnés inline par plaine, contact directement dans le texte) - le socle
+`find_plone_content()` a fonctionné du premier coup, sans adaptation.
+
+**Écart avec ce qui était attendu :** l'investigation notait "dates + âges
+inline par site" comme un point fort de Verviers par rapport à Ans, ce qui
+est confirmé - mais **aucun prix n'est indiqué nulle part sur la page**
+(contrairement à Ans, qui donne 2,50 €/semaine). Le champ `prix` est donc
+`"Non communiqué sur cette page"` pour les 5 lignes Verviers. Le
+tarif existe probablement dans un des deux PDF joints ("Règlement d'ordre
+intérieur", "Projet pédagogique") ou sur le portail d'inscription lui-même,
+non explorés cette session.
 
 ## Limites connues de cette version (best-effort, pas de perfection)
 
@@ -127,14 +178,15 @@ Voir `output/timings.txt` après exécution. Dernier run mesuré (session du
 
 | Commune | Activités extraites | Durée |
 |---|---|---|
-| Ans | 6 | ~1,1 s |
-| Seraing | 9 | ~1,1 s |
-| Neupré | 5 | ~1,4 s |
+| Ans | 6 | ~0,8 s |
+| Seraing | 9 | ~1,0 s |
+| Neupré | 5 | ~1,1 s |
+| Verviers | 5 | ~1,0 s |
 | Floreffe | — | EN_ATTENTE |
 
-**Total : 20 activités en ~3,6 s** pour 3 pages. À ce rythme (une requête
-HTTP simple par commune, pas de rendu JS nécessaire même pour le site en
-apparence le plus "moderne"), élargir à une dizaine de communes
-supplémentaires resterait de l'ordre de quelques secondes au total — le
-goulot d'étranglement pour passer à l'échelle sera l'écriture d'un nouveau
-parseur par plateforme, pas le temps d'exécution.
+**Total : 25 activités en ~3,9 s** pour 4 pages. Ajouter Verviers n'a
+quasiment rien coûté en temps (le socle iMio partagé, déjà valide pour Ans,
+a été réutilisé tel quel) - confirme que le goulot d'étranglement pour
+passer à l'échelle reste l'écriture d'un parseur par commune (ou son
+adaptation pour les cas iMio non couverts : PDF, page hub, image), pas le
+temps d'exécution.
