@@ -25,7 +25,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from common import Activite, find_plone_content, respectful_get
+from common import Activite, classify_type, find_plone_content, respectful_get
 
 STAGES_HUB_URL = "https://www.huy.be/vivre-a/jeunesse/les-stages/accueil"
 COMMUNE = "Huy"
@@ -97,6 +97,7 @@ def scrape() -> list[Activite]:
     activite = Activite(
         commune=COMMUNE,
         nom_activite="Le Repaire des P'tits Loups (plaine communale)",
+        type_activite=classify_type("Le Repaire des P'tits Loups (plaine communale)"),
         dates=dates,
         age_min=age_min,
         age_max=age_max,

@@ -157,6 +157,7 @@
   .chip.chip-all{font-weight:700;}
   .chip.chip-all.active{background:var(--ink);border-color:var(--ink);}
   .chip.age-chip.active{background:var(--orange-deep);border-color:var(--orange-deep);}
+  .chip.type-chip.active{background:var(--blue);border-color:var(--blue);}
 
   .status-line{font-size:13px;color:var(--ink-soft);margin:14px 0;min-height:1.4em;}
   .load-more{
@@ -265,6 +266,10 @@
       <div class="chip-row" id="ageChips"></div>
     </div>
     <div class="filter-group">
+      <span class="filter-label">Type d'activité</span>
+      <div class="chip-row" id="typeChips"></div>
+    </div>
+    <div class="filter-group">
       <span class="filter-label" id="communeLabel">Communes</span>
       <div class="chip-row" id="communeChips"></div>
     </div>
@@ -300,6 +305,7 @@
   const statsEl = document.getElementById('stats');
   const chipAllBtn = document.getElementById('chipAll');
   const ageChipsEl = document.getElementById('ageChips');
+  const typeChipsEl = document.getElementById('typeChips');
   const communeChipsEl = document.getElementById('communeChips');
   const orgChipsEl = document.getElementById('orgChips');
   const communeLabelEl = document.getElementById('communeLabel');
@@ -319,6 +325,10 @@
     { key: '9-12', label: '9-12 ans', min: 9, max: 12 },
     { key: '12+', label: '12 ans et +', min: 12, max: Infinity },
   ];
+
+  // Meme liste que TYPE_ACTIVITE_CHOICES cote scraper (voir common.py) -
+  // le champ est assigne une fois pour toutes au scraping, pas devine ici.
+  const TYPE_ACTIVITE_CHOICES = ['Sport', 'Art & créativité', 'Sciences & nature', 'Langues', 'Multi-activités'];
 
   const MOIS = {janvier:0,février:1,fevrier:1,mars:2,avril:3,mai:4,juin:5,juillet:6,août:7,aout:7,septembre:8,octobre:9,novembre:10,décembre:11,decembre:11};
 
@@ -382,6 +392,7 @@
   let data = [];
   let activeGroup = 'ALL';
   let activeAge = 'ALL';
+  let activeType = 'ALL';
   let showPast = false;
   let visibleLimit = PAGE_SIZE;
 
@@ -405,6 +416,7 @@
     const g = groupKey(r);
     if (except !== 'group' && activeGroup !== 'ALL' && g !== activeGroup) return false;
     if (except !== 'age' && !matchesAge(r, activeAge)) return false;
+    if (except !== 'type' && activeType !== 'ALL' && r.type_activite !== activeType) return false;
     if (q){
       const hay = [r.nom_activite, r.commune, r.organisateur, r.dates, r.lieu, ageLabel(r)].join(' ').toLowerCase();
       if (hay.indexOf(q) === -1) return false;
@@ -513,6 +525,16 @@
     });
     ageChipsEl.innerHTML = ageHtml;
 
+    // Type d'activité : même logique, en ignorant le filtre de type lui-même.
+    let typeHtml = '';
+    TYPE_ACTIVITE_CHOICES.forEach(function(t){
+      const count = data.filter(function(r){
+        return matchesFilters(r, q, 'type') && r.type_activite === t && (showPast || !isPast(r));
+      }).length;
+      typeHtml += chipHtml(t, count, activeType === t, 'data-type="' + esc(t) + '"', 'type-chip');
+    });
+    typeChipsEl.innerHTML = typeHtml;
+
     // Communes / organismes : compte en ignorant le filtre de source lui-même,
     // ET en ignorant le filtre "dates passées" - toutes les sources connues
     // doivent apparaître dans la liste, même si leurs seules données sont
@@ -541,7 +563,7 @@
     orgChipsEl.innerHTML = orgHtml;
     orgLabelEl.textContent = 'Organismes (' + Object.keys(orgCounts).length + ')';
 
-    chipAllBtn.classList.toggle('active', activeGroup === 'ALL' && activeAge === 'ALL');
+    chipAllBtn.classList.toggle('active', activeGroup === 'ALL' && activeAge === 'ALL' && activeType === 'ALL');
   }
 
   function renderStats(){
@@ -570,6 +592,7 @@
   chipAllBtn.addEventListener('click', resetPageAnd(function(){
     activeGroup = 'ALL';
     activeAge = 'ALL';
+    activeType = 'ALL';
   }));
   communeChipsEl.addEventListener('click', resetPageAnd(function(e){
     const btn = e.target.closest('.chip');
@@ -585,6 +608,11 @@
     const btn = e.target.closest('.chip');
     if (!btn) return;
     activeAge = (activeAge === btn.dataset.age) ? 'ALL' : btn.dataset.age;
+  }));
+  typeChipsEl.addEventListener('click', resetPageAnd(function(e){
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    activeType = (activeType === btn.dataset.type) ? 'ALL' : btn.dataset.type;
   }));
   searchEl.addEventListener('input', function(){
     visibleLimit = PAGE_SIZE;

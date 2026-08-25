@@ -14,7 +14,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from common import Activite, respectful_get
+from common import Activite, classify_type, respectful_get
 
 URL = "https://www.chaudfontaine.be/mes-services/enfance-education-jeunesse/education/stages-activites/"
 COMMUNE = "Chaudfontaine"
@@ -81,6 +81,7 @@ def scrape() -> list[Activite]:
             Activite(
                 commune=COMMUNE,
                 nom_activite=f"{titre.strip()} — {saison}" if saison else titre.strip(),
+                type_activite=classify_type(titre),
                 dates=dates,
                 age_min=float(age_min_txt.replace(",", ".")),
                 age_max=float(age_max_txt.replace(",", ".")),

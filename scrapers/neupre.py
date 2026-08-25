@@ -20,7 +20,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from common import Activite, extract_disponibilite, respectful_get
+from common import Activite, classify_type, extract_disponibilite, respectful_get
 
 URL = "https://www.neupre.be/neupre/information/plaines-de-vacances"
 COMMUNE = "Neupre"
@@ -126,6 +126,7 @@ def scrape() -> list[Activite]:
             Activite(
                 commune=COMMUNE,
                 nom_activite=f"Plaines de vacances Neupre - {nom_groupe} (Enfants de {niveau_desc}){note_age}",
+                type_activite=classify_type(nom_groupe),
                 dates=dates,
                 age_min=age_min if age_min is not None else age_min_global,
                 age_max=age_max if age_max is not None else age_max_global,

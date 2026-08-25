@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import re
 
-from common import Activite, fetch_pdf_bytes, extract_pdf_text, is_pdf
+from common import Activite, classify_type, fetch_pdf_bytes, extract_pdf_text, is_pdf
 
 URL_PAGE = "https://www.grace-hollogne.be/loisirs/sports/plaines-de-vacances-2026"
 URL_PDF = "https://www.grace-hollogne.be/loisirs/sports/finalplainev4.pdf"
@@ -84,6 +84,7 @@ def scrape() -> list[Activite]:
             Activite(
                 commune=COMMUNE,
                 nom_activite=f"Plaines de vacances Grâce-Hollogne - Centre {nom_centre.strip()}",
+                type_activite=classify_type("Plaines de vacances Grâce-Hollogne"),
                 dates=dates,
                 age_min=_parse_age(age_min_tok),
                 age_max=float(age_max_tok),

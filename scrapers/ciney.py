@@ -12,7 +12,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from common import Activite, extract_disponibilite, find_plone_content, respectful_get
+from common import Activite, classify_type, extract_disponibilite, find_plone_content, respectful_get
 
 URL = "https://www.ciney.be/vivre-a-ciney/enfance/plaines-de-vacances"
 COMMUNE = "Ciney"
@@ -69,6 +69,7 @@ def scrape() -> list[Activite]:
             Activite(
                 commune=COMMUNE,
                 nom_activite=f"Plaines de vacances Ciney — {ville.title()}",
+                type_activite=classify_type("Plaines de vacances Ciney"),
                 dates=dates,
                 age_min=age_min,
                 age_max=age_max,

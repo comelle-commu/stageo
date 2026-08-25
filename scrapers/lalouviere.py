@@ -14,7 +14,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from common import Activite, extract_disponibilite, find_plone_content, respectful_get
+from common import Activite, classify_type, extract_disponibilite, find_plone_content, respectful_get
 
 URL = "https://atl.lalouviere.be/vacances-scolaires/centres-de-vacances"
 COMMUNE = "La Louviere"
@@ -49,6 +49,7 @@ def scrape() -> list[Activite]:
         Activite(
             commune=COMMUNE,
             nom_activite="Centres de Vacances de La Louvière (automne, détente, printemps, été)",
+            type_activite=classify_type("Centres de Vacances de La Louvière"),
             dates=(
                 "Dates précises non données sur cette page - se déroulent chaque période de "
                 "vacances scolaires (automne, détente/Carnaval, printemps/Pâques, été), voir "

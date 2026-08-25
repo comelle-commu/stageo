@@ -16,7 +16,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from common import Activite, find_plone_content, respectful_get
+from common import Activite, classify_type, find_plone_content, respectful_get
 
 URL = "https://www.sprimont.be/loisirs/stages/stages-sur-la-commune-de-sprimont/stages-de-la-commune-kids-holidays"
 PLANNING_IMAGE_URL = (
@@ -62,6 +62,7 @@ def scrape() -> list[Activite]:
     activite = Activite(
         commune=COMMUNE,
         nom_activite="Kids Holidays (plaine communale non résidentielle)",
+        type_activite=classify_type("Kids Holidays (plaine communale non résidentielle)"),
         dates=(
             "Dates exactes publiées uniquement sous forme d'image "
             f"({PLANNING_IMAGE_URL}) - non extraites cette session (pas d'OCR)"

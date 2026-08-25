@@ -317,6 +317,67 @@ def find_plone_content(soup) -> object:
     )
 
 
+# --- Classification par type d'activite ------------------------------------
+#
+# Pas de champ "type" fourni nativement par aucune source (communes, ADEPS,
+# Cap Sciences...) - seulement un nom d'activite en texte libre. Plutot que
+# de deviner cote frontend a chaque affichage, chaque scraper appelle
+# classify_type() UNE FOIS a la construction de l'Activite, et le resultat
+# est stocke comme un vrai champ (voir Activite.type_activite plus bas) :
+# plus fiable qu'un mots-cles cote client, et le filtre frontend devient une
+# simple comparaison exacte.
+#
+# Approche best-effort assumee (meme esprit que extract_disponibilite()) :
+# l'organisateur tranche en premier quand il est structurellement fiable
+# (ADEPS = programme sportif officiel, Cap Sciences = organisme scientifique,
+# les clubs "Royal ... Club" = sport), sinon mots-cles sur le nom. Un intitule
+# generique ("Plaines de vacances Ans") ou qui melange plusieurs themes
+# retombe honnetement sur "Multi-activites" plutot qu'un choix force.
+TYPE_ACTIVITE_CHOICES = ["Sport", "Art & créativité", "Sciences & nature", "Langues", "Multi-activités"]
+
+# \b (limite de mot) partout - piège rencontré en ecrivant ce classifieur :
+# un simple "in" sur "crea" matchait aussi "RÉCRÉA'kids" (activite generique,
+# pas artistique) et "art" seul matchait "d'Artagnan" ou "partir" - \b evite
+# ces faux positifs en n'acceptant le mot-cle qu'en frontiere de mot reel.
+_LANGUE_RE = re.compile(r"\b(anglais|néerlandais|neerlandais|allemand|espagnol|immersion|langues?)\b", re.I)
+_SCIENCES_NATURE_RE = re.compile(
+    r"\b(sciences?|nature|environnement|écologie|ecologie|ferme|animaux|aventure|explorat\w*|jardin|plein\s+air)\b",
+    re.I,
+)
+_SPORT_RE = re.compile(
+    r"\b(sports?|judo|foot(?:ball)?|basket|tennis|natation|piscine|gymnastique|multisports?|"
+    r"vélo|velo|cyclisme|athlétisme|athletisme|karate|handball|volley|rugby|badminton|escalade|"
+    r"équitation|equitation)\b",
+    re.I,
+)
+_ART_RE = re.compile(
+    r"\b(arts?|créativité|creativite|dessin|peinture|bd|manga|théâtre|theatre|théâtral\w*|"
+    r"musi\w*|chant|chorale|chœur|choeur|danse|bricolage|cirque)\b|atelier\s+cr[ée]a\w*",
+    re.I,
+)
+
+
+def classify_type(nom_activite: str, organisateur: Optional[str] = None) -> str:
+    """Assigne un type best-effort - a appeler explicitement dans chaque
+    scraper au moment de construire l'Activite (voir TYPE_ACTIVITE_CHOICES)."""
+    if organisateur == "ADEPS":
+        return "Sport"
+    if organisateur == "Cap Sciences":
+        return "Sciences & nature"
+    if organisateur and "club" in organisateur.lower():
+        return "Sport"
+
+    if _LANGUE_RE.search(nom_activite):
+        return "Langues"
+    if _SCIENCES_NATURE_RE.search(nom_activite):
+        return "Sciences & nature"
+    if _SPORT_RE.search(nom_activite):
+        return "Sport"
+    if _ART_RE.search(nom_activite):
+        return "Art & créativité"
+    return "Multi-activités"
+
+
 @dataclass
 class Activite:
     # `commune` = la commune belge concernee quand elle est identifiable
@@ -326,6 +387,9 @@ class Activite:
     # vraie localisation reste dans `lieu` dans tous les cas.
     commune: str
     nom_activite: str
+    # Un des TYPE_ACTIVITE_CHOICES - toujours assigne explicitement par
+    # l'appelant via classify_type(), jamais laisse au hasard (voir plus bas).
+    type_activite: str
     dates: str
     age_min: Optional[float]
     age_max: Optional[float]
@@ -345,6 +409,7 @@ FIELDNAMES = [
     "commune",
     "organisateur",
     "nom_activite",
+    "type_activite",
     "dates",
     "age_min",
     "age_max",

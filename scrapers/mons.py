@@ -11,7 +11,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from common import Activite, extract_disponibilite, find_plone_content, respectful_get
+from common import Activite, classify_type, extract_disponibilite, find_plone_content, respectful_get
 
 URL = (
     "https://www.mons.be/fr/vivre-a-mons/education-extrascolaire/extrascolaire/"
@@ -61,6 +61,7 @@ def scrape() -> list[Activite]:
             Activite(
                 commune=COMMUNE,
                 nom_activite=f"Plaines de vacances Mons - Été {year} - Semaine du {d1} {month1}",
+                type_activite=classify_type("Plaines de vacances Mons"),
                 dates=dates,
                 age_min=age_min,
                 age_max=age_max,

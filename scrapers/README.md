@@ -88,13 +88,24 @@ s'applique au prochain déclenchement programmé.
 
 ## Schéma de sortie
 
-Une ligne par activité : `commune, nom_activite, dates, age_min, age_max,
-prix, lieu, modalites_inscription, disponibilite, lien_source,
-date_verification`.
+Une ligne par activité : `commune, nom_activite, type_activite, dates,
+age_min, age_max, prix, lieu, modalites_inscription, disponibilite,
+lien_source, date_verification`.
 
 `age_min`/`age_max` sont numériques quand l'info est disponible (sinon
 `null`). Tous les autres champs sont du texte libre — voir les limites
 ci-dessous, notamment pour `disponibilite`.
+
+`type_activite` est assigné par `common.classify_type()` — un des 5
+`TYPE_ACTIVITE_CHOICES` (`Sport`, `Art & créativité`, `Sciences & nature`,
+`Langues`, `Multi-activités`). Best-effort par mots-clés sur le nom de
+l'activité (avec priorité à l'organisateur quand il est structurellement
+fiable : ADEPS → Sport, Cap Sciences → Sciences & nature, tout organisme
+contenant "Club" → Sport). Un intitulé générique ou multi-thèmes retombe
+honnêtement sur `Multi-activités` plutôt qu'un choix forcé. Piège rencontré
+en l'écrivant : un match par simple sous-chaîne sur "créa" faisait aussi
+matcher "RÉCRÉA'kids" (activité générique) — corrigé avec des regex à
+limites de mots (`\b`).
 
 ## Architecture : un parseur par plateforme, un socle commun pour iMio/Plone
 

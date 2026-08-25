@@ -19,7 +19,7 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
-from common import Activite, respectful_get
+from common import Activite, classify_type, respectful_get
 
 URL = "https://www.capsciences.be/stages-de-vacances/"
 BASE_URL = "https://www.capsciences.be"
@@ -86,6 +86,7 @@ def _parse_card(card) -> Activite | None:
         commune=lieu,
         organisateur=ORGANISATEUR,
         nom_activite=nom,
+        type_activite=classify_type(nom, ORGANISATEUR),
         dates=_parse_dates(date_text),
         age_min=age_min,
         age_max=age_max,

@@ -12,7 +12,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from common import Activite, extract_disponibilite, find_plone_content, respectful_get
+from common import Activite, classify_type, extract_disponibilite, find_plone_content, respectful_get
 
 URL = (
     "https://www.olln.be/fr/vivre-a-olln/famille-enfance-et-jeunesse/"
@@ -71,6 +71,7 @@ def scrape() -> list[Activite]:
         Activite(
             commune=COMMUNE,
             nom_activite="Plaines de vacances communales du CLA (grandes vacances)",
+            type_activite=classify_type("Plaines de vacances communales du CLA"),
             dates=dates,
             age_min=age_min,
             age_max=age_max,

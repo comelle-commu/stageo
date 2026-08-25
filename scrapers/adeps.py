@@ -15,7 +15,7 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
-from common import Activite, respectful_get
+from common import Activite, classify_type, respectful_get
 
 BASE_URL = "https://activites.sport-adeps.be"
 CATALOGUE_URL = f"{BASE_URL}/catalogue/stages"
@@ -99,6 +99,7 @@ def _parse_row(article) -> Activite | None:
         commune="",
         organisateur=ORGANISATEUR,
         nom_activite=nom,
+        type_activite=classify_type(nom, ORGANISATEUR),
         dates=dates,
         age_min=age_min,
         age_max=age_max,

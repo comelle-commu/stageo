@@ -18,7 +18,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from common import Activite, extract_disponibilite, find_plone_content, respectful_get
+from common import Activite, classify_type, extract_disponibilite, find_plone_content, respectful_get
 
 URL = (
     "https://www.bastogne.be/cpas/famille-enfance-et-jeunesse/enfance/"
@@ -111,6 +111,7 @@ def scrape() -> list[Activite]:
             Activite(
                 commune=COMMUNE,
                 nom_activite=f"{prog['nom']} — CPAS Bastogne (de la {prog['niveau']})",
+                type_activite=classify_type(prog["nom"]),
                 dates=dates,
                 age_min=None,
                 age_max=None,

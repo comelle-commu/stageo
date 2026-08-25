@@ -19,7 +19,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from common import Activite, extract_pdf_tables, fetch_pdf_bytes, find_plone_content, is_pdf, respectful_get
+from common import Activite, classify_type, extract_pdf_tables, fetch_pdf_bytes, find_plone_content, is_pdf, respectful_get
 
 PAGE_URL = "https://www.herstal.be/vivre-a-herstal/stages"
 COMMUNE = "Herstal"
@@ -105,6 +105,7 @@ def scrape() -> list[Activite]:
                 Activite(
                     commune=COMMUNE,
                     nom_activite=f"{theme} ({organisme})" if organisme else theme,
+                    type_activite=classify_type(theme),
                     dates=current_week,
                     age_min=age_min,
                     age_max=age_max,

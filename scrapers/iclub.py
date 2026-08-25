@@ -26,7 +26,7 @@ from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
 
-from common import Activite, respectful_get
+from common import Activite, classify_type, respectful_get
 
 # (nom_affiche, commune, sous-domaine, ClubID) - clubs confirmés (page de
 # stages non vide, structure vérifiée) pour l'instant ; à compléter au fur
@@ -87,6 +87,7 @@ def _parse_card(card, club: dict, base_url: str) -> Activite | None:
         commune=club["commune"],
         organisateur=club["nom"],
         nom_activite=nom,
+        type_activite=classify_type(nom, club["nom"]),
         dates=dates,
         age_min=age_min,
         age_max=age_max,

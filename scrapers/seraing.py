@@ -11,7 +11,7 @@ import re
 
 from bs4 import BeautifulSoup
 
-from common import Activite, extract_disponibilite, respectful_get
+from common import Activite, classify_type, extract_disponibilite, respectful_get
 
 URL = "https://www.seraing.be/plaines-2026-inscriptions/"
 COMMUNE = "Seraing"
@@ -87,6 +87,7 @@ def scrape() -> list[Activite]:
         Activite(
             commune=COMMUNE,
             nom_activite=f"Plaine de vacances - {site}",
+            type_activite=classify_type(site),
             dates=dates,
             age_min=age_min,
             age_max=age_max,
