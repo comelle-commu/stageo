@@ -56,6 +56,10 @@ SCRAPERS = [
     ("Chaudfontaine", chaudfontaine),
     ("Mons", mons),
     ("Arlon", arlon),
+    ("Bastogne", bastogne),
+    ("Ciney", ciney),
+    ("La Louviere", lalouviere),
+    ("Ottignies-Louvain-la-Neuve", ottignieslln),
     ("ADEPS", adeps),
     ("Cap Sciences", capsciences),
     ("iClub", iclub),
@@ -78,10 +82,6 @@ EN_ATTENTE = [
     ("FunheLangues", funhelangues),
     ("Namur", namur),
     ("Nivelles", nivelles),
-    ("La Louvière", lalouviere),
-    ("Ottignies-Louvain-la-Neuve", ottignieslln),
-    ("Bastogne", bastogne),
-    ("Ciney", ciney),
 ]
 
 OUT_DIR = Path(__file__).parent / "output"

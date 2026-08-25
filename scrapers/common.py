@@ -72,6 +72,10 @@ IMIO_DOMAINS = {
     # même sans scraper actif (page vide pour l'instant, voir fleron.py).
     "www.grace-hollogne.be",
     "atl.fleron.be",
+    # Élargissement communes en attente (25/08/2026) - iMio confirmé sur les
+    # trois (robots.txt + /gdpr-view).
+    "www.olln.be",
+    "atl.lalouviere.be",
 }
 CRAWL_DELAYS = {domain: IMIO_CRAWL_DELAY for domain in IMIO_DOMAINS}
 # Organismes hors socle communal (voir

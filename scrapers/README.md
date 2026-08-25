@@ -118,6 +118,12 @@ un socle mutualisé pour cette famille de sites (voir
 | Neupré | Nuxt.js | **SSR** — HTML déjà complet dans la réponse HTTP brute, malgré l'apparence de SPA JS (vérifié : pas besoin de navigateur headless) | `neupre.py` |
 | Grâce-Hollogne | Plone (iMio) | Page HTML sommaire + **PDF texte natif** (dates/prix/adresses par centre, bien plus complet que la page) | `grace_hollogne.py` |
 | Chaudfontaine | WordPress | HTML statique, très structuré (accordéons `<details>` un par stage) | `chaudfontaine.py` |
+| Mons | Plone (iMio) | HTML statique, prose | `mons.py` |
+| Arlon | Plone (iMio) | HTML statique, prose | `arlon.py` |
+| Bastogne | Plone (iMio) | HTML statique, blocs structurés (titre + horaire/lieu par bloc) | `bastogne.py` |
+| Ciney | Plone (iMio) | HTML statique, prose (organisé avec Ocarina Dinant) | `ciney.py` |
+| La Louvière | Plone (iMio, sous-domaine `atl.`) | HTML statique, page permanente sans dates chiffrées | `lalouviere.py` |
+| Ottignies-LLN | Plone (iMio, domaine réel `olln.be`) | HTML statique, prose | `ottignieslln.py` |
 
 `common.py` porte la logique partagée : requêtes HTTP respectueuses,
 détection de disponibilité en texte libre, écriture JSON/CSV, **et depuis
