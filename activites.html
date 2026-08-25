@@ -500,10 +500,15 @@
     });
     ageChipsEl.innerHTML = ageHtml;
 
-    // Communes / organismes : compte en ignorant le filtre de source lui-même.
+    // Communes / organismes : compte en ignorant le filtre de source lui-même,
+    // ET en ignorant le filtre "dates passées" - toutes les sources connues
+    // doivent apparaître dans la liste, même si leurs seules données sont
+    // anciennes (ça montre l'étendue de la couverture). Si on sélectionne une
+    // source qui n'a que du passé, render() propose déjà "Les afficher quand
+    // même" plutôt que de tomber sur une liste vide sans explication.
     const communeCounts = {}, orgCounts = {};
     data.forEach(function(r){
-      if (!matchesFilters(r, q, 'group') || !(showPast || !isPast(r))) return;
+      if (!matchesFilters(r, q, 'group')) return;
       const g = groupKey(r);
       const bucket = groupKind(r) === 'org' ? orgCounts : communeCounts;
       bucket[g] = (bucket[g] || 0) + 1;
