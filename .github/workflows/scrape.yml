@@ -38,6 +38,19 @@ jobs:
         # de 50% du nombre d'activités par rapport au dernier run sain) ->
         # ce step échoue -> le job est rouge dans l'onglet Actions.
 
+      - name: Envoyer l'email hebdomadaire (nouvelles activités)
+        working-directory: scrapers
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          BREVO_LIST_ID: ${{ secrets.BREVO_LIST_ID }}
+          BREVO_SENDER_EMAIL: ${{ secrets.BREVO_SENDER_EMAIL }}
+        run: python brevo_digest.py
+        # Ne tourne que si le scrape ci-dessus a réussi (comportement par
+        # défaut de GitHub Actions) : on ne veut pas prévenir les abonnés
+        # sur base d'un run en échec/incomplet.
+
       - name: Conserver la sortie du run (debug)
         if: always() # même si le step précédent a échoué - c'est justement quand on veut inspecter la sortie
         uses: actions/upload-artifact@v4

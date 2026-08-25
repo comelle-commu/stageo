@@ -52,7 +52,9 @@ détail complet). En bref :
 - **Secrets à configurer une fois** (Settings → Secrets and variables →
   Actions → New repository secret, sur le dépôt GitHub) :
   `SUPABASE_URL` et `SUPABASE_SECRET_KEY` (mêmes valeurs que dans
-  `scrapers/.env` en local).
+  `scrapers/.env` en local), plus `BREVO_API_KEY`, `BREVO_LIST_ID` et
+  `BREVO_SENDER_EMAIL` pour l'email hebdomadaire (voir
+  `docs/email-hebdomadaire-2026-08-25.md`).
 - **Historique des runs** : onglet **Actions** du dépôt GitHub → workflow
   "Scraper Stagéo" → chaque ligne = un run passé, ✅ ou ❌, avec les logs et
   les fichiers de sortie téléchargeables en pièce jointe.
