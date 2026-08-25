@@ -129,8 +129,12 @@
   .chip:hover{border-color:var(--teal);color:var(--ink);}
   .chip.active{background:var(--teal);border-color:var(--teal);color:#fff;}
 
-  .status-line{font-size:13px;color:var(--ink-soft);margin:14px 0;}
-  .empty-state{text-align:center;padding:60px 20px;color:var(--ink-soft);font-size:14.5px;}
+  .status-line{font-size:13px;color:var(--ink-soft);margin:14px 0;min-height:1.4em;}
+  .empty-state{text-align:center;padding:60px 20px;color:var(--ink-soft);font-size:14.5px;line-height:1.7;}
+  .empty-reveal{
+    display:inline-block;margin-top:8px;border:none;background:none;cursor:pointer;
+    font-size:14.5px;font-weight:700;color:var(--teal-deep);text-decoration:underline;
+  }
   .loading-state{text-align:center;padding:60px 20px;color:var(--ink-soft);font-size:14.5px;}
 
   /* ---- Cards ---- */
@@ -139,6 +143,12 @@
     background:var(--paper);border:1px solid var(--line);border-radius:18px;
     box-shadow:0 12px 28px -18px rgba(1,83,128,0.3);overflow:hidden;
     display:flex;flex-direction:column;
+  }
+  .card.is-past{opacity:.72;}
+  .card.is-past .card-name{color:var(--ink-soft);}
+  .past-badge{
+    display:inline-block;font-size:11px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;
+    color:var(--ink-faint);background:var(--pill-bg);padding:3px 10px;border-radius:100px;margin-bottom:10px;
   }
   .card-body{padding:18px 20px;flex:1;}
   .card-source{font-size:11.5px;font-weight:700;letter-spacing:.02em;color:var(--teal-deep);margin-bottom:8px;text-transform:uppercase;}
@@ -204,7 +214,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <input id="search" type="text" placeholder="Une commune, un organisme, une activité…" aria-label="Rechercher">
       </label>
-      <button class="toggle-past" id="togglePast" type="button">Voir aussi les dates passées</button>
+      <button class="toggle-past" id="togglePast" type="button" title="Affiche aussi les éditions déjà terminées, pour se faire une idée du type de programme proposé par chaque source">Voir aussi les dates passées</button>
     </div>
     <div class="chip-row" id="chips"></div>
   </div>
@@ -303,38 +313,63 @@
 
   function groupKey(r){ return r.organisateur || r.commune || 'Non précisé'; }
 
+  function matchesFilters(r, q){
+    const g = groupKey(r);
+    if (activeGroup !== 'ALL' && g !== activeGroup) return false;
+    if (q){
+      const hay = [r.nom_activite, r.commune, r.organisateur, r.dates, r.lieu, ageLabel(r)].join(' ').toLowerCase();
+      if (hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  }
+
   function render(){
     const q = searchEl.value.trim().toLowerCase();
-    const visible = data.filter(function(r){
-      if (!showPast && isPast(r)) return false;
-      const g = groupKey(r);
-      if (activeGroup !== 'ALL' && g !== activeGroup) return false;
-      if (q){
-        const hay = [r.nom_activite, r.commune, r.organisateur, r.dates, r.lieu, ageLabel(r)].join(' ').toLowerCase();
-        if (hay.indexOf(q) === -1) return false;
-      }
-      return true;
-    });
+    const matching = data.filter(function(r){ return matchesFilters(r, q); });
+    const visible = showPast ? matching : matching.filter(function(r){ return !isPast(r); });
 
-    // Tri : activités les plus proches en premier (date de début détectable), sans date à la fin.
+    // Tri : à venir (ou date illisible) triées de la plus proche à la plus
+    // lointaine, TOUJOURS avant les activités passées - sinon, en activant
+    // "Voir aussi les dates passées", les entrées les plus anciennes (ex.
+    // janvier) remontaient en premier au lieu des plus récentes, donnant
+    // l'impression que le site n'affiche que du contenu périmé.
     visible.sort(function(a, b){
       const da = lastDate(a.dates), db = lastDate(b.dates);
-      if (da && db) return da - db;
+      const pa = da ? isPast(a) : false, pb = db ? isPast(b) : false;
+      if (pa !== pb) return pa ? 1 : -1; // passées toujours après
+      if (da && db) return pa ? db - da : da - db; // passées : plus récentes d'abord ; à venir : plus proches d'abord
       if (da) return -1;
       if (db) return 1;
       return 0;
     });
 
     if (!visible.length){
-      resultsEl.innerHTML = '<div class="empty-state">Aucune activité ne correspond à cette recherche pour le moment.</div>';
+      const hiddenPastCount = showPast ? 0 : matching.filter(isPast).length;
+      if (hiddenPastCount > 0){
+        resultsEl.innerHTML = '<div class="empty-state">Rien à venir pour ce filtre en ce moment' +
+          ' - mais ' + hiddenPastCount + ' activité' + (hiddenPastCount !== 1 ? 's' : '') + ' déjà passée' + (hiddenPastCount !== 1 ? 's' : '') +
+          ' correspond' + (hiddenPastCount !== 1 ? 'ent' : '') + ' à cette recherche. ' +
+          '<button class="empty-reveal" id="emptyReveal" type="button">Les afficher quand même →</button></div>';
+        const revealBtn = document.getElementById('emptyReveal');
+        if (revealBtn) revealBtn.addEventListener('click', function(){
+          showPast = true;
+          togglePastBtn.classList.add('active');
+          togglePastBtn.textContent = 'Masquer les dates passées';
+          render();
+        });
+      } else {
+        resultsEl.innerHTML = '<div class="empty-state">Aucune activité ne correspond à cette recherche pour le moment.</div>';
+      }
     } else {
       let html = '<div class="grid">';
       visible.forEach(function(r){
         const dispo = classifyDispo(r.disponibilite);
         const age = ageLabel(r);
         const source = groupKey(r);
-        html += '<article class="card">';
+        const past = isPast(r);
+        html += '<article class="card' + (past ? ' is-past' : '') + '">';
         html += '<div class="card-body">';
+        if (past) html += '<div class="past-badge">Édition passée</div>';
         html += '<div class="card-source">' + esc(source) + '</div>';
         html += '<div class="card-name">' + esc(r.nom_activite) + '</div>';
         html += '<div class="card-meta">';
@@ -351,7 +386,12 @@
       resultsEl.innerHTML = html;
     }
 
-    statusLine.textContent = visible.length + ' activité' + (visible.length !== 1 ? 's' : '') + ' affichée' + (visible.length !== 1 ? 's' : '') + (showPast ? '' : ' (dates déjà passées masquées)') + '.';
+    if (visible.length){
+      statusLine.textContent = visible.length + ' activité' + (visible.length !== 1 ? 's' : '') + ' affichée' + (visible.length !== 1 ? 's' : '') +
+        (showPast ? ' (dont des éditions déjà passées, pour se faire une idée du type de programme)' : ' à venir.');
+    } else {
+      statusLine.textContent = '';
+    }
   }
 
   function renderChips(){
