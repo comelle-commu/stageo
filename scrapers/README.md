@@ -135,6 +135,7 @@ un socle mutualisé pour cette famille de sites (voir
 | Ciney | Plone (iMio) | HTML statique, prose (organisé avec Ocarina Dinant) | `ciney.py` |
 | La Louvière | Plone (iMio, sous-domaine `atl.`) | HTML statique, page permanente sans dates chiffrées | `lalouviere.py` |
 | Ottignies-LLN | Plone (iMio, domaine réel `olln.be`) | HTML statique, prose | `ottignieslln.py` |
+| Ferme de Roloux (organisme privé, Fexhe-le-Haut-Clocher) | Constructeur onlc.be | HTML statique, pas d'obstacle JS | `ferme_de_roloux.py` |
 
 `common.py` porte la logique partagée : requêtes HTTP respectueuses,
 détection de disponibilité en texte libre, écriture JSON/CSV, **et depuis
@@ -184,17 +185,19 @@ cette partie.
 
 Les modules `floreffe.py`, `waremme.py`, `hannut.py`, `oupeye.py`,
 `aywaille.py`, `fleron.py`, `esneux.py`, `vise.py`, `jeunesses_musicales.py`,
-`crie_liege.py` et `funhelangues.py` **ne font aucune requête réseau** et
-exposent une constante `RAISON` expliquant pourquoi. `run_all.py` les
-affiche explicitement comme `EN_ATTENTE` dans le résumé plutôt que de les
-omettre. Détail de chaque raison (403 robots.txt, PDF sans structure
-exploitable, page pas encore publiée, image nécessitant de l'OCR,
-plateforme tierce non vérifiée légalement) :
+`crie_liege.py`, `funhelangues.py` et `cote_campagne.py` **ne font aucune
+requête réseau** et exposent une constante `RAISON` expliquant pourquoi.
+`run_all.py` les affiche explicitement comme `EN_ATTENTE` dans le résumé
+plutôt que de les omettre. Détail de chaque raison (403 robots.txt, PDF
+sans structure exploitable, page pas encore publiée, image nécessitant de
+l'OCR, plateforme tierce non vérifiée légalement) :
 `docs/scraper-cas-difficiles-2026-08-24.md` pour les cinq premiers ;
 raisons données directement dans chaque fichier pour les suivants — page
 vide (Fléron), contenu chargé en JS/AJAX (Esneux, Jeunesses Musicales),
-robots.txt interdisant explicitement ClaudeBot (Visé), ou programme pas
-encore publié pour la saison (CRIE de Liège, FunheLangues).
+robots.txt interdisant explicitement ClaudeBot (Visé), programme pas
+encore publié pour la saison (CRIE de Liège, FunheLangues), ou liens
+cachés derrière du JavaScript nécessitant un navigateur headless non
+encore intégré au pipeline (Côté Campagne).
 
 ## Verviers : plus simple qu'Ans, mais avec un écart par rapport à l'attendu
 

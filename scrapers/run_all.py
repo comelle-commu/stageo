@@ -18,8 +18,10 @@ import bastogne
 import capsciences
 import chaudfontaine
 import ciney
+import cote_campagne
 import crie_liege
 import esneux
+import ferme_de_roloux
 import fleron
 import floreffe
 import funhelangues
@@ -57,6 +59,7 @@ SCRAPERS = [
     ("Mons", mons),
     ("Arlon", arlon),
     ("Bastogne", bastogne),
+    ("Ferme de Roloux", ferme_de_roloux),
     ("Ciney", ciney),
     ("La Louviere", lalouviere),
     ("Ottignies-Louvain-la-Neuve", ottignieslln),
@@ -80,6 +83,7 @@ EN_ATTENTE = [
     ("Jeunesses Musicales", jeunesses_musicales),
     ("CRIE de Liège", crie_liege),
     ("FunheLangues", funhelangues),
+    ("Côté Campagne", cote_campagne),
     ("Namur", namur),
     ("Nivelles", nivelles),
 ]
