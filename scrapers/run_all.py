@@ -18,6 +18,7 @@ import floreffe
 import hannut
 import herstal
 import huy
+import iclub
 import neupre
 import oupeye
 import seraing
@@ -37,6 +38,7 @@ SCRAPERS = [
     ("Sprimont", sprimont),
     ("ADEPS", adeps),
     ("Cap Sciences", capsciences),
+    ("iClub", iclub),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque

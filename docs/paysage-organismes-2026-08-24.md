@@ -23,31 +23,44 @@ Léopold Club, Les Copains du Sport, Ville de Bruxelles (Vacances
 Sportives), et d'autres non encore identifiés (les `ClubID` ne sont pas
 forcément séquentiels/publics).
 
-**Vérification technique de premier niveau faite** :
-- `www2.iclub.be/robots.txt` → **404** (fichier inexistant) : aucune
-  restriction déclarée, mais aussi aucun `Crawl-delay` à respecter
-  explicitement → appliquer notre minimum de courtoisie par défaut.
-- Techno : ASP classique + ASP.NET (IIS 10), page HTML avec CSS
-  Bootstrap-like.
-- **Testé concrètement sur un club** (`ClubID=10`, Royal Léopold Club,
-  `register.asp?ClubID=10&action=Search&CategorieEvenement=Stages&LG=FR`) :
-  un simple `curl` (sans JS) **renvoie déjà des dates réelles dans le HTML**
-  (`10/08/2026`, `24/08/2026`, etc.) → rendu côté serveur confirmé, pas
-  besoin de Playwright pour ce club au moins. Le prix n'est en revanche pas
-  trouvé sous un format numérique simple sur cette page - à creuser (peut-
-  être affiché après sélection d'un stage précis).
-- **Reste à faire** avant de construire un scraper : confirmer que la
-  structure HTML est identique (mêmes classes CSS) sur 2-3 autres `ClubID`
-  différents (ex. `ClubID=203` Ville de Bruxelles, `ClubID=53` déjà croisé
-  plus tôt), et trouver comment obtenir la liste des `ClubID` valides sans
-  deviner un par un (annuaire iClub, ou liens trouvés via recherche comme
-  ici).
+**Statut final (scraper construit — `scrapers/iclub.py`)** :
+- `robots.txt` → **404** sur tous les sous-domaines testés (`www.`,
+  `www2.`, `www4.`, `www6.iclub.be`) : aucune restriction déclarée, aucun
+  `Crawl-delay` → minimum de courtoisie par défaut appliqué.
+- Techno : ASP classique (IIS 10), rendu **100% côté serveur** - confirmé
+  sur plusieurs clubs, structure HTML identique partout (classes CSS
+  `.TitreFormule`, `.location-formule`, `.periode-formule`,
+  `.age-formule`, `.prix-formule`, `.text-success`/`.text-danger` pour la
+  disponibilité). Chaque stage est un lien `<a class="pull-left">` avec un
+  `EvenementID` unique - utilisé comme `lien_source`.
+- Piège rencontré (déjà connu, déjà géré) : pas de charset déclaré dans le
+  `Content-Type` → mojibake sur les accents sans la correction
+  `apparent_encoding` déjà présente dans `common.respectful_get()` (même
+  cas que Neupré).
+- **Correction importante** sur l'hypothèse initiale : `ClubID` **n'est
+  PAS un identifiant global** - chaque combinaison (sous-domaine, ClubID)
+  est un club distinct, sans registre public pour les énumérer. Impossible
+  de "deviner" une liste de clubs par force brute (et pas souhaitable non
+  plus, éthiquement, vu le volume de requêtes que ça représenterait). Testé
+  concrètement : `ClubID=51`/`53` sur `www2`, `203` sur `www6`, `572` sur
+  `www4` répondent tous `200` mais **sans aucun stage actuellement publié**
+  (club sans stage ouvert en ce moment, ou mauvais paramètres - pas
+  distingué, pas grave : on les revisitera plus tard plutôt que de deviner).
+- **2 clubs confirmés et intégrés** (stages réels extraits, testés de bout
+  en bout) : **Royal Léopold Club** (Uccle, `ClubID=10` sur `www2`, 16
+  stages) et **Royal Racing Club de Bruxelles** (Uccle, `ClubID=27` sur
+  `www`, 65 stages) - 81 activités au total.
 
-**Pourquoi c'est la piste à creuser en premier** : si le motif se répète
-(même structure de page, juste le `ClubID` qui change), **un seul scraper
-paramétrable par `ClubID` pourrait couvrir des dizaines de clubs d'un
-coup** — exactement le même effet de levier qu'avait eu la découverte du
-socle iMio pour les communes.
+**Conclusion sur le potentiel "socle mutualisé"** : partiellement confirmé.
+La **structure d'extraction est bien 100% réutilisable** d'un club à
+l'autre (un seul parseur, `scrapers/iclub.py`, fonctionne déjà pour 2 clubs
+sans aucune adaptation) - contrairement à un scraper communal, où chaque
+site a sa propre mise en page. En revanche, **il n'existe pas de raccourci
+pour découvrir tous les clubs d'un coup** comme le permettait le robots.txt
+identique iMio : chaque club doit être identifié individuellement (recherche
+web, lien depuis son propre site) et ajouté à la liste `CLUBS` dans
+`iclub.py` - exactement le même travail d'onboarding que pour les communes,
+juste avec un parseur déjà prêt à chaque fois.
 
 ## Autres pistes identifiées (non vérifiées techniquement/légalement)
 
@@ -95,12 +108,9 @@ socle iMio pour les communes.
 
 ## Recommandation
 
-Trois pistes concrètes, par ordre de priorité suggéré :
-
-1. **`iclub.be`** — vérification technique complète (Playwright si besoin,
-   robots.txt confirmé absent donc pas de blocage légal évident) pour
-   confirmer si un seul scraper paramétrable peut couvrir plusieurs clubs
-   d'un coup. Plus gros potentiel de levier.
+1. ~~`iclub.be`~~ — **fait** (voir ci-dessus, `scrapers/iclub.py`, 2 clubs
+   intégrés). Prochaine sous-étape possible : trouver d'autres clubs
+   (recherche web au cas par cas) pour enrichir `CLUBS`.
 2. **`mya-sport.be` (PromoSport)** — reste en attente d'inspection réseau
    Playwright (déjà identifié comme nécessaire dans la doc précédente).
 3. **Annuaires** (`pour-nos-enfants.be` notamment, en évitant

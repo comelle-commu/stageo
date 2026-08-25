@@ -52,6 +52,8 @@ PLATEFORME_SOURCE = {
     "Sprimont": "Plone",
     "ADEPS": "Drupal",
     "Cap Sciences": "WordPress",
+    "Royal Léopold Club": "MyiClub",
+    "Royal Racing Club de Bruxelles": "MyiClub",
 }
 
 
