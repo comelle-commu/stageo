@@ -457,7 +457,7 @@
       button.disabled = true;
       button.textContent = 'Envoi...';
 
-      fetch('/.netlify/functions/brevo-signup', {
+      fetch('/api/brevo-signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email })
