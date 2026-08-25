@@ -52,7 +52,7 @@
     padding-top:24px;padding-bottom:24px;
   }
   .logo{display:flex;align-items:center;}
-  .logo-img{height:30px;width:auto;display:block;}
+  .logo-img{height:46px;width:auto;display:block;}
   .nav-cta{
     font-family:'Work Sans',sans-serif;
     font-size:14px;font-weight:700;
@@ -70,7 +70,7 @@
   .cta-short{display:none;}
   @media (max-width:520px){
     nav.wrap{padding-top:16px;padding-bottom:16px;}
-    .logo{font-size:17px;}
+    .logo-img{height:36px;}
     .nav-links{gap:8px;}
     .nav-link{font-size:12.5px;}
     .nav-cta{font-size:13px;padding:10px 16px;}
@@ -98,13 +98,8 @@
 
   .hero-grid{
     display:grid;grid-template-columns:1.05fr 0.95fr;gap:30px;align-items:center;
-    padding-top:8px;padding-bottom:56px;position:relative;z-index:1;
+    padding-top:32px;padding-bottom:56px;position:relative;z-index:1;
   }
-  .brand-lockup{
-    display:flex;align-items:center;justify-content:center;
-    padding:34px 0 6px;position:relative;z-index:1;
-  }
-  .brand-lockup-img{height:clamp(52px,7vw,78px);width:auto;display:block;}
   .eyebrow{
     display:inline-flex;align-items:center;gap:8px;
     font-size:13px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
@@ -300,24 +295,19 @@
 <header class="hero" id="top-form">
   <div class="blob blob1"></div>
   <div class="blob blob2"></div>
-  <div class="wrap">
-    <div class="brand-lockup">
-      <img src="trouveo-logo.png" alt="Trouvéo" class="brand-lockup-img">
-    </div>
-  </div>
   <div class="wrap hero-grid">
     <div>
-      <span class="eyebrow">Bêta · Wallonie &amp; Bruxelles</span>
+      <span class="eyebrow">Tout juste lancé · Wallonie &amp; Bruxelles</span>
       <h1 class="headline">Trouvez le <span class="hi">bon stage</span> avant qu'il ne soit complet.</h1>
-      <p class="sub">Trouvéo rassemble les stages, plaines et activités des communes, de l'ONE et des organisateurs privés en un seul endroit — et vous alerte dès qu'une place correspond à votre enfant.</p>
+      <p class="sub">Les stages et plaines de vacances sont éparpillés partout : sites communaux, ONE, organisateurs privés... Trouvéo regroupe tout au même endroit et vous prévient dès qu'une place correspond à votre enfant.</p>
 
       <form class="signup" id="signupForm" novalidate>
         <input type="email" name="email" placeholder="votre@email.be" required aria-label="Adresse email">
         <button type="submit">Je m'inscris</button>
       </form>
-      <div class="confirm" id="confirmMsg" role="status">C'est noté ! Vous serez parmi les premiers prévenus à l'ouverture de la bêta.</div>
+      <div class="confirm" id="confirmMsg" role="status">C'est noté ! On vous écrit dès que c'est prêt.</div>
       <div class="error" id="errorMsg" role="alert"></div>
-      <p class="form-note">Accès prioritaire et gratuit à la bêta. Un email à l'ouverture, pas de spam, désinscription en un clic.</p>
+      <p class="form-note">Gratuit, accès prioritaire au lancement. Un email quand c'est prêt, pas de spam, désinscription en un clic.</p>
     </div>
 
     <div class="hero-visual">
@@ -336,7 +326,7 @@
   <div class="wrap problem-layout">
     <div class="problem-head">
       <h2>Chaque période de vacances, le même casse-tête.</h2>
-      <p>Six périodes de congé par an, et l'information éparpillée sur des dizaines de sites communaux, associatifs et privés. Le tout à réserver en quelques jours, parfois en quelques heures.</p>
+      <p>Six périodes de congé par an, et à chaque fois il faut re-fouiller des dizaines de sites communaux, associatifs et privés. Et souvent, ça se réserve en quelques jours, parfois en quelques heures.</p>
     </div>
     <div class="stat-list">
       <div class="stat-row">
@@ -364,7 +354,7 @@
       <div class="tstep">
         <div class="tdot">1</div>
         <div class="tcontent">
-          <h3>Dites-nous qui vous cherchez</h3>
+          <h3>Dites-nous ce que vous cherchez</h3>
           <p>Âge de l'enfant, commune ou rayon de recherche, périodes de vacances, centres d'intérêt.</p>
         </div>
       </div>
@@ -389,8 +379,8 @@
 <section class="scope">
   <div class="wrap scope-grid">
     <div class="scope-card">
-      <h2>Ce que couvre la bêta</h2>
-      <p>On démarre concentré, pour bien faire les choses avant d'élargir : Wallonie et Bruxelles, toutes périodes de vacances scolaires, enfants de 2,5 à 15 ans.</p>
+      <h2>Ce qu'on couvre pour l'instant</h2>
+      <p>On préfère bien faire les choses sur un périmètre restreint avant d'élargir : Wallonie et Bruxelles, toutes les périodes de vacances scolaires, pour les enfants de 2,5 à 15 ans.</p>
       <div class="tag-row">
         <span class="tag">Plaines &amp; stages ONE</span>
         <span class="tag">Activités communales</span>
@@ -401,7 +391,7 @@
     <div class="pro-card">
       <div>
         <h3>Vous organisez des activités ?</h3>
-        <p>Communes, ASBL, clubs : gagnez en visibilité auprès des parents de votre région dès l'ouverture de la bêta.</p>
+        <p>Communes, ASBL, clubs : vous gagnerez en visibilité auprès des parents de votre région dès qu'on ouvre.</p>
       </div>
       <a class="pro-link" href="mailto:hello@trouveo.be">Nous contacter →</a>
     </div>
@@ -416,7 +406,7 @@
       <input type="email" name="email" placeholder="votre@email.be" required aria-label="Adresse email">
       <button type="submit">Je m'inscris</button>
     </form>
-    <div class="confirm" id="confirmMsg2" role="status">C'est noté ! Vous serez parmi les premiers prévenus à l'ouverture de la bêta.</div>
+    <div class="confirm" id="confirmMsg2" role="status">C'est noté ! On vous écrit dès que c'est prêt.</div>
     <div class="error" id="errorMsg2" role="alert"></div>
   </div>
 </section>
