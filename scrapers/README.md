@@ -166,16 +166,18 @@ cette partie.
 ## Communes EN ATTENTE : pas ignorées silencieusement
 
 Les modules `floreffe.py`, `waremme.py`, `hannut.py`, `oupeye.py`,
-`aywaille.py`, `fleron.py`, `esneux.py` et `vise.py` **ne font aucune
-requête réseau** et exposent une constante `RAISON` expliquant pourquoi.
-`run_all.py` les affiche explicitement comme `EN_ATTENTE` dans le résumé
-plutôt que de les omettre. Détail de chaque raison (403 robots.txt, PDF
-sans structure exploitable, page pas encore publiée, image nécessitant de
-l'OCR, plateforme tierce non vérifiée légalement) :
+`aywaille.py`, `fleron.py`, `esneux.py`, `vise.py`, `jeunesses_musicales.py`,
+`crie_liege.py` et `funhelangues.py` **ne font aucune requête réseau** et
+exposent une constante `RAISON` expliquant pourquoi. `run_all.py` les
+affiche explicitement comme `EN_ATTENTE` dans le résumé plutôt que de les
+omettre. Détail de chaque raison (403 robots.txt, PDF sans structure
+exploitable, page pas encore publiée, image nécessitant de l'OCR,
+plateforme tierce non vérifiée légalement) :
 `docs/scraper-cas-difficiles-2026-08-24.md` pour les cinq premiers ;
-raisons données directement dans chaque fichier pour Fléron (page vide),
-Esneux (contenu chargé en JS/AJAX) et Visé (robots.txt de la plateforme
-tierce `visestages.be` interdit explicitement ClaudeBot — refus respecté).
+raisons données directement dans chaque fichier pour les suivants — page
+vide (Fléron), contenu chargé en JS/AJAX (Esneux, Jeunesses Musicales),
+robots.txt interdisant explicitement ClaudeBot (Visé), ou programme pas
+encore publié pour la saison (CRIE de Liège, FunheLangues).
 
 ## Verviers : plus simple qu'Ans, mais avec un écart par rapport à l'attendu
 

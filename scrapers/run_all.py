@@ -18,14 +18,17 @@ import bastogne
 import capsciences
 import chaudfontaine
 import ciney
+import crie_liege
 import esneux
 import fleron
 import floreffe
+import funhelangues
 import grace_hollogne
 import hannut
 import herstal
 import huy
 import iclub
+import jeunesses_musicales
 import lalouviere
 import mons
 import namur
@@ -70,6 +73,9 @@ EN_ATTENTE = [
     ("Fléron", fleron),
     ("Esneux", esneux),
     ("Visé", vise),
+    ("Jeunesses Musicales", jeunesses_musicales),
+    ("CRIE de Liège", crie_liege),
+    ("FunheLangues", funhelangues),
     ("Namur", namur),
     ("Nivelles", nivelles),
     ("La Louvière", lalouviere),
