@@ -90,18 +90,30 @@ def _dedupe_rows(rows: list[dict]) -> list[dict]:
     le PDF Herstal, qui contient deux entrées strictement identiques
     (même thème/organisme/semaine, doublon dans le PDF source lui-même).
     On déduplique donc côté client sur la même clé que la contrainte
-    unique en base avant l'envoi."""
+    unique en base avant l'envoi.
+
+    `lieu` ET `lien_source` font partie de la clé (pas seulement
+    commune_slug/nom/dates) : l'ADEPS réutilise le même nom de stage
+    générique pour la même semaine dans plusieurs centres différents (ex.
+    "Zap Multisports" à Jambes, à Neufchâteau ET à Spa la même semaine) ET
+    dans plusieurs tranches d'âge au même endroit (ex. "Multisports" à Mons
+    la même semaine pour 6-8 ans et pour 9-12 ans) - toutes des activités
+    bien distinctes. Sans `lieu`/`lien_source` dans la clé, elles étaient
+    fusionnées à tort - 154 puis 60 activités ADEPS perdues aux deux
+    premiers imports avant que ce bug ne soit repéré. Voir
+    supabase/migrations/20260824c_fix_dedup_key_add_lieu.sql."""
     seen: dict[tuple, dict] = {}
     for row in rows:
-        key = (row["commune_slug"], row["nom_activite"], row["dates"])
+        key = (row["commune_slug"], row["nom_activite"], row["dates"], row["lieu"], row["lien_source"])
         seen[key] = row  # la dernière occurrence gagne (elles sont identiques en pratique)
     return list(seen.values())
 
 
 def upsert_activites(activites: list["Activite"]) -> list[dict]:
     """Upsert (insert ou update) sur la clé (commune_slug, nom_activite,
-    dates) définie par la contrainte unique `activites_dedup_key` - relancer
-    le scraper plusieurs fois ne duplique pas les lignes déjà présentes."""
+    dates, lieu, lien_source) définie par la contrainte unique
+    `activites_dedup_key` - relancer le scraper plusieurs fois ne duplique
+    pas les lignes déjà présentes."""
     if not activites:
         return []
     if not is_configured():
@@ -110,7 +122,7 @@ def upsert_activites(activites: list["Activite"]) -> list[dict]:
             "(non committé, à créer à partir des credentials du projet Supabase)."
         )
     rows = _dedupe_rows([to_row(a) for a in activites])
-    url = f"{SUPABASE_URL}/rest/v1/{TABLE}?on_conflict=commune_slug,nom_activite,dates"
+    url = f"{SUPABASE_URL}/rest/v1/{TABLE}?on_conflict=commune_slug,nom_activite,dates,lieu,lien_source"
     resp = requests.post(
         url,
         headers=_headers("resolution=merge-duplicates,return=representation"),
