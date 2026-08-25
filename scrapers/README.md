@@ -116,6 +116,8 @@ un socle mutualisé pour cette famille de sites (voir
 | Sprimont | Plone (iMio, thème Sunburst) | HTML statique (planning daté en image, non extrait) | `sprimont.py` |
 | Seraing | WordPress | HTML statique | `seraing.py` |
 | Neupré | Nuxt.js | **SSR** — HTML déjà complet dans la réponse HTTP brute, malgré l'apparence de SPA JS (vérifié : pas besoin de navigateur headless) | `neupre.py` |
+| Grâce-Hollogne | Plone (iMio) | Page HTML sommaire + **PDF texte natif** (dates/prix/adresses par centre, bien plus complet que la page) | `grace_hollogne.py` |
+| Chaudfontaine | WordPress | HTML statique, très structuré (accordéons `<details>` un par stage) | `chaudfontaine.py` |
 
 `common.py` porte la logique partagée : requêtes HTTP respectueuses,
 détection de disponibilité en texte libre, écriture JSON/CSV, **et depuis
@@ -163,13 +165,17 @@ cette partie.
 
 ## Communes EN ATTENTE : pas ignorées silencieusement
 
-Cinq modules (`floreffe.py`, `waremme.py`, `hannut.py`, `oupeye.py`,
-`aywaille.py`) **ne font aucune requête réseau** et exposent une constante
-`RAISON` expliquant pourquoi. `run_all.py` les affiche explicitement comme
-`EN_ATTENTE` dans le résumé plutôt que de les omettre. Détail de chaque
-raison (403 robots.txt, PDF sans structure exploitable, page pas encore
-publiée, image nécessitant de l'OCR, plateforme tierce non vérifiée
-légalement) : `docs/scraper-cas-difficiles-2026-08-24.md`.
+Les modules `floreffe.py`, `waremme.py`, `hannut.py`, `oupeye.py`,
+`aywaille.py`, `fleron.py`, `esneux.py` et `vise.py` **ne font aucune
+requête réseau** et exposent une constante `RAISON` expliquant pourquoi.
+`run_all.py` les affiche explicitement comme `EN_ATTENTE` dans le résumé
+plutôt que de les omettre. Détail de chaque raison (403 robots.txt, PDF
+sans structure exploitable, page pas encore publiée, image nécessitant de
+l'OCR, plateforme tierce non vérifiée légalement) :
+`docs/scraper-cas-difficiles-2026-08-24.md` pour les cinq premiers ;
+raisons données directement dans chaque fichier pour Fléron (page vide),
+Esneux (contenu chargé en JS/AJAX) et Visé (robots.txt de la plateforme
+tierce `visestages.be` interdit explicitement ClaudeBot — refus respecté).
 
 ## Verviers : plus simple qu'Ans, mais avec un écart par rapport à l'attendu
 

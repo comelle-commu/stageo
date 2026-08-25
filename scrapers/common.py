@@ -66,6 +66,12 @@ IMIO_DOMAINS = {
     "www.arlon.be",
     "www.bastogne.be",
     "www.ciney.be",
+    # Ajoutées lors de l'élargissement autour de Liège (25/08/2026) - iMio
+    # confirmé sur les deux (robots.txt + /gdpr-view). Grâce-Hollogne
+    # scrapée (voir grace_hollogne.py) ; atl.fleron.be reste enregistrée
+    # même sans scraper actif (page vide pour l'instant, voir fleron.py).
+    "www.grace-hollogne.be",
+    "atl.fleron.be",
 }
 CRAWL_DELAYS = {domain: IMIO_CRAWL_DELAY for domain in IMIO_DOMAINS}
 # Organismes hors socle communal (voir

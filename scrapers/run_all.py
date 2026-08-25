@@ -16,8 +16,12 @@ import arlon
 import aywaille
 import bastogne
 import capsciences
+import chaudfontaine
 import ciney
+import esneux
+import fleron
 import floreffe
+import grace_hollogne
 import hannut
 import herstal
 import huy
@@ -33,6 +37,7 @@ import seraing
 import sprimont
 import supabase_client
 import verviers
+import vise
 import waremme
 from common import write_outputs
 
@@ -44,6 +49,8 @@ SCRAPERS = [
     ("Herstal", herstal),
     ("Huy", huy),
     ("Sprimont", sprimont),
+    ("Grace-Hollogne", grace_hollogne),
+    ("Chaudfontaine", chaudfontaine),
     ("Mons", mons),
     ("Arlon", arlon),
     ("ADEPS", adeps),
@@ -60,6 +67,9 @@ EN_ATTENTE = [
     ("Hannut", hannut),
     ("Oupeye", oupeye),
     ("Aywaille", aywaille),
+    ("Fléron", fleron),
+    ("Esneux", esneux),
+    ("Visé", vise),
     ("Namur", namur),
     ("Nivelles", nivelles),
     ("La Louvière", lalouviere),
