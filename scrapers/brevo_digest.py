@@ -27,6 +27,7 @@ import sys
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import quote
 
 import requests
 
@@ -73,9 +74,12 @@ def _log_digest(nb_nouvelles: int, statut: str, details: str, brevo_campaign_id:
 
 
 def _fetch_new_activites(since_iso: str) -> list[dict]:
+    # quote() est indispensable ici : un "+" (fuseau horaire, ex.
+    # "+00:00") non encodé dans une query string est interprété comme un
+    # espace par PostgREST -> "invalid input syntax for type timestamp".
     url = (
         f"{SUPABASE_URL}/rest/v1/activites?select=*"
-        f"&premiere_apparition=gt.{since_iso}"
+        f"&premiere_apparition=gt.{quote(since_iso, safe='')}"
         "&order=premiere_apparition.asc"
     )
     resp = requests.get(url, headers=_digest_headers("count=none"), timeout=30)
@@ -122,7 +126,12 @@ def build_email_html(rows: list[dict]) -> tuple[str, str]:
             f"</div>"
         )
 
-    html = f"""
+    # <meta charset> explicite indispensable : sans elle, certains clients
+    # mail/navigateurs devinent un mauvais encodage pour ce fragment et les
+    # accents s'affichent en mojibake ("TrouvÃ©o") - repere en previsualisant
+    # digest_preview.html avant le premier envoi reel.
+    html = f"""<!DOCTYPE html>
+<html lang="fr"><head><meta charset="UTF-8"></head><body>
 <div style="font-family:'Work Sans',Arial,sans-serif;max-width:560px;margin:0 auto;background:#FFFDF8;padding:32px 24px;color:#015380;">
   <div style="font-family:Georgia,serif;font-weight:700;font-size:22px;margin-bottom:6px;">Trouvéo</div>
   <p style="color:#5C7A8C;font-size:15px;line-height:1.6;margin:0 0 24px;">
@@ -136,6 +145,7 @@ def build_email_html(rows: list[dict]) -> tuple[str, str]:
     Trouvéo est encore en bêta - cet email liste automatiquement ce que notre outil a repéré, sans filtre par âge ou par commune pour l'instant.
   </p>
 </div>
+</body></html>
 """.strip()
     return subject, html
 

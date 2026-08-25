@@ -26,7 +26,11 @@ BASE_URL = "https://www.capsciences.be"
 ORGANISATEUR = "Cap Sciences"
 
 AGE_RE = re.compile(r"(\d+)\s*-\s*(\d+)\s*ans", re.I)
-DATE_RE = re.compile(r"(\d{2})/(\d{2})\s*-\s*(\d{2})/(\d{2})/(\d{2})")
+# Année sur 2 OU 4 chiffres : le site a changé de format en cours de route
+# ("17/08 - 21/08/26" au 24/08, "09/08-13/08/2027" au 25/08 sur d'autres
+# fiches de la même page) - un pattern figé sur 2 chiffres capturait juste
+# les 2 premiers d'une année à 4 chiffres ("2027" -> "20" -> 2020 calculé).
+DATE_RE = re.compile(r"(\d{2})/(\d{2})\s*-\s*(\d{2})/(\d{2})/(\d{4}|\d{2})")
 
 
 def _parse_age(text: str) -> tuple[float | None, float | None]:
@@ -40,8 +44,9 @@ def _parse_dates(text: str) -> str:
     m = DATE_RE.search(text)
     if not m:
         return text.strip() or "Non précisées"
-    d1, m1, d2, m2, yy = m.groups()
-    year = f"20{yy}"
+    d1, m1, d2, m2, year = m.groups()
+    if len(year) == 2:
+        year = f"20{year}"
     return f"du {d1}/{m1}/{year} au {d2}/{m2}/{year}"
 
 
