@@ -82,6 +82,10 @@
     transition:transform .15s ease, box-shadow .15s ease;
   }
   .nav-cta:hover{transform:translateY(-1px);box-shadow:0 12px 28px -8px rgba(1,151,175,0.55);background:var(--teal-deep);}
+  .nav-links{display:flex;align-items:center;gap:26px;}
+  .nav-link{font-size:14.5px;font-weight:600;color:var(--ink-soft);text-decoration:none;}
+  .nav-link:hover{color:var(--ink);}
+  @media (max-width:640px){.nav-link{display:none;}}
   .nav-cta:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible{
     outline:3px solid var(--blue);outline-offset:2px;
   }
@@ -291,7 +295,10 @@
   <div class="logo">
     <span class="wordmark">Trouv<span class="e-accent">é</span><img src="trouveo-icon.png" alt="" class="o-face"></span>
   </div>
-  <a href="#top-form" class="nav-cta">Rejoindre la liste d'attente</a>
+  <div class="nav-links">
+    <a href="/activites" class="nav-link">Voir les activités</a>
+    <a href="#top-form" class="nav-cta">Rejoindre la liste d'attente</a>
+  </div>
 </nav>
 
 <header class="hero" id="top-form">
