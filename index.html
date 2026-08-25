@@ -228,8 +228,8 @@
   .tcontent p{color:var(--ink-soft);font-size:15px;line-height:1.6;}
 
   /* ---- Scope / pricing ---- */
-  section.scope{padding:74px 0;background:var(--cream);}
-  .scope-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:22px;}
+  section.scope{padding:74px 0 0;background:var(--cream);}
+  .scope-grid{display:grid;grid-template-columns:1fr;}
   .scope-card{
     background:var(--teal-deep);color:var(--cream);
     border-radius:28px;padding:40px;
@@ -238,18 +238,35 @@
   .scope-card p{color:rgba(255,253,248,0.82);font-size:16px;line-height:1.6;max-width:48ch;}
   .tag-row{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px;}
   .tag{font-size:13px;font-weight:700;padding:9px 16px;border-radius:100px;background:rgba(255,253,248,0.14);color:#fff;}
-  .pro-card{
-    background:var(--paper);
-    border-radius:28px;padding:36px;display:flex;flex-direction:column;
-    justify-content:space-between;
-    box-shadow:0 14px 34px -20px rgba(36,49,60,0.2);
-    border:1px solid var(--line);
+
+  /* ---- Partenaires (organisateurs) ---- */
+  section.partners-cta{padding:56px 0 74px;background:var(--cream);}
+  .partners-inner{
+    background:var(--peach);border-radius:28px;padding:40px;
+    display:flex;align-items:center;justify-content:space-between;gap:32px;
+    flex-wrap:wrap;
   }
-  .pro-card h3{font-size:21px;margin-bottom:12px;}
-  .pro-card p{color:var(--ink-soft);font-size:15px;line-height:1.55;margin-bottom:22px;}
-  .pro-link{
-    font-size:14px;font-weight:800;color:var(--teal-deep);text-decoration:none;
-    display:inline-flex;align-items:center;gap:6px;
+  .partners-copy{flex:1;min-width:260px;}
+  .partners-eyebrow{
+    display:inline-block;font-size:13px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+    color:var(--orange-deep);margin-bottom:10px;
+  }
+  .partners-copy h2{font-size:clamp(22px,2.6vw,28px);margin-bottom:10px;color:var(--ink);}
+  .partners-copy p{color:var(--ink-soft);font-size:15.5px;line-height:1.6;max-width:52ch;}
+  .partners-actions{display:flex;flex-direction:column;align-items:flex-start;gap:10px;flex:none;}
+  .partners-btn{
+    font-family:'Work Sans',sans-serif;font-size:14.5px;font-weight:700;
+    background:var(--teal);color:#fff;padding:14px 26px;border-radius:100px;
+    text-decoration:none;white-space:nowrap;
+    box-shadow:0 10px 24px -8px rgba(1,151,175,0.5);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .partners-btn:hover{transform:translateY(-1px);background:var(--teal-deep);}
+  .partners-mail{font-size:13.5px;font-weight:600;color:var(--ink-soft);text-decoration:underline;}
+  @media (max-width:640px){
+    .partners-inner{padding:30px 24px;flex-direction:column;align-items:flex-start;}
+    .partners-actions{align-items:flex-start;width:100%;}
+    .partners-btn{width:100%;text-align:center;}
   }
 
   /* ---- Final CTA ---- */
@@ -387,12 +404,21 @@
         <span class="tag">Sport, art, nature, langues</span>
       </div>
     </div>
-    <div class="pro-card">
-      <div>
-        <h3>Vous organisez des activités ?</h3>
-        <p>Communes, ASBL, clubs : vous gagnerez en visibilité auprès des parents de votre région dès qu'on ouvre.</p>
+  </div>
+</section>
+
+<section class="partners-cta">
+  <div class="wrap">
+    <div class="partners-inner">
+      <div class="partners-copy">
+        <span class="partners-eyebrow">Vous organisez des activités ?</span>
+        <h2>Vos stages, aux côtés des communes et organismes déjà sur Trouvéo.</h2>
+        <p>Communes, ASBL, clubs : devenez partenaire fondateur, gratuitement pendant le lancement, et gagnez en visibilité auprès des parents de votre région.</p>
       </div>
-      <a class="pro-link" href="mailto:hello@trouveo.be">Nous contacter →</a>
+      <div class="partners-actions">
+        <a class="partners-btn" href="partenaires.html">Découvrir l'offre partenaires →</a>
+        <a class="partners-mail" href="mailto:hello@trouveo.be">ou écrivez-nous directement</a>
+      </div>
     </div>
   </div>
 </section>

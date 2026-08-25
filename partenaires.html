@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trouvéo — Devenir partenaire fondateur</title>
+<meta name="description" content="Communes, ASBL et clubs : vos activités sont déjà visibles sur Trouvéo. Voici ce que le statut de partenaire fondateur peut apporter, gratuitement pendant le lancement.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Grandstander:wght@500;600;700;800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream: #FFFDF8;
+    --peach: #FDF1E1;
+    --mint: #E7F4EE;
+    --blush: #FCEAE7;
+    --paper: #FFFFFF;
+    --ink: #015380;
+    --ink-soft: #5C7A8C;
+    --teal: #0197AF;
+    --teal-deep: #017089;
+    --orange: #FDBA18;
+    --orange-deep: #E2A20E;
+    --blue: #017CCA;
+    --pink: #FD6258;
+    --line: rgba(1,83,128,0.1);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    font-variant-numeric: tabular-nums;
+  }
+  h1,h2,h3{
+    font-family:'Grandstander', sans-serif;
+    font-weight:700;
+    letter-spacing:-0.01em;
+    margin:0;
+  }
+  p{margin:0;}
+  .wrap{max-width:1140px;margin:0 auto;padding:0 28px;}
+  .narrow{max-width:760px;margin:0 auto;}
+  a{color:inherit;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;}
+  }
+
+  /* ---- Nav (identique aux autres pages) ---- */
+  nav.wrap{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:24px;padding-bottom:24px;}
+  .logo{display:flex;align-items:center;}
+  .logo-img{height:46px;width:auto;display:block;}
+  .nav-links{display:flex;align-items:center;gap:20px;flex:none;}
+  .nav-link{font-size:14.5px;font-weight:600;color:var(--ink-soft);text-decoration:none;white-space:nowrap;}
+  .nav-link:hover{color:var(--ink);}
+  .nav-cta{
+    font-family:'Work Sans',sans-serif;font-size:14px;font-weight:700;
+    padding:13px 24px;border-radius:100px;background:var(--teal);color:#fff;
+    text-decoration:none;box-shadow:0 10px 24px -8px rgba(1,151,175,0.5);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .nav-cta:hover{transform:translateY(-1px);box-shadow:0 12px 28px -8px rgba(1,151,175,0.55);background:var(--teal-deep);}
+  .cta-short{display:none;}
+  @media (max-width:520px){
+    nav.wrap{padding-top:16px;padding-bottom:16px;}
+    .logo-img{height:36px;}
+    .nav-links{gap:8px;}
+    .nav-link{font-size:12.5px;}
+    .nav-cta{font-size:13px;padding:10px 16px;}
+    .cta-full{display:none;}
+    .cta-short{display:inline;}
+  }
+  .nav-cta:focus-visible, a:focus-visible, button:focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
+
+  /* ---- Bandes ---- */
+  .band{padding:64px 0;}
+
+  /* ---- Header ---- */
+  .band-header{padding-top:16px;padding-bottom:56px;position:relative;overflow:hidden;}
+  .blob{position:absolute;border-radius:50%;opacity:.4;filter:blur(2px);pointer-events:none;}
+  .blob1{width:200px;height:200px;background:var(--mint);top:-40px;right:8%;}
+  .blob2{width:120px;height:120px;background:var(--blush);bottom:0;left:2%;}
+  .eyebrow{
+    display:block;text-align:center;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--teal-deep);margin-bottom:18px;position:relative;z-index:1;
+  }
+  h1.headline{
+    font-size:clamp(30px,4.4vw,46px);line-height:1.14;text-align:center;
+    max-width:20ch;margin:0 auto 22px;color:var(--ink);position:relative;z-index:1;
+  }
+  h1.headline .hi{color:var(--orange-deep);}
+  p.lede{
+    font-size:18px;line-height:1.6;color:var(--ink-soft);
+    max-width:52ch;margin:0 auto 40px;text-align:center;position:relative;z-index:1;
+  }
+  .stat-strip{
+    display:flex;justify-content:center;gap:0;background:var(--paper);border-radius:20px;
+    box-shadow:0 14px 34px -20px rgba(1,83,128,0.25);max-width:640px;margin:0 auto;overflow:hidden;
+    position:relative;z-index:1;
+  }
+  .stat-cell{flex:1;padding:22px 14px;text-align:center;border-left:1px solid var(--line);}
+  .stat-cell:first-child{border-left:none;}
+  .stat-num{font-family:'Grandstander',sans-serif;font-weight:800;font-size:28px;color:var(--teal);display:block;}
+  .stat-label{font-size:12.5px;color:var(--ink-soft);line-height:1.4;margin-top:4px;display:block;}
+
+  /* ---- Preuve ---- */
+  .band-proof{background:var(--mint);}
+  .proof-head{max-width:56ch;margin:0 auto 36px;text-align:center;}
+  .proof-head h2{font-size:clamp(24px,3vw,32px);margin-bottom:12px;}
+  .proof-head p{color:var(--ink-soft);font-size:16px;line-height:1.6;}
+  .proof-group{margin-bottom:26px;}
+  .proof-group:last-child{margin-bottom:0;}
+  .proof-group-label{
+    font-size:12.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--teal-deep);display:block;margin-bottom:12px;
+  }
+  .chip-row{display:flex;flex-wrap:wrap;gap:9px;}
+  .chip{
+    font-size:14.5px;font-weight:600;color:var(--ink);background:var(--paper);
+    padding:9px 16px;border-radius:100px;box-shadow:0 4px 12px -6px rgba(1,83,128,0.18);white-space:nowrap;
+  }
+  .chip .n{color:var(--ink-soft);font-weight:500;}
+
+  /* ---- Offre ---- */
+  .band-offer{background:var(--paper);}
+  .offer-grid{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:start;}
+  .offer-copy h2{font-size:clamp(24px,3vw,32px);margin-bottom:16px;}
+  .offer-copy p.lead{color:var(--ink-soft);font-size:16px;line-height:1.6;margin-bottom:22px;}
+  .offer-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px;}
+  .offer-list li{display:flex;gap:12px;font-size:15px;line-height:1.55;color:var(--ink);}
+  .offer-list .ok{
+    flex:none;width:22px;height:22px;border-radius:50%;background:var(--teal);color:#fff;
+    font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:1px;
+  }
+  .offer-note{margin-top:22px;font-size:13.5px;color:var(--ink-soft);background:var(--peach);padding:12px 16px;border-radius:12px;}
+
+  .mock-label{font-size:12.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;display:block;}
+  .card{
+    background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px 20px;
+    box-shadow:0 10px 26px -18px rgba(1,83,128,0.3);position:relative;margin-bottom:22px;
+  }
+  .card:last-child{margin-bottom:0;}
+  .card-source{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;}
+  .card-name{font-family:'Grandstander',sans-serif;font-weight:700;font-size:16.5px;margin-bottom:10px;color:var(--ink);}
+  .card-meta{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+  .card-meta .row{display:flex;gap:7px;font-size:13.5px;color:var(--ink-soft);}
+  .card-foot{display:flex;justify-content:flex-end;}
+  .pill-ok{font-size:12px;font-weight:700;color:var(--teal-deep);background:var(--mint);padding:5px 12px;border-radius:100px;}
+  .card.is-partner{border:1.5px solid var(--orange-deep);box-shadow:0 16px 32px -16px rgba(226,162,14,0.4);}
+  .partner-ribbon{
+    position:absolute;top:-11px;right:16px;background:var(--orange);color:var(--ink);
+    font-size:11.5px;font-weight:800;letter-spacing:.02em;padding:5px 12px;border-radius:100px;
+    box-shadow:0 6px 14px -6px rgba(226,162,14,0.6);
+  }
+
+  /* ---- Comment ça se passe ---- */
+  .band-how{background:var(--cream);}
+  .how-head{max-width:56ch;margin:0 auto 40px;text-align:center;}
+  .how-head h2{font-size:clamp(24px,3vw,32px);}
+  .timeline{max-width:560px;margin:0 auto;position:relative;}
+  .tstep{display:grid;grid-template-columns:40px 1fr;gap:20px;position:relative;padding-bottom:32px;}
+  .tstep:last-child{padding-bottom:0;}
+  .tstep::before{content:'';position:absolute;left:19px;top:40px;bottom:-4px;width:2px;background:var(--line);}
+  .tstep:last-child::before{display:none;}
+  .tdot{
+    font-family:'Grandstander',sans-serif;font-weight:800;font-size:15px;color:#fff;
+    width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:1;
+  }
+  .tstep:nth-child(1) .tdot{background:var(--orange);color:var(--ink);}
+  .tstep:nth-child(2) .tdot{background:var(--teal);}
+  .tstep:nth-child(3) .tdot{background:var(--teal-deep);}
+  .tcontent{padding-top:6px;}
+  .tcontent h3{font-size:17px;margin-bottom:6px;font-family:'Grandstander',sans-serif;font-weight:700;}
+  .tcontent p{color:var(--ink-soft);font-size:14.5px;line-height:1.55;}
+
+  /* ---- CTA finale ---- */
+  .band-cta{background:var(--teal-deep);text-align:center;}
+  .band-cta h2{color:#fff;font-size:clamp(26px,3.4vw,36px);margin-bottom:14px;}
+  .band-cta p{color:rgba(255,253,248,0.82);font-size:16px;line-height:1.6;max-width:44ch;margin:0 auto 28px;}
+  .cta-btn{
+    display:inline-flex;align-items:center;gap:8px;background:var(--orange);color:var(--ink);
+    font-family:'Work Sans',sans-serif;font-weight:700;font-size:15.5px;padding:15px 30px;border-radius:100px;
+    text-decoration:none;box-shadow:0 14px 30px -12px rgba(0,0,0,0.35);transition:transform .15s ease;
+  }
+  .cta-btn:hover{transform:translateY(-1px);}
+  .cta-btn:focus-visible{outline:3px solid #fff;outline-offset:3px;}
+  .cta-fine{margin-top:18px;font-size:13px;color:rgba(255,253,248,0.65);}
+
+  footer{padding:26px 0 40px;border-top:1px solid var(--line);background:var(--cream);}
+  footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+  footer p{font-size:13px;color:var(--ink-soft);}
+  footer a{text-decoration:underline;}
+
+  @media (max-width:640px){
+    .band{padding:44px 0;}
+    .offer-grid{grid-template-columns:1fr;gap:34px;}
+    .stat-strip{flex-direction:column;}
+    .stat-cell{border-left:none;border-top:1px solid var(--line);}
+    .stat-cell:first-child{border-top:none;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="wrap">
+  <a class="logo" href="/">
+    <img src="trouveo-logo.png" alt="Trouvéo" class="logo-img">
+  </a>
+  <div class="nav-links">
+    <a href="/activites" class="nav-link">Activités</a>
+    <a href="/#top-form" class="nav-cta">
+      <span class="cta-full">Rejoindre la liste d'attente</span>
+      <span class="cta-short">S'inscrire</span>
+    </a>
+  </div>
+</nav>
+
+<header class="band band-header">
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="wrap narrow">
+    <span class="eyebrow">Devenir partenaire fondateur</span>
+    <h1 class="headline">On fait déjà connaître <span class="hi">vos activités</span> aux parents.</h1>
+    <p class="lede">Trouvéo prévient les parents de Wallonie et de Bruxelles dès qu'une place de stage ou de plaine correspond à leur enfant. Vos activités y sont déjà — voici ce qu'on peut construire ensemble à partir de là.</p>
+    <div class="stat-strip">
+      <div class="stat-cell"><span class="stat-num">15</span><span class="stat-label">communes &amp; organismes déjà connectés</span></div>
+      <div class="stat-cell"><span class="stat-num">700+</span><span class="stat-label">activités actuellement recensées</span></div>
+      <div class="stat-cell"><span class="stat-num">6×</span><span class="stat-label">mises à jour par an, une par période de vacances</span></div>
+    </div>
+  </div>
+</header>
+
+<section class="band band-proof">
+  <div class="wrap narrow">
+    <div class="proof-head">
+      <h2>Déjà en ligne aujourd'hui</h2>
+      <p>Pas une maquette : ce sont les sources réellement affichées sur Trouvéo en ce moment, avec leurs propres données publiques.</p>
+    </div>
+    <div class="proof-group">
+      <span class="proof-group-label">Communes (11)</span>
+      <div class="chip-row">
+        <span class="chip">Ans <span class="n">· 6</span></span>
+        <span class="chip">Arlon <span class="n">· 2</span></span>
+        <span class="chip">Chaudfontaine <span class="n">· 6</span></span>
+        <span class="chip">Grâce-Hollogne <span class="n">· 4</span></span>
+        <span class="chip">Herstal <span class="n">· 56</span></span>
+        <span class="chip">Huy <span class="n">· 1</span></span>
+        <span class="chip">Mons <span class="n">· 4</span></span>
+        <span class="chip">Neupré <span class="n">· 5</span></span>
+        <span class="chip">Seraing <span class="n">· 9</span></span>
+        <span class="chip">Sprimont <span class="n">· 1</span></span>
+        <span class="chip">Verviers <span class="n">· 5</span></span>
+      </div>
+    </div>
+    <div class="proof-group">
+      <span class="proof-group-label">Organismes (4)</span>
+      <div class="chip-row">
+        <span class="chip">ADEPS <span class="n">· 361</span></span>
+        <span class="chip">Cap Sciences <span class="n">· 200</span></span>
+        <span class="chip">Royal Racing Club de Bruxelles <span class="n">· 65</span></span>
+        <span class="chip">Royal Léopold Club <span class="n">· 16</span></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band band-offer">
+  <div class="wrap narrow">
+    <div class="offer-grid">
+      <div class="offer-copy">
+        <h2>Ce qu'on vous propose</h2>
+        <p class="lead">Le statut de partenaire fondateur est gratuit tant que Trouvéo est en phase de lancement. En échange, on vous demande juste un retour honnête sur ce qui marche ou pas.</p>
+        <ul class="offer-list">
+          <li><span class="ok">✓</span> Votre logo et votre lien officiel affichés sur votre fiche, au lieu d'un simple nom de commune</li>
+          <li><span class="ok">✓</span> Un badge "Partenaire fondateur" qui distingue vos activités dans les résultats</li>
+          <li><span class="ok">✓</span> Vos activités remontent en priorité quand un parent filtre votre commune ou votre tranche d'âge</li>
+          <li><span class="ok">✓</span> On vous relit avant publication : rien ne change sur votre fiche sans votre accord</li>
+        </ul>
+        <p class="offer-note">Rien à payer ni à configurer de votre côté — on garde vos infos publiques à jour, vous n'avez qu'à valider.</p>
+      </div>
+      <div class="offer-mock">
+        <span class="mock-label">Aujourd'hui</span>
+        <div class="card">
+          <div class="card-source">GRACE-HOLLOGNE</div>
+          <div class="card-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
+          <div class="card-meta">
+            <div class="row">📅 Du 6 juillet au 7 août 2026, de 9h à 16h</div>
+            <div class="row">📍 Ecole Sinibaldo Basile, Rue Paul Janson, 187</div>
+          </div>
+          <div class="card-foot"><span class="pill-ok">4–5 ans</span></div>
+        </div>
+        <span class="mock-label">Avec le statut partenaire</span>
+        <div class="card is-partner">
+          <span class="partner-ribbon">Partenaire fondateur</span>
+          <div class="card-source">GRACE-HOLLOGNE · SITE OFFICIEL ↗</div>
+          <div class="card-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
+          <div class="card-meta">
+            <div class="row">📅 Du 6 juillet au 7 août 2026, de 9h à 16h</div>
+            <div class="row">📍 Ecole Sinibaldo Basile, Rue Paul Janson, 187</div>
+          </div>
+          <div class="card-foot"><span class="pill-ok">4–5 ans</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band band-how">
+  <div class="wrap narrow">
+    <div class="how-head">
+      <h2>Comment ça se passe pour vous</h2>
+    </div>
+    <div class="timeline">
+      <div class="tstep">
+        <div class="tdot">1</div>
+        <div class="tcontent">
+          <h3>On regarde ensemble votre fiche actuelle</h3>
+          <p>Cinq minutes suffisent : on vérifie que les infos déjà publiées (dates, lieu, âge, prix) sont correctes.</p>
+        </div>
+      </div>
+      <div class="tstep">
+        <div class="tdot">2</div>
+        <div class="tcontent">
+          <h3>On ajoute votre badge et votre lien officiel</h3>
+          <p>Votre logo, un lien direct vers votre page d'inscription, et le badge "Partenaire fondateur".</p>
+        </div>
+      </div>
+      <div class="tstep">
+        <div class="tdot">3</div>
+        <div class="tcontent">
+          <h3>Vos activités remontent en priorité</h3>
+          <p>Dès qu'un parent de votre région cherche une activité qui correspond, votre fiche apparaît en tête.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="band band-cta">
+  <div class="wrap narrow">
+    <h2>On en discute ?</h2>
+    <p>Dix minutes suffisent pour voir ce que ça donnerait pour vous, concrètement, avec vos propres activités.</p>
+    <a class="cta-btn" href="mailto:hello@trouveo.be?subject=Devenir%20partenaire%20fondateur%20Trouv%C3%A9o">Écrire à hello@trouveo.be →</a>
+    <p class="cta-fine">Gratuit pendant la phase fondateur. Sans engagement, sans configuration technique de votre côté.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>Trouvéo — service indépendant, non affilié aux communes référencées.</p>
+    <p><a href="/">← Retour à l'accueil</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
