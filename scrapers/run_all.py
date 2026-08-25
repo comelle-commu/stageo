@@ -12,15 +12,23 @@ from pathlib import Path
 
 import adeps
 import ans
+import arlon
 import aywaille
+import bastogne
 import capsciences
+import ciney
 import floreffe
 import hannut
 import herstal
 import huy
 import iclub
+import lalouviere
+import mons
+import namur
 import neupre
+import nivelles
 import oupeye
+import ottignieslln
 import seraing
 import sprimont
 import supabase_client
@@ -36,6 +44,8 @@ SCRAPERS = [
     ("Herstal", herstal),
     ("Huy", huy),
     ("Sprimont", sprimont),
+    ("Mons", mons),
+    ("Arlon", arlon),
     ("ADEPS", adeps),
     ("Cap Sciences", capsciences),
     ("iClub", iclub),
@@ -44,7 +54,19 @@ SCRAPERS = [
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque
 # fichier pour la raison), mais apparaissent explicitement dans le résumé
 # plutôt que d'être silencieusement absents.
-EN_ATTENTE = [floreffe, waremme, hannut, oupeye, aywaille]
+EN_ATTENTE = [
+    ("Floreffe", floreffe),
+    ("Waremme", waremme),
+    ("Hannut", hannut),
+    ("Oupeye", oupeye),
+    ("Aywaille", aywaille),
+    ("Namur", namur),
+    ("Nivelles", nivelles),
+    ("La Louvière", lalouviere),
+    ("Ottignies-Louvain-la-Neuve", ottignieslln),
+    ("Bastogne", bastogne),
+    ("Ciney", ciney),
+]
 
 OUT_DIR = Path(__file__).parent / "output"
 
@@ -68,8 +90,7 @@ def run_scrapers() -> tuple[list, list[tuple[str, int, float, str]]]:
             print(f"  ERREUR après {elapsed:.2f}s : {exc}")
             timings.append((nom, 0, elapsed, f"ERREUR: {exc}"))
 
-    for module in EN_ATTENTE:
-        nom = module.__name__.capitalize()
+    for nom, module in EN_ATTENTE:
         print(f"--- {nom} ---")
         print(f"  EN_ATTENTE - {module.RAISON}")
         timings.append((nom, 0, 0.0, "EN_ATTENTE"))

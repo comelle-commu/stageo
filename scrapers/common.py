@@ -52,6 +52,20 @@ IMIO_DOMAINS = {
     "www.aywaille.be",
     "www.sprimont.be",
     "www.oupeye.be",
+    # Confirmées iMio le 25/08/2026 via redirection de leur robots.txt vers
+    # static.imio.be (voir docs/elargissement-provinces-2026-08-24.md) -
+    # Namur, Hainaut, Brabant wallon et Luxembourg, pas seulement Liège.
+    # Scraper écrit seulement pour Mons et Arlon pour l'instant ; les
+    # autres restent enregistrées ici (Crawl-delay correct dès qu'on les
+    # scrape) même sans scraper actif.
+    "www.namur.be",
+    "www.mons.be",
+    "www.lalouviere.be",
+    "www.ottignies-louvain-la-neuve.be",
+    "www.nivelles.be",
+    "www.arlon.be",
+    "www.bastogne.be",
+    "www.ciney.be",
 }
 CRAWL_DELAYS = {domain: IMIO_CRAWL_DELAY for domain in IMIO_DOMAINS}
 # Organismes hors socle communal (voir
