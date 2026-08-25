@@ -92,7 +92,10 @@ def _group_key(row: dict) -> str:
 
 
 def build_email_html(rows: list[dict]) -> tuple[str, str]:
-    """Retourne (subject, html)."""
+    """Retourne (subject, html). Reprend la charte graphique du site
+    (fonds crème, cartes blanches arrondies, badges pilule teal, police
+    Grandstander/Work Sans) plutôt qu'un email texte générique - voir
+    index.html / activites.html pour les mêmes tokens de couleur."""
     groups: dict[str, list[dict]] = defaultdict(list)
     for row in rows:
         groups[_group_key(row)].append(row)
@@ -102,50 +105,95 @@ def build_email_html(rows: list[dict]) -> tuple[str, str]:
     sections = []
     for source in sorted(groups.keys(), key=lambda k: -len(groups[k])):
         items = groups[source]
-        rows_html = []
+        cards_html = []
         for r in items[:MAX_ITEMS_PER_SOURCE]:
             nom = (r.get("nom_activite") or "").strip()
             dates = (r.get("dates") or "").strip()
             lieu = (r.get("lieu") or "").strip()
-            rows_html.append(
-                f'<tr><td style="padding:8px 0;border-top:1px solid #EEF3F1;">'
-                f'<div style="font-weight:600;color:#015380;font-size:14.5px;">{_esc(nom)}</div>'
-                f'<div style="color:#5C7A8C;font-size:13px;margin-top:2px;">{_esc(dates)}'
-                f'{" · " + _esc(lieu) if lieu else ""}</div></td></tr>'
+            cards_html.append(
+                '<tr><td style="padding:0 0 10px;">'
+                '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" '
+                'style="background:#FFFFFF;border:1px solid rgba(1,83,128,0.12);border-radius:14px;">'
+                '<tr><td style="padding:14px 16px;">'
+                f'<div style="font-family:\'Grandstander\',Arial,sans-serif;font-weight:700;'
+                f'color:#015380;font-size:15px;line-height:1.35;margin-bottom:4px;">{_esc(nom)}</div>'
+                f'<div style="color:#5C7A8C;font-size:13px;line-height:1.5;">{_esc(dates)}'
+                f'{" &middot; " + _esc(lieu) if lieu else ""}</div>'
+                "</td></tr></table></td></tr>"
             )
         remaining = len(items) - MAX_ITEMS_PER_SOURCE
         if remaining > 0:
-            rows_html.append(
-                f'<tr><td style="padding:8px 0;border-top:1px solid #EEF3F1;color:#5C7A8C;font-size:13px;">'
-                f"… et {remaining} autre{'s' if remaining != 1 else ''} chez {_esc(source)}.</td></tr>"
+            cards_html.append(
+                '<tr><td style="padding:2px 4px 10px;color:#5C7A8C;font-size:13px;">'
+                f"…et {remaining} autre{'s' if remaining != 1 else ''} chez {_esc(source)}.</td></tr>"
             )
         sections.append(
-            f'<div style="margin-bottom:24px;">'
-            f'<div style="font-size:12px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#017089;margin-bottom:6px;">{_esc(source)} ({len(items)})</div>'
-            f'<table role="presentation" width="100%" cellpadding="0" cellspacing="0">{"".join(rows_html)}</table>'
-            f"</div>"
+            '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px;">'
+            "<tr><td style=\"padding-bottom:10px;\">"
+            '<span style="display:inline-block;font-size:11.5px;font-weight:700;letter-spacing:.03em;'
+            'text-transform:uppercase;color:#017089;background:#E7F4EE;padding:5px 12px;border-radius:100px;">'
+            f"{_esc(source)} &middot; {len(items)}</span>"
+            "</td></tr>"
+            f"{''.join(cards_html)}"
+            "</table>"
         )
+
+    n_txt = f"{len(rows)} nouvelle{'s' if len(rows) != 1 else ''} activité{'s' if len(rows) != 1 else ''}"
 
     # <meta charset> explicite indispensable : sans elle, certains clients
     # mail/navigateurs devinent un mauvais encodage pour ce fragment et les
     # accents s'affichent en mojibake ("TrouvÃ©o") - repere en previsualisant
     # digest_preview.html avant le premier envoi reel.
     html = f"""<!DOCTYPE html>
-<html lang="fr"><head><meta charset="UTF-8"></head><body>
-<div style="font-family:'Work Sans',Arial,sans-serif;max-width:560px;margin:0 auto;background:#FFFDF8;padding:32px 24px;color:#015380;">
-  <div style="font-family:Georgia,serif;font-weight:700;font-size:22px;margin-bottom:6px;">Trouvéo</div>
-  <p style="color:#5C7A8C;font-size:15px;line-height:1.6;margin:0 0 24px;">
-    {len(rows)} nouvelle{'s' if len(rows) != 1 else ''} activité{'s' if len(rows) != 1 else ''} détectée{'s' if len(rows) != 1 else ''} cette semaine :
-  </p>
-  {"".join(sections)}
-  <div style="margin-top:28px;text-align:center;">
-    <a href="{SITE_URL}/activites" style="display:inline-block;background:#0197AF;color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:13px 26px;border-radius:100px;">Voir toutes les activités →</a>
-  </div>
-  <p style="color:#93A9B5;font-size:12px;margin-top:32px;text-align:center;">
-    Trouvéo est encore en bêta - cet email liste automatiquement ce que notre outil a repéré, sans filtre par âge ou par commune pour l'instant.
-  </p>
-</div>
-</body></html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Grandstander:wght@700;800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body style="margin:0;background:#FFFDF8;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFFDF8;">
+<tr><td align="center" style="padding:36px 16px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;font-family:'Work Sans',Arial,sans-serif;">
+
+  <tr><td style="padding-bottom:22px;">
+    <span style="font-family:'Grandstander',Arial,sans-serif;font-weight:800;font-size:22px;color:#015380;">Trouvéo</span>
+  </td></tr>
+
+  <tr><td style="padding-bottom:8px;">
+    <span style="display:inline-block;font-size:12px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+      color:#017089;background:#FFFFFF;padding:7px 14px;border-radius:100px;border:1px solid rgba(1,83,128,0.12);">
+      Nouveautés de la semaine
+    </span>
+  </td></tr>
+
+  <tr><td style="padding-bottom:24px;">
+    <span style="font-family:'Grandstander',Arial,sans-serif;font-weight:700;font-size:21px;color:#015380;line-height:1.3;">
+      {n_txt} repérée{'s' if len(rows) != 1 else ''} cette semaine
+    </span>
+  </td></tr>
+
+  <tr><td>{"".join(sections)}</td></tr>
+
+  <tr><td align="center" style="padding:14px 0 28px;">
+    <a href="{SITE_URL}/activites" style="display:inline-block;background:#0197AF;color:#ffffff;text-decoration:none;
+      font-family:'Work Sans',Arial,sans-serif;font-weight:700;font-size:14px;padding:14px 28px;border-radius:100px;">
+      Voir toutes les activités →
+    </a>
+  </td></tr>
+
+  <tr><td style="border-top:1px solid rgba(1,83,128,0.12);padding-top:18px;">
+    <p style="color:#93A9B5;font-size:12px;line-height:1.6;margin:0;text-align:center;">
+      Trouvéo est encore en bêta - cet email liste automatiquement ce que notre outil a repéré,
+      sans filtre par âge ou par commune pour l'instant.
+    </p>
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>
 """.strip()
     return subject, html
 

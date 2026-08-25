@@ -62,17 +62,25 @@
   :focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
 
   /* ---- Nav (identique à la landing) ---- */
-  nav.wrap{display:flex;align-items:center;justify-content:space-between;padding:28px 28px;}
-  .logo{font-family:'Grandstander', sans-serif;font-weight:800;font-size:23px;display:flex;align-items:center;color:var(--ink);text-decoration:none;}
+  nav.wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:24px 28px;}
+  .logo{font-family:'Grandstander', sans-serif;font-weight:800;font-size:23px;display:flex;align-items:center;color:var(--ink);text-decoration:none;flex:none;}
   .wordmark{display:inline-flex;align-items:center;}
   .o-face{height:1.05em;width:auto;display:inline-block;margin-left:0.04em;transform:translateY(0.02em);}
   .nav-cta{
     font-size:14px;font-weight:700;padding:13px 24px;border-radius:100px;
-    background:var(--teal);color:#fff;text-decoration:none;
+    background:var(--teal);color:#fff;text-decoration:none;white-space:nowrap;
     box-shadow:0 10px 24px -8px rgba(1,151,175,0.5);
     transition:transform .15s ease, box-shadow .15s ease;
   }
   .nav-cta:hover{transform:translateY(-1px);background:var(--teal-deep);}
+  .cta-short{display:none;}
+  @media (max-width:480px){
+    nav.wrap{padding:16px 20px;}
+    .logo{font-size:17px;}
+    .nav-cta{font-size:13px;padding:10px 16px;}
+    .cta-full{display:none;}
+    .cta-short{display:inline;}
+  }
 
   /* ---- Intro ---- */
   header.intro{padding:8px 0 36px;position:relative;overflow:hidden;}
@@ -100,12 +108,12 @@
   .stat-label{font-size:12px;color:var(--ink-soft);margin-top:3px;display:block;}
 
   /* ---- Controls ---- */
-  .controls{
+  .controls-sticky{
     position:sticky;top:0;z-index:5;background:color-mix(in srgb, var(--cream) 90%, transparent);
     backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-    padding:14px 0;margin-bottom:6px;border-bottom:1px solid var(--line);
+    padding:14px 0 10px;border-bottom:1px solid var(--line);
   }
-  .search-row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+  .search-row{display:flex;gap:10px;flex-wrap:wrap;}
   .search-box{
     flex:1;min-width:220px;display:flex;align-items:center;gap:9px;
     background:var(--paper);border:1px solid var(--line);border-radius:100px;
@@ -119,6 +127,12 @@
     font-size:13px;font-weight:600;padding:0 16px;border-radius:100px;cursor:pointer;white-space:nowrap;
   }
   .toggle-past.active{background:var(--ink);border-color:var(--ink);color:#fff;}
+
+  .filters{padding:16px 0 4px;display:flex;flex-direction:column;gap:14px;}
+  .filter-group{display:flex;flex-direction:column;gap:8px;}
+  .filter-label{
+    font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-faint);
+  }
   .chip-row{display:flex;flex-wrap:wrap;gap:7px;}
   .chip{
     font-size:13px;font-weight:600;padding:7px 13px;border-radius:100px;
@@ -128,8 +142,17 @@
   .chip .n{opacity:.7;}
   .chip:hover{border-color:var(--teal);color:var(--ink);}
   .chip.active{background:var(--teal);border-color:var(--teal);color:#fff;}
+  .chip.chip-all{font-weight:700;}
+  .chip.chip-all.active{background:var(--ink);border-color:var(--ink);}
+  .chip.age-chip.active{background:var(--orange-deep);border-color:var(--orange-deep);}
 
   .status-line{font-size:13px;color:var(--ink-soft);margin:14px 0;min-height:1.4em;}
+  .load-more{
+    display:block;margin:8px auto 40px;border:1px solid var(--line);background:var(--paper);
+    color:var(--teal-deep);font-weight:700;font-size:14px;padding:12px 28px;border-radius:100px;
+    cursor:pointer;box-shadow:0 6px 18px -12px rgba(1,83,128,0.25);
+  }
+  .load-more:hover{border-color:var(--teal);}
   .empty-state{text-align:center;padding:60px 20px;color:var(--ink-soft);font-size:14.5px;line-height:1.7;}
   .empty-reveal{
     display:inline-block;margin-top:8px;border:none;background:none;cursor:pointer;
@@ -189,7 +212,10 @@
   <a class="logo" href="/">
     <span class="wordmark">Trouv<span>é</span><img src="trouveo-icon.png" alt="" class="o-face"></span>
   </a>
-  <a href="/#top-form" class="nav-cta">Rejoindre la liste d'attente</a>
+  <a href="/#top-form" class="nav-cta">
+    <span class="cta-full">Rejoindre la liste d'attente</span>
+    <span class="cta-short">S'inscrire</span>
+  </a>
 </nav>
 
 <header class="intro wrap">
@@ -208,7 +234,7 @@
 <div class="wrap">
   <div class="stats" id="stats"></div>
 
-  <div class="controls">
+  <div class="controls-sticky">
     <div class="search-row">
       <label class="search-box">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -216,11 +242,29 @@
       </label>
       <button class="toggle-past" id="togglePast" type="button" title="Affiche aussi les éditions déjà terminées, pour se faire une idée du type de programme proposé par chaque source">Voir aussi les dates passées</button>
     </div>
-    <div class="chip-row" id="chips"></div>
+  </div>
+
+  <div class="filters">
+    <div class="filter-group">
+      <button class="chip chip-all active" id="chipAll" type="button">Toutes les sources</button>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Âge</span>
+      <div class="chip-row" id="ageChips"></div>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label" id="communeLabel">Communes</span>
+      <div class="chip-row" id="communeChips"></div>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label" id="orgLabel">Organismes</span>
+      <div class="chip-row" id="orgChips"></div>
+    </div>
   </div>
 
   <p class="status-line" id="statusLine">Chargement des activités…</p>
   <div id="results"></div>
+  <button class="load-more" id="loadMore" type="button" style="display:none;"></button>
 </div>
 
 <section class="final wrap">
@@ -242,11 +286,27 @@
   const SUPABASE_KEY = "sb_publishable_BO_qv6_PsRrAP6VoVXYq7w_YoT2CfLG";
 
   const statsEl = document.getElementById('stats');
-  const chipsEl = document.getElementById('chips');
+  const chipAllBtn = document.getElementById('chipAll');
+  const ageChipsEl = document.getElementById('ageChips');
+  const communeChipsEl = document.getElementById('communeChips');
+  const orgChipsEl = document.getElementById('orgChips');
+  const communeLabelEl = document.getElementById('communeLabel');
+  const orgLabelEl = document.getElementById('orgLabel');
   const resultsEl = document.getElementById('results');
   const searchEl = document.getElementById('search');
   const togglePastBtn = document.getElementById('togglePast');
   const statusLine = document.getElementById('statusLine');
+  const loadMoreBtn = document.getElementById('loadMore');
+
+  const PAGE_SIZE = 30;
+
+  const AGE_BRACKETS = [
+    { key: '0-3', label: '0-3 ans', min: 0, max: 3 },
+    { key: '3-6', label: '3-6 ans', min: 3, max: 6 },
+    { key: '6-9', label: '6-9 ans', min: 6, max: 9 },
+    { key: '9-12', label: '9-12 ans', min: 9, max: 12 },
+    { key: '12+', label: '12 ans et +', min: 12, max: Infinity },
+  ];
 
   const MOIS = {janvier:0,février:1,fevrier:1,mars:2,avril:3,mai:4,juin:5,juillet:6,août:7,aout:7,septembre:8,octobre:9,novembre:10,décembre:11,decembre:11};
 
@@ -309,13 +369,30 @@
 
   let data = [];
   let activeGroup = 'ALL';
+  let activeAge = 'ALL';
   let showPast = false;
+  let visibleLimit = PAGE_SIZE;
 
   function groupKey(r){ return r.organisateur || r.commune || 'Non précisé'; }
+  function groupKind(r){ return r.organisateur ? 'org' : 'commune'; }
 
-  function matchesFilters(r, q){
+  function matchesAge(r, bracketKey){
+    if (bracketKey === 'ALL') return true;
+    const bracket = AGE_BRACKETS.find(function(b){ return b.key === bracketKey; });
+    if (!bracket) return true;
+    if (r.age_min == null && r.age_max == null) return false; // âge inconnu -> exclu quand un âge précis est choisi
+    const aMin = r.age_min != null ? r.age_min : 0;
+    const aMax = r.age_max != null ? r.age_max : Infinity;
+    return aMin <= bracket.max && aMax >= bracket.min;
+  }
+
+  // `except` omet une dimension du filtre (pour calculer le compteur d'un
+  // chip : "combien de résultats SI je choisis celui-ci", donc sans déjà
+  // appliquer le filtre de cette même dimension).
+  function matchesFilters(r, q, except){
     const g = groupKey(r);
-    if (activeGroup !== 'ALL' && g !== activeGroup) return false;
+    if (except !== 'group' && activeGroup !== 'ALL' && g !== activeGroup) return false;
+    if (except !== 'age' && !matchesAge(r, activeAge)) return false;
     if (q){
       const hay = [r.nom_activite, r.commune, r.organisateur, r.dates, r.lieu, ageLabel(r)].join(' ').toLowerCase();
       if (hay.indexOf(q) === -1) return false;
@@ -353,16 +430,19 @@
         const revealBtn = document.getElementById('emptyReveal');
         if (revealBtn) revealBtn.addEventListener('click', function(){
           showPast = true;
+          visibleLimit = PAGE_SIZE;
           togglePastBtn.classList.add('active');
           togglePastBtn.textContent = 'Masquer les dates passées';
+          renderChips();
           render();
         });
       } else {
         resultsEl.innerHTML = '<div class="empty-state">Aucune activité ne correspond à cette recherche pour le moment.</div>';
       }
     } else {
+      const page = visible.slice(0, visibleLimit);
       let html = '<div class="grid">';
-      visible.forEach(function(r){
+      page.forEach(function(r){
         const dispo = classifyDispo(r.disponibilite);
         const age = ageLabel(r);
         const source = groupKey(r);
@@ -387,22 +467,64 @@
     }
 
     if (visible.length){
-      statusLine.textContent = visible.length + ' activité' + (visible.length !== 1 ? 's' : '') + ' affichée' + (visible.length !== 1 ? 's' : '') +
+      const shown = Math.min(visibleLimit, visible.length);
+      statusLine.textContent = (shown < visible.length ? shown + ' sur ' + visible.length + ' activités affichées' : visible.length + ' activité' + (visible.length !== 1 ? 's' : '') + ' affichée' + (visible.length !== 1 ? 's' : '')) +
         (showPast ? ' (dont des éditions déjà passées, pour se faire une idée du type de programme)' : ' à venir.');
     } else {
       statusLine.textContent = '';
     }
+
+    if (visible.length > visibleLimit){
+      loadMoreBtn.style.display = 'block';
+      loadMoreBtn.textContent = 'Afficher ' + Math.min(PAGE_SIZE, visible.length - visibleLimit) + ' de plus (' + (visible.length - visibleLimit) + ' restantes)';
+    } else {
+      loadMoreBtn.style.display = 'none';
+    }
+  }
+
+  function chipHtml(label, count, isActive, dataAttr, extraClass){
+    return '<button class="chip' + (extraClass ? ' ' + extraClass : '') + (isActive ? ' active' : '') + '" ' + dataAttr + '>' +
+      esc(label) + ' <span class="n">' + count + '</span></button>';
   }
 
   function renderChips(){
-    const counts = {};
-    data.forEach(function(r){ const g = groupKey(r); counts[g] = (counts[g] || 0) + 1; });
-    const names = Object.keys(counts).sort();
-    let html = '<button class="chip' + (activeGroup === 'ALL' ? ' active' : '') + '" data-group="ALL">Toutes <span class="n">' + data.length + '</span></button>';
-    names.forEach(function(c){
-      html += '<button class="chip' + (activeGroup === c ? ' active' : '') + '" data-group="' + esc(c) + '">' + esc(c) + ' <span class="n">' + counts[c] + '</span></button>';
+    const q = searchEl.value.trim().toLowerCase();
+
+    // Âge : compte en ignorant le filtre d'âge lui-même (mais en respectant
+    // source + recherche), pour montrer "si je choisis cette tranche".
+    let ageHtml = '';
+    AGE_BRACKETS.forEach(function(b){
+      const count = data.filter(function(r){
+        return matchesFilters(r, q, 'age') && matchesAge(r, b.key) && (showPast || !isPast(r));
+      }).length;
+      ageHtml += chipHtml(b.label, count, activeAge === b.key, 'data-age="' + b.key + '"', 'age-chip');
     });
-    chipsEl.innerHTML = html;
+    ageChipsEl.innerHTML = ageHtml;
+
+    // Communes / organismes : compte en ignorant le filtre de source lui-même.
+    const communeCounts = {}, orgCounts = {};
+    data.forEach(function(r){
+      if (!matchesFilters(r, q, 'group') || !(showPast || !isPast(r))) return;
+      const g = groupKey(r);
+      const bucket = groupKind(r) === 'org' ? orgCounts : communeCounts;
+      bucket[g] = (bucket[g] || 0) + 1;
+    });
+
+    let communeHtml = '';
+    Object.keys(communeCounts).sort().forEach(function(c){
+      communeHtml += chipHtml(c, communeCounts[c], activeGroup === c, 'data-group="' + esc(c) + '"');
+    });
+    communeChipsEl.innerHTML = communeHtml;
+    communeLabelEl.textContent = 'Communes (' + Object.keys(communeCounts).length + ')';
+
+    let orgHtml = '';
+    Object.keys(orgCounts).sort().forEach(function(c){
+      orgHtml += chipHtml(c, orgCounts[c], activeGroup === c, 'data-group="' + esc(c) + '"');
+    });
+    orgChipsEl.innerHTML = orgHtml;
+    orgLabelEl.textContent = 'Organismes (' + Object.keys(orgCounts).length + ')';
+
+    chipAllBtn.classList.toggle('active', activeGroup === 'ALL' && activeAge === 'ALL');
   }
 
   function renderStats(){
@@ -419,18 +541,49 @@
       tile('Chaque lundi', 'Mise à jour automatique');
   }
 
-  chipsEl.addEventListener('click', function(e){
+  function resetPageAnd(fn){
+    return function(e){
+      visibleLimit = PAGE_SIZE;
+      fn(e);
+      renderChips();
+      render();
+    };
+  }
+
+  chipAllBtn.addEventListener('click', resetPageAnd(function(){
+    activeGroup = 'ALL';
+    activeAge = 'ALL';
+  }));
+  communeChipsEl.addEventListener('click', resetPageAnd(function(e){
     const btn = e.target.closest('.chip');
     if (!btn) return;
-    activeGroup = btn.dataset.group;
+    activeGroup = (activeGroup === btn.dataset.group) ? 'ALL' : btn.dataset.group;
+  }));
+  orgChipsEl.addEventListener('click', resetPageAnd(function(e){
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    activeGroup = (activeGroup === btn.dataset.group) ? 'ALL' : btn.dataset.group;
+  }));
+  ageChipsEl.addEventListener('click', resetPageAnd(function(e){
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    activeAge = (activeAge === btn.dataset.age) ? 'ALL' : btn.dataset.age;
+  }));
+  searchEl.addEventListener('input', function(){
+    visibleLimit = PAGE_SIZE;
     renderChips();
     render();
   });
-  searchEl.addEventListener('input', render);
   togglePastBtn.addEventListener('click', function(){
     showPast = !showPast;
+    visibleLimit = PAGE_SIZE;
     togglePastBtn.classList.toggle('active', showPast);
     togglePastBtn.textContent = showPast ? 'Masquer les dates passées' : 'Voir aussi les dates passées';
+    renderChips();
+    render();
+  });
+  loadMoreBtn.addEventListener('click', function(){
+    visibleLimit += PAGE_SIZE;
     render();
   });
 
