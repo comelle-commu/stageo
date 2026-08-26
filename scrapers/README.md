@@ -140,6 +140,9 @@ un socle mutualisé pour cette famille de sites (voir
 | Let's Sport (organisme privé, ~15 sites Liège/Luxembourg) | Site sur-mesure | HTML statique, structuré (classes CSS explicites) | `letssport.py` |
 | Côté Campagne (organisme privé, Awans) | Constructeur générique | **SPA JS pur** - liens réels cachés derrière `onclick`, nécessite `fetch_rendered_html()` (Playwright) | `cote_campagne.py` |
 | Village des Benjamins (organisme privé, Grâce-Hollogne) | Vue.js | **SPA JS pur** - rien en HTML brut, nécessite `fetch_rendered_html()` (Playwright) | `village_des_benjamins.py` |
+| Dimension Sport (organisme privé, ~8 sites province de Liège) | Site sur-mesure | HTML statique, mais tableau dense avec balisage imbriqué/mal fermé → parsing hybride BeautifulSoup + regex par cellule | `dimension_sport.py` |
+| Coordination ATL (plateforme multi-communes : Dinant, Fernelmont, Gesves, Incourt, Ohey, Wavre - Namur & Brabant wallon) | WordPress + TablePress | HTML statique, colonnes variables selon la commune (mapping par mot-clé d'en-tête) | `coordination_atl.py` |
+| ADSL Stages (organisme privé, ~40 localités Hainaut/Luxembourg/Namur/BW) | Site sur-mesure | HTML statique, une carte par stage avec tout (âge/lieu/dates/prix) déjà dessus - pagination par "région" (liste figée d'IDs) | `adsl_stages.py` |
 
 ### Sites 100% JavaScript : `common.fetch_rendered_html()`
 

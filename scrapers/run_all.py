@@ -11,6 +11,7 @@ import time
 from pathlib import Path
 
 import adeps
+import adsl_stages
 import ans
 import arlon
 import aywaille
@@ -18,8 +19,10 @@ import bastogne
 import capsciences
 import chaudfontaine
 import ciney
+import coordination_atl
 import cote_campagne
 import crie_liege
+import dimension_sport
 import esneux
 import ferme_de_roloux
 import fleron
@@ -71,6 +74,9 @@ SCRAPERS = [
     ("Cap Sciences", capsciences),
     ("iClub", iclub),
     ("Let's Sport", letssport),
+    ("Dimension Sport", dimension_sport),
+    ("Coordination ATL", coordination_atl),
+    ("ADSL Stages", adsl_stages),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque
