@@ -196,6 +196,36 @@
   .tcontent h3{font-size:17px;margin-bottom:6px;font-family:'Grandstander',sans-serif;font-weight:700;}
   .tcontent p{color:var(--ink-soft);font-size:14.5px;line-height:1.55;}
 
+  /* ---- Formulaires de contact ---- */
+  .band-forms{background:var(--mint);}
+  .forms-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+  .form-card{
+    background:var(--paper);border-radius:20px;padding:28px 26px;
+    box-shadow:0 14px 34px -22px rgba(1,83,128,0.3);
+  }
+  .form-card h3{font-size:18px;margin-bottom:10px;}
+  .form-card > p{color:var(--ink-soft);font-size:14.5px;line-height:1.55;margin-bottom:18px;}
+  .contact-form{display:flex;flex-direction:column;gap:10px;}
+  .contact-form input, .contact-form textarea{
+    border:1.5px solid var(--line);background:var(--cream);border-radius:12px;
+    padding:12px 14px;font-size:14.5px;font-family:'Work Sans',sans-serif;color:var(--ink);
+    outline:none;resize:vertical;
+  }
+  .contact-form input::placeholder, .contact-form textarea::placeholder{color:#9aa5ac;}
+  .contact-form input:focus, .contact-form textarea:focus{border-color:var(--teal);}
+  .contact-form button{
+    border:none;background:var(--teal);color:#fff;font-family:'Work Sans',sans-serif;
+    font-weight:700;font-size:14.5px;padding:12px 20px;border-radius:100px;cursor:pointer;
+    transition:background .15s ease;align-self:flex-start;
+  }
+  .contact-form button:hover{background:var(--teal-deep);}
+  .contact-form.is-loading button{opacity:.7;cursor:default;}
+  .form-confirm{display:none;margin-top:12px;font-size:14px;font-weight:700;color:var(--teal-deep);}
+  .form-error{
+    display:none;margin-top:12px;font-size:13.5px;font-weight:600;color:var(--pink);
+    background:var(--blush);padding:10px 14px;border-radius:12px;
+  }
+
   /* ---- CTA finale ---- */
   .band-cta{background:var(--teal-deep);text-align:center;}
   .band-cta h2{color:#fff;font-size:clamp(26px,3.4vw,36px);margin-bottom:14px;}
@@ -220,6 +250,7 @@
     .stat-strip{flex-direction:column;}
     .stat-cell{border-left:none;border-top:1px solid var(--line);}
     .stat-cell:first-child{border-top:none;}
+    .forms-grid{grid-template-columns:1fr;}
   }
 </style>
 </head>
@@ -369,6 +400,38 @@
   </div>
 </section>
 
+<section class="band band-forms">
+  <div class="wrap narrow">
+    <div class="how-head">
+      <h2>Deux autres façons de nous aider</h2>
+    </div>
+    <div class="forms-grid">
+      <div class="form-card">
+        <h3>Signaler un organisme</h3>
+        <p>Une commune, une ASBL ou un club que vous connaissez n'est pas encore sur Trouvéo ? Laissez-nous son site, on s'occupe du reste.</p>
+        <form class="contact-form" id="organismeForm" novalidate>
+          <input type="url" name="url" placeholder="https://... (site de l'organisme)" required aria-label="Site de l'organisme">
+          <input type="email" name="email" placeholder="votre@email.be (optionnel, pour vous tenir au courant)" aria-label="Votre email (optionnel)">
+          <button type="submit">Signaler cet organisme</button>
+        </form>
+        <div class="form-confirm" id="organismeConfirm" role="status">Merci ! On regarde ça de près.</div>
+        <div class="form-error" id="organismeError" role="alert"></div>
+      </div>
+      <div class="form-card">
+        <h3>Être recontacté·e</h3>
+        <p>Intéressé·e par le statut partenaire officiel, une mise en avant ou un encart publicitaire ? Laissez votre email, on vous recontacte.</p>
+        <form class="contact-form" id="premiumForm" novalidate>
+          <input type="email" name="email" placeholder="votre@email.be" required aria-label="Votre email">
+          <textarea name="message" placeholder="Un mot sur votre besoin (optionnel)" rows="2" aria-label="Message (optionnel)"></textarea>
+          <button type="submit">Être recontacté·e</button>
+        </form>
+        <div class="form-confirm" id="premiumConfirm" role="status">Merci ! On vous recontacte rapidement.</div>
+        <div class="form-error" id="premiumError" role="alert"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="band band-cta">
   <div class="wrap narrow">
     <h2>On en discute ?</h2>
@@ -384,6 +447,84 @@
     <p><a href="/">← Retour à l'accueil</a></p>
   </div>
 </footer>
+
+<script>
+  // Relais vers functions/api/contact-request.js (jamais directement vers
+  // Supabase depuis le navigateur : la clé secrète resterait exposée). Même
+  // logique que le formulaire d'inscription de index.html.
+  function handleContactForm(opts){
+    const form = document.getElementById(opts.formId);
+    const confirm = document.getElementById(opts.confirmId);
+    const error = document.getElementById(opts.errorId);
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const urlRe = /^https?:\/\/[^\s]+\.[^\s]+$/i;
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      error.style.display = 'none';
+
+      const emailInput = form.querySelector('input[type=email]');
+      const urlInput = form.querySelector('input[type=url]');
+      const messageInput = form.querySelector('textarea');
+      const email = emailInput ? emailInput.value.trim() : '';
+      const url = urlInput ? urlInput.value.trim() : '';
+
+      if (opts.type === 'organisme' && !urlRe.test(url)) {
+        error.textContent = "Merci d'indiquer une adresse de site valide (https://...).";
+        error.style.display = 'block';
+        urlInput.focus();
+        return;
+      }
+      if ((opts.type === 'premium' || email) && !emailRe.test(email)) {
+        error.textContent = "Cette adresse email ne semble pas valide.";
+        error.style.display = 'block';
+        emailInput.focus();
+        return;
+      }
+
+      const button = form.querySelector('button');
+      const originalLabel = button.textContent;
+      form.classList.add('is-loading');
+      button.disabled = true;
+      button.textContent = 'Envoi...';
+
+      fetch('/api/contact-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: opts.type,
+          email: email || null,
+          url: url || null,
+          message: messageInput ? messageInput.value.trim() : null
+        })
+      })
+        .then(function(res){
+          return res.json().catch(function(){ return {}; }).then(function(data){
+            return { ok: res.ok, data: data };
+          });
+        })
+        .then(function(result){
+          if (!result.ok) {
+            throw new Error((result.data && result.data.error) || "L'envoi a échoué, réessayez dans un instant.");
+          }
+          form.style.display = 'none';
+          confirm.style.display = 'block';
+        })
+        .catch(function(err){
+          error.textContent = err.message || "L'envoi a échoué, réessayez dans un instant.";
+          error.style.display = 'block';
+        })
+        .finally(function(){
+          form.classList.remove('is-loading');
+          button.disabled = false;
+          button.textContent = originalLabel;
+        });
+    });
+  }
+
+  handleContactForm({ formId: 'organismeForm', confirmId: 'organismeConfirm', errorId: 'organismeError', type: 'organisme' });
+  handleContactForm({ formId: 'premiumForm', confirmId: 'premiumConfirm', errorId: 'premiumError', type: 'premium' });
+</script>
 
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "eceefc64e8bd4505bf888cad33783426"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
