@@ -136,11 +136,18 @@
     max-width:44ch;margin-bottom:30px;
   }
 
+  .signup-badge{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:13.5px;font-weight:800;color:var(--orange-deep);
+    background:var(--peach);padding:8px 16px;border-radius:100px;
+    margin-bottom:12px;
+  }
   form.signup{
     display:flex;gap:8px;max-width:480px;
     background:var(--paper);
     padding:7px;border-radius:100px;
-    box-shadow:0 16px 40px -18px rgba(36,49,60,0.35);
+    border:2px solid var(--orange);
+    box-shadow:0 16px 40px -18px rgba(36,49,60,0.35), 0 0 0 6px rgba(253,186,24,0.15);
   }
   form.signup input[type=email]{
     flex:1;border:none;background:transparent;
@@ -214,6 +221,7 @@
     font-family:'Grandstander',sans-serif;font-weight:800;
     font-size:40px;color:var(--teal);white-space:nowrap;
   }
+  .stat-num.stat-num-text{font-size:22px;white-space:normal;line-height:1.2;}
   .stat-row p{color:var(--ink-soft);font-size:16px;line-height:1.55;margin:0;}
 
   /* ---- How it works (timeline) ---- */
@@ -332,6 +340,7 @@
       <h1 class="headline">Trouvez le <span class="hi">bon stage</span> avant qu'il ne soit complet.</h1>
       <p class="sub">Les stages et plaines de vacances sont éparpillés partout : sites communaux, organisateurs privés... Trouvéo regroupe tout au même endroit et vous prévient dès qu'une place correspond à votre enfant.</p>
 
+      <span class="signup-badge">🔔 Laissez votre email pour être prévenu·e en priorité du lancement</span>
       <form class="signup" id="signupForm" novalidate>
         <input type="email" name="email" placeholder="votre@email.be" required aria-label="Adresse email">
         <button type="submit">Je m'inscris</button>
@@ -371,6 +380,10 @@
       <div class="stat-row">
         <span class="stat-num">48h</span>
         <p>c'est souvent le temps que mettent les meilleures places à disparaître une fois les inscriptions ouvertes.</p>
+      </div>
+      <div class="stat-row">
+        <span class="stat-num stat-num-text">Toujours les mêmes</span>
+        <p>lieux de stage, par facilité — parce que suivre les dates d'ouverture de dizaines d'autres endroits prend trop de temps, quitte à rater une meilleure option, voire l'ouverture de son propre lieu habituel.</p>
       </div>
     </div>
   </div>
@@ -441,6 +454,7 @@
   <div class="wrap">
     <h2>Ne ratez plus la prochaine ouverture des inscriptions.</h2>
     <p>Rejoignez la liste d'attente — c'est gratuit et ça prend dix secondes.</p>
+    <span class="signup-badge">🔔 Priorité au lancement pour les premiers inscrits</span>
     <form class="signup" id="signupForm2" novalidate>
       <input type="email" name="email" placeholder="votre@email.be" required aria-label="Adresse email">
       <button type="submit">Je m'inscris</button>
