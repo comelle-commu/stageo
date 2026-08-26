@@ -203,6 +203,17 @@
     color:var(--orange-deep);background:var(--peach);padding:3px 9px;border-radius:100px;margin-bottom:8px;
   }
   .ad-mock-body{font-size:13.5px;color:var(--ink);line-height:1.5;}
+  .ad-mock-photo{
+    background:var(--paper);border:1.5px dashed var(--orange-deep);border-radius:14px;
+    overflow:hidden;margin-top:18px;
+  }
+  .ad-mock-photo img{width:100%;height:120px;object-fit:cover;display:block;}
+  .ad-mock-photo .ad-mock-inner{padding:12px 14px;}
+  .ad-mock-targets{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px;}
+  .ad-mock-targets span{
+    font-size:10.5px;font-weight:700;color:var(--teal-deep);background:var(--mint);
+    padding:3px 9px;border-radius:100px;
+  }
 
   /* ---- Comment ça se passe ---- */
   .band-how{background:var(--cream);}
@@ -358,17 +369,16 @@
         <div class="zone-copy">
           <h3>Dès aujourd'hui, pour toujours</h3>
           <ul class="offer-list">
-            <li><span class="ok">✓</span> Si vos activités n'y sont pas encore, on les ajoute avec vous</li>
-            <li><span class="ok">✓</span> Votre logo et un lien direct vers votre page d'inscription, affichés sur votre fiche, au lieu d'un simple nom de commune</li>
-            <li><span class="ok">✓</span> Le badge "Partenaire officiel", visible par les parents sur vos activités</li>
+            <li><span class="ok">✓</span> Toutes vos activités reprises automatiquement, dès qu'elles sont publiées sur votre site</li>
+            <li><span class="ok">✓</span> Mise à jour automatique chaque semaine, sans rien faire de votre côté</li>
+            <li><span class="ok">✓</span> Si elles n'y sont pas encore, on les ajoute avec vous</li>
             <li><span class="ok">✓</span> On vous relit avant publication : rien ne change sur votre fiche sans votre accord</li>
           </ul>
         </div>
         <div class="zone-mock">
-          <span class="mock-label">Votre fiche, version partenaire officiel</span>
-          <div class="card is-partner">
-            <span class="partner-ribbon">Partenaire officiel</span>
-            <div class="card-source">GRACE-HOLLOGNE · S'INSCRIRE ↗</div>
+          <span class="mock-label">Votre fiche, automatiquement</span>
+          <div class="card">
+            <div class="card-source">GRACE-HOLLOGNE</div>
             <div class="card-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
             <div class="card-meta">
               <div class="row">📅 Du 6 juillet au 7 août 2026, de 9h à 16h</div>
@@ -385,15 +395,27 @@
       <div class="zone-grid">
         <div class="zone-copy">
           <h3>Ce qu'on prépare pour la suite</h3>
-          <p class="zone-lead">Deux améliorations qu'on a en tête, sans date ni condition fixées pour l'instant — on préfère vous montrer où on va plutôt que de vous promettre quelque chose qu'on ne peut pas encore tenir.</p>
+          <p class="zone-lead">Plusieurs paliers qu'on a en tête pour financer la suite, du plus simple au plus poussé — sans date ni prix fixés pour l'instant. On préfère vous montrer où on va plutôt que de vous promettre quelque chose qu'on ne peut pas encore tenir.</p>
           <ul class="offer-list">
+            <li><span class="ok">↑</span> Badge "Partenaire officiel" — votre logo et un lien direct vers votre page d'inscription, mis en valeur sur vos fiches</li>
             <li><span class="ok">↑</span> Remontée en tête des résultats — vos activités passent en premier quand un parent filtre votre commune ou une tranche d'âge</li>
-            <li><span class="ok">↑</span> Encart publicitaire dédié — un bloc rien qu'à vous pour mettre en avant une activité précise (dernières places, nouvelle offre...)</li>
+            <li><span class="ok">↑</span> Encart publicitaire avec photo — décliné par région ou par catégorie d'activité, visible même en dehors des résultats de recherche</li>
           </ul>
           <p class="offer-note">Rien de tout ça n'existe encore aujourd'hui. On vous tiendra au courant si et quand ça se concrétise.</p>
         </div>
         <div class="zone-mock">
-          <span class="mock-label">Remontée en tête des résultats</span>
+          <span class="mock-label">Badge "Partenaire officiel"</span>
+          <div class="card is-partner">
+            <span class="partner-ribbon">Partenaire officiel</span>
+            <div class="card-source">GRACE-HOLLOGNE · S'INSCRIRE ↗</div>
+            <div class="card-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
+            <div class="card-meta">
+              <div class="row">📅 Du 6 juillet au 7 août 2026, de 9h à 16h</div>
+              <div class="row">📍 Ecole Sinibaldo Basile, Rue Paul Janson, 187</div>
+            </div>
+            <div class="card-foot"><span class="pill-ok">4–5 ans</span></div>
+          </div>
+          <span class="mock-label" style="margin-top:20px;">Remontée en tête des résultats</span>
           <div class="priority-mock">
             <div class="mini-card is-boosted">
               <span class="mini-tag">En avant</span>
@@ -409,10 +431,17 @@
               <div class="mini-meta">VERVIERS · 3–6 ans</div>
             </div>
           </div>
-          <span class="mock-label" style="margin-top:20px;">Encart publicitaire dédié</span>
-          <div class="ad-mock">
-            <span class="ad-mock-tag">Sponsorisé</span>
-            <div class="ad-mock-body"><strong>Grâce-Hollogne</strong> — Dernières places pour le stage d'été au Centre Janson !</div>
+          <span class="mock-label" style="margin-top:20px;">Encart publicitaire avec photo</span>
+          <div class="ad-mock-photo">
+            <img src="hero-photo.jpg" alt="">
+            <div class="ad-mock-inner">
+              <span class="ad-mock-tag">Sponsorisé</span>
+              <div class="ad-mock-body"><strong>Grâce-Hollogne</strong> — Dernières places pour le stage d'été au Centre Janson !</div>
+              <div class="ad-mock-targets">
+                <span>📍 Par région</span>
+                <span>🏷️ Par catégorie</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -436,15 +465,15 @@
       <div class="tstep">
         <div class="tdot">2</div>
         <div class="tcontent">
-          <h3>On ajoute votre badge et votre lien officiel</h3>
-          <p>Votre logo, un lien direct vers votre page d'inscription, et le badge "Partenaire officiel" sur vos fiches.</p>
+          <h3>Vos activités apparaissent, automatiquement</h3>
+          <p>Avec vos infos publiques, mises à jour chaque semaine sans rien faire de votre côté.</p>
         </div>
       </div>
       <div class="tstep">
         <div class="tdot">3</div>
         <div class="tcontent">
           <h3>Le reste, c'est pour plus tard</h3>
-          <p>Remontée en tête des résultats, encart dédié : ce sont des pistes qu'on prépare, montrées plus haut sur cette page — sans date ni engagement de votre part aujourd'hui.</p>
+          <p>Badge "Partenaire officiel", remontée en tête des résultats, encart publicitaire avec photo : ce sont des pistes qu'on prépare, montrées plus haut sur cette page — sans date ni engagement de votre part aujourd'hui.</p>
         </div>
       </div>
     </div>
