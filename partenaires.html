@@ -141,22 +141,32 @@
 
   /* ---- Offre ---- */
   .band-offer{background:var(--paper);}
-  .offer-grid{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:start;}
-  .offer-copy h2{font-size:clamp(24px,3vw,32px);margin-bottom:16px;}
-  .offer-copy p.lead{color:var(--ink-soft);font-size:16px;line-height:1.6;margin-bottom:22px;}
-  .offer-subtitle{
-    font-family:'Grandstander',sans-serif;font-weight:700;font-size:15px;color:var(--ink);
-    margin:22px 0 12px;
+  .offer-head{max-width:62ch;margin:0 auto 36px;text-align:center;}
+  .offer-head h2{font-size:clamp(24px,3vw,32px);margin-bottom:14px;}
+  .offer-head p.lead{color:var(--ink-soft);font-size:16px;line-height:1.6;}
+
+  .offer-zone{border-radius:24px;padding:36px 38px;margin-bottom:24px;}
+  .offer-zone:last-child{margin-bottom:0;}
+  .offer-zone-free{background:var(--mint);}
+  .offer-zone-later{background:var(--peach);}
+  .zone-badge{
+    display:inline-block;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+    padding:6px 14px;border-radius:100px;margin-bottom:18px;
   }
-  .offer-subtitle:first-of-type{margin-top:0;}
+  .offer-zone-free .zone-badge{background:var(--teal);color:#fff;}
+  .offer-zone-later .zone-badge{background:var(--orange);color:var(--ink);}
+  .zone-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;}
+  .zone-copy h3{font-size:clamp(19px,2.4vw,24px);margin-bottom:12px;}
+  .zone-copy p.zone-lead{color:var(--ink-soft);font-size:15px;line-height:1.6;margin-bottom:18px;}
+
   .offer-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px;}
   .offer-list li{display:flex;gap:12px;font-size:15px;line-height:1.55;color:var(--ink);}
   .offer-list .ok{
     flex:none;width:22px;height:22px;border-radius:50%;background:var(--teal);color:#fff;
     font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:1px;
   }
-  .offer-list:nth-of-type(2) .ok{background:var(--orange);color:var(--ink);}
-  .offer-note{margin-top:22px;font-size:13.5px;color:var(--ink-soft);background:var(--peach);padding:12px 16px;border-radius:12px;}
+  .offer-zone-later .ok{background:var(--orange);color:var(--ink);}
+  .offer-note{margin-top:22px;font-size:13.5px;color:var(--ink-soft);background:var(--paper);padding:12px 16px;border-radius:12px;}
 
   .mock-label{font-size:12.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;display:block;}
   .card{
@@ -176,6 +186,23 @@
     font-size:11.5px;font-weight:800;letter-spacing:.02em;padding:5px 12px;border-radius:100px;
     box-shadow:0 6px 14px -6px rgba(226,162,14,0.6);
   }
+
+  .priority-mock{display:flex;flex-direction:column;gap:9px;}
+  .mini-card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:11px 14px;position:relative;}
+  .mini-card.is-boosted{border:1.5px solid var(--orange-deep);box-shadow:0 10px 22px -14px rgba(226,162,14,0.5);}
+  .mini-tag{
+    position:absolute;top:-9px;right:12px;background:var(--orange);color:var(--ink);
+    font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:100px;
+  }
+  .mini-name{font-family:'Grandstander',sans-serif;font-weight:700;font-size:13.5px;color:var(--ink);margin-bottom:3px;}
+  .mini-meta{font-size:11.5px;color:var(--ink-soft);}
+
+  .ad-mock{background:var(--paper);border:1.5px dashed var(--orange-deep);border-radius:14px;padding:14px 16px;margin-top:18px;}
+  .ad-mock-tag{
+    display:inline-block;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;
+    color:var(--orange-deep);background:var(--peach);padding:3px 9px;border-radius:100px;margin-bottom:8px;
+  }
+  .ad-mock-body{font-size:13.5px;color:var(--ink);line-height:1.5;}
 
   /* ---- Comment ça se passe ---- */
   .band-how{background:var(--cream);}
@@ -247,7 +274,8 @@
 
   @media (max-width:640px){
     .band{padding:44px 0;}
-    .offer-grid{grid-template-columns:1fr;gap:34px;}
+    .zone-grid{grid-template-columns:1fr;gap:26px;}
+    .offer-zone{padding:26px 22px;}
     .stat-strip{flex-direction:column;}
     .stat-cell{border-left:none;border-top:1px solid var(--line);}
     .stat-cell:first-child{border-top:none;}
@@ -324,45 +352,73 @@
 
 <section class="band band-offer">
   <div class="wrap narrow">
-    <div class="offer-grid">
-      <div class="offer-copy">
-        <h2>Ce qu'on vous propose</h2>
-        <p class="lead">Apparaître sur Trouvéo est et restera toujours gratuit, que vos activités y soient déjà ou pas encore. Le statut de partenaire officiel ajoute deux choses en plus, sans jamais toucher à cette gratuité de base.</p>
-        <h3 class="offer-subtitle">Inclus, gratuitement</h3>
-        <ul class="offer-list">
-          <li><span class="ok">✓</span> Si vos activités n'y sont pas encore, on les ajoute avec vous</li>
-          <li><span class="ok">✓</span> Votre logo et votre lien officiel affichés sur votre fiche, au lieu d'un simple nom de commune</li>
-          <li><span class="ok">✓</span> Le badge "Partenaire officiel", visible par les parents sur vos activités</li>
-          <li><span class="ok">✓</span> On vous relit avant publication : rien ne change sur votre fiche sans votre accord</li>
-        </ul>
-        <h3 class="offer-subtitle">Pour aller plus loin, si vous le souhaitez</h3>
-        <ul class="offer-list">
-          <li><span class="ok">↑</span> Faire remonter vos activités en tête des résultats, quand un parent filtre votre commune ou une tranche d'âge</li>
-          <li><span class="ok">↑</span> Un encart dédié pour mettre en avant une activité précise (dernières places, nouvelle offre...)</li>
-        </ul>
-        <p class="offer-note">Ces deux options seront proposées une fois qu'il y aura assez de visiteurs pour que ça ait un vrai impact pour vous — gratuites pour l'instant en tant que partenaire officiel.</p>
-      </div>
-      <div class="offer-mock">
-        <span class="mock-label">Aujourd'hui</span>
-        <div class="card">
-          <div class="card-source">GRACE-HOLLOGNE</div>
-          <div class="card-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
-          <div class="card-meta">
-            <div class="row">📅 Du 6 juillet au 7 août 2026, de 9h à 16h</div>
-            <div class="row">📍 Ecole Sinibaldo Basile, Rue Paul Janson, 187</div>
-          </div>
-          <div class="card-foot"><span class="pill-ok">4–5 ans</span></div>
+    <div class="offer-head">
+      <h2>Ce qu'on vous propose</h2>
+      <p class="lead">Apparaître sur Trouvéo est et restera toujours gratuit, que vos activités y soient déjà ou pas encore. Voici ce qui est déjà acquis, et ce qu'on pourra proposer plus tard.</p>
+    </div>
+
+    <div class="offer-zone offer-zone-free">
+      <span class="zone-badge">Gratuit</span>
+      <div class="zone-grid">
+        <div class="zone-copy">
+          <h3>Dès aujourd'hui, pour toujours</h3>
+          <ul class="offer-list">
+            <li><span class="ok">✓</span> Si vos activités n'y sont pas encore, on les ajoute avec vous</li>
+            <li><span class="ok">✓</span> Votre logo et votre lien officiel affichés sur votre fiche, au lieu d'un simple nom de commune</li>
+            <li><span class="ok">✓</span> Le badge "Partenaire officiel", visible par les parents sur vos activités</li>
+            <li><span class="ok">✓</span> On vous relit avant publication : rien ne change sur votre fiche sans votre accord</li>
+          </ul>
         </div>
-        <span class="mock-label">Avec le statut partenaire officiel</span>
-        <div class="card is-partner">
-          <span class="partner-ribbon">Partenaire officiel</span>
-          <div class="card-source">GRACE-HOLLOGNE · SITE OFFICIEL ↗</div>
-          <div class="card-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
-          <div class="card-meta">
-            <div class="row">📅 Du 6 juillet au 7 août 2026, de 9h à 16h</div>
-            <div class="row">📍 Ecole Sinibaldo Basile, Rue Paul Janson, 187</div>
+        <div class="zone-mock">
+          <span class="mock-label">Votre fiche, version partenaire officiel</span>
+          <div class="card is-partner">
+            <span class="partner-ribbon">Partenaire officiel</span>
+            <div class="card-source">GRACE-HOLLOGNE · SITE OFFICIEL ↗</div>
+            <div class="card-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
+            <div class="card-meta">
+              <div class="row">📅 Du 6 juillet au 7 août 2026, de 9h à 16h</div>
+              <div class="row">📍 Ecole Sinibaldo Basile, Rue Paul Janson, 187</div>
+            </div>
+            <div class="card-foot"><span class="pill-ok">4–5 ans</span></div>
           </div>
-          <div class="card-foot"><span class="pill-ok">4–5 ans</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="offer-zone offer-zone-later">
+      <span class="zone-badge">Dans un 2ᵉ temps</span>
+      <div class="zone-grid">
+        <div class="zone-copy">
+          <h3>Ce qu'on pourra vous proposer plus tard</h3>
+          <p class="zone-lead">Une fois qu'il y aura assez de visiteurs pour que ça ait un vrai impact pour vous, ces deux options deviendront payantes. Rien d'automatique : on vous recontactera si et quand elles sont prêtes, jamais l'inverse.</p>
+          <ul class="offer-list">
+            <li><span class="ok">↑</span> Remontée en tête des résultats — vos activités passent en premier quand un parent filtre votre commune ou une tranche d'âge, pour plus de vues</li>
+            <li><span class="ok">↑</span> Encart publicitaire dédié — un bloc rien qu'à vous pour mettre en avant une activité précise (dernières places, nouvelle offre...)</li>
+          </ul>
+          <p class="offer-note">Aujourd'hui, ces deux options n'existent pas encore et rien ne vous sera facturé sans qu'on vous recontacte d'abord.</p>
+        </div>
+        <div class="zone-mock">
+          <span class="mock-label">Remontée en tête des résultats</span>
+          <div class="priority-mock">
+            <div class="mini-card is-boosted">
+              <span class="mini-tag">En avant</span>
+              <div class="mini-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
+              <div class="mini-meta">GRACE-HOLLOGNE · 4–5 ans</div>
+            </div>
+            <div class="mini-card">
+              <div class="mini-name">Stage multisports — Sprimont</div>
+              <div class="mini-meta">SPRIMONT · 6–9 ans</div>
+            </div>
+            <div class="mini-card">
+              <div class="mini-name">Plaine communale de Verviers</div>
+              <div class="mini-meta">VERVIERS · 3–6 ans</div>
+            </div>
+          </div>
+          <span class="mock-label" style="margin-top:20px;">Encart publicitaire dédié</span>
+          <div class="ad-mock">
+            <span class="ad-mock-tag">Sponsorisé</span>
+            <div class="ad-mock-body"><strong>Grâce-Hollogne</strong> — Dernières places pour le stage d'été au Centre Janson !</div>
+          </div>
         </div>
       </div>
     </div>
