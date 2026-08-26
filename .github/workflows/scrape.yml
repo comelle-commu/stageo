@@ -28,6 +28,13 @@ jobs:
       - name: Installer les dépendances
         run: pip install -r scrapers/requirements.txt
 
+      - name: Installer Chromium (Playwright, pour les sites 100% JS)
+        run: playwright install --with-deps chromium
+        # Nécessaire pour les scrapers utilisant common.fetch_rendered_html()
+        # (sites qui ne rendent rien en HTML brut, ex. Côté Campagne,
+        # Village des Benjamins) - ajoute ~1-2 min au run mais reste gratuit
+        # dans les volumes actuels de GitHub Actions.
+
       - name: Lancer le scraper (+ import Supabase + contrôle qualité)
         working-directory: scrapers
         env:

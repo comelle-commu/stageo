@@ -112,6 +112,49 @@ def respectful_get(url: str, timeout: int = 20) -> requests.Response:
     return resp
 
 
+def fetch_rendered_html(url: str, click_selector: Optional[str] = None, wait_ms: int = 800, timeout_ms: int = 20000) -> str:
+    """Comme respectful_get(), mais pour les sites qui ne rendent rien en
+    HTML brut (SPA pur, ou liens caches derriere du JS) - Cote Campagne et
+    Village des Benjamins en sont les deux premiers exemples (voir
+    cote_campagne.py / village_des_benjamins.py). Coute nettement plus cher
+    qu'une requete HTTP classique (lancement d'un navigateur headless) :
+    a n'utiliser que quand respectful_get() + BeautifulSoup ne suffisent
+    vraiment pas.
+
+    Meme respect du Crawl-delay par domaine que respectful_get() (meme
+    dict `_last_request_at`, throttling partage entre les deux methodes).
+
+    `click_selector` : si fourni, clique cet element apres chargement et
+    attend la navigation qui suit (cas Cote Campagne, dont le lien reel
+    n'existe que via un gestionnaire JS `onclick`, pas un href exploitable
+    tel quel). Import de playwright fait localement : les scrapers qui
+    n'en ont pas besoin n'ont pas a l'avoir installe."""
+    from playwright.sync_api import sync_playwright
+
+    domain = _domain_of(url)
+    min_delay = CRAWL_DELAYS.get(domain, DEFAULT_MIN_DELAY)
+    last = _last_request_at.get(domain)
+    if last is not None:
+        elapsed = time.monotonic() - last
+        wait = min_delay - elapsed
+        if wait > 0:
+            time.sleep(wait)
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page(user_agent=USER_AGENT)
+        page.goto(url, wait_until="networkidle", timeout=timeout_ms)
+        if click_selector:
+            page.click(click_selector, timeout=timeout_ms)
+            page.wait_for_load_state("networkidle", timeout=timeout_ms)
+        page.wait_for_timeout(wait_ms)  # laisse le temps aux derniers rendus asynchrones (cartes, widgets)
+        html = page.content()
+        browser.close()
+
+    _last_request_at[domain] = time.monotonic()
+    return html
+
+
 # Mots-clés simples pour repérer une mention de disponibilité en texte libre.
 # Best-effort volontairement simple (voir consigne : pas besoin de perfection).
 # Piège rencontré en pratique (page Neupré) : "L'inscription est OBLIGATOIRE
@@ -347,7 +390,7 @@ _SCIENCES_NATURE_RE = re.compile(
 _SPORT_RE = re.compile(
     r"\b(sports?|judo|foot(?:ball)?|basket|tennis|natation|piscine|gymnastique|multisports?|"
     r"vélo|velo|cyclisme|athlétisme|athletisme|karate|handball|volley|rugby|badminton|escalade|"
-    r"équitation|equitation)\b",
+    r"équitation|equitation|poney|équestres?|equestres?)\b",
     re.I,
 )
 _ART_RE = re.compile(

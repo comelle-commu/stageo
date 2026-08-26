@@ -18,6 +18,7 @@ Herstal/Waremme/Huy/Sprimont/Hannut).
 cd scrapers
 python3 -m venv venv
 ./venv/bin/pip install -r requirements.txt
+./venv/bin/playwright install chromium
 ```
 
 ## Lancer le scraper
@@ -136,6 +137,25 @@ un socle mutualisé pour cette famille de sites (voir
 | La Louvière | Plone (iMio, sous-domaine `atl.`) | HTML statique, page permanente sans dates chiffrées | `lalouviere.py` |
 | Ottignies-LLN | Plone (iMio, domaine réel `olln.be`) | HTML statique, prose | `ottignieslln.py` |
 | Ferme de Roloux (organisme privé, Fexhe-le-Haut-Clocher) | Constructeur onlc.be | HTML statique, pas d'obstacle JS | `ferme_de_roloux.py` |
+| Let's Sport (organisme privé, ~15 sites Liège/Luxembourg) | Site sur-mesure | HTML statique, structuré (classes CSS explicites) | `letssport.py` |
+| Côté Campagne (organisme privé, Awans) | Constructeur générique | **SPA JS pur** - liens réels cachés derrière `onclick`, nécessite `fetch_rendered_html()` (Playwright) | `cote_campagne.py` |
+| Village des Benjamins (organisme privé, Grâce-Hollogne) | Vue.js | **SPA JS pur** - rien en HTML brut, nécessite `fetch_rendered_html()` (Playwright) | `village_des_benjamins.py` |
+
+### Sites 100% JavaScript : `common.fetch_rendered_html()`
+
+Ajouté le 26/08/2026 pour Côté Campagne et Village des Benjamins - deux
+sites qui ne rendent RIEN en HTML brut (SPA Vue.js, ou liens réels cachés
+derrière un gestionnaire `onclick` plutôt qu'un `href` exploitable).
+`respectful_get()` + BeautifulSoup ne suffisent pas dans ce cas : la
+fonction lance un navigateur Chromium headless (Playwright), respecte le
+même Crawl-delay par domaine que `respectful_get()` (même dictionnaire de
+throttling), et retourne le HTML une fois le JS exécuté (et, si besoin, un
+clic effectué via `click_selector`).
+
+Coût réel : un navigateur headless est nettement plus lourd qu'une simple
+requête HTTP - à réserver aux sites qui l'exigent vraiment. Nécessite
+`playwright install --with-deps chromium` (voir `.github/workflows/scrape.yml`)
+en plus de `pip install -r requirements.txt`.
 
 `common.py` porte la logique partagée : requêtes HTTP respectueuses,
 détection de disponibilité en texte libre, écriture JSON/CSV, **et depuis

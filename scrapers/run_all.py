@@ -32,6 +32,7 @@ import huy
 import iclub
 import jeunesses_musicales
 import lalouviere
+import letssport
 import mons
 import namur
 import neupre
@@ -42,6 +43,7 @@ import seraing
 import sprimont
 import supabase_client
 import verviers
+import village_des_benjamins
 import vise
 import waremme
 from common import write_outputs
@@ -60,12 +62,15 @@ SCRAPERS = [
     ("Arlon", arlon),
     ("Bastogne", bastogne),
     ("Ferme de Roloux", ferme_de_roloux),
+    ("Côté Campagne", cote_campagne),
+    ("Village des Benjamins", village_des_benjamins),
     ("Ciney", ciney),
     ("La Louviere", lalouviere),
     ("Ottignies-Louvain-la-Neuve", ottignieslln),
     ("ADEPS", adeps),
     ("Cap Sciences", capsciences),
     ("iClub", iclub),
+    ("Let's Sport", letssport),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque
@@ -83,7 +88,6 @@ EN_ATTENTE = [
     ("Jeunesses Musicales", jeunesses_musicales),
     ("CRIE de Liège", crie_liege),
     ("FunheLangues", funhelangues),
-    ("Côté Campagne", cote_campagne),
     ("Namur", namur),
     ("Nivelles", nivelles),
 ]
