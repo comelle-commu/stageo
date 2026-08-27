@@ -27,6 +27,7 @@ import esneux
 import ferme_de_roloux
 import fleron
 import floreffe
+import forest
 import funhelangues
 import grace_hollogne
 import hannut
@@ -45,6 +46,7 @@ import ottignieslln
 import seraing
 import sprimont
 import supabase_client
+import uccle
 import verviers
 import village_des_benjamins
 import vise
@@ -77,6 +79,8 @@ SCRAPERS = [
     ("Dimension Sport", dimension_sport),
     ("Coordination ATL", coordination_atl),
     ("ADSL Stages", adsl_stages),
+    ("Forest", forest),
+    ("Uccle", uccle),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque

@@ -143,6 +143,8 @@ un socle mutualisé pour cette famille de sites (voir
 | Dimension Sport (organisme privé, ~8 sites province de Liège) | Site sur-mesure | HTML statique, mais tableau dense avec balisage imbriqué/mal fermé → parsing hybride BeautifulSoup + regex par cellule | `dimension_sport.py` |
 | Coordination ATL (plateforme multi-communes : Dinant, Fernelmont, Gesves, Incourt, Ohey, Wavre - Namur & Brabant wallon) | WordPress + TablePress | HTML statique, colonnes variables selon la commune (mapping par mot-clé d'en-tête) | `coordination_atl.py` |
 | ADSL Stages (organisme privé, ~40 localités Hainaut/Luxembourg/Namur/BW) | Site sur-mesure | HTML statique, une carte par stage avec tout (âge/lieu/dates/prix) déjà dessus - pagination par "région" (liste figée d'IDs) | `adsl_stages.py` |
+| Forest (commune bruxelloise) | Drupal | HTML statique, texte en prose (pas de balisage sémantique par activité) - une ligne "plaine" bornée sur l'ensemble des périodes citées + une ligne par stage nommé | `forest.py` |
+| Uccle (commune bruxelloise) | Drupal | HTML statique, texte en prose, une seule offre ("plaine de jeux") avec 4 profils de prix selon la résidence | `uccle.py` |
 
 ### Sites 100% JavaScript : `common.fetch_rendered_html()`
 
@@ -237,6 +239,23 @@ est confirmé - mais **aucun prix n'est indiqué nulle part sur la page**
 tarif existe probablement dans un des deux PDF joints ("Règlement d'ordre
 intérieur", "Projet pédagogique") ou sur le portail d'inscription lui-même,
 non explorés cette session.
+
+## Forest / Uccle : pages communales mises à jour uniquement à l'approche de la période
+
+Contrairement aux organismes privés (ADEPS, Cap Sciences, Dimension Sport...)
+qui publient tout leur calendrier annuel à l'avance, les pages "plaine de
+vacances" de Forest et Uccle ne semblent republiées qu'à l'approche de
+chaque période (Forest l'indique explicitement : inscriptions ouvertes
+"trois semaines avant la période des vacances"). Au 27/08/2026, les deux
+pages ne couvrent encore que l'été 2026 (déjà passé, inscriptions closes) -
+zéro ligne visible sur le site tant que ces dates ne sont pas dans le futur
+(`isPast()` les masque par défaut côté `/activites`). Les regex sont
+volontairement génériques (aucun mois/saison en dur) : dès que chaque
+commune publiera sa page pour la Toussaint, le prochain run hebdomadaire
+réextraira les nouvelles dates automatiquement, sans changement de code -
+mais la structure n'a pas pu être vérifiée à l'avance sur du contenu
+Toussaint réel, seulement sur l'été. À rouvrir l'œil dessus au premier run
+de septembre.
 
 ## Limites connues de cette version (best-effort, pas de perfection)
 
