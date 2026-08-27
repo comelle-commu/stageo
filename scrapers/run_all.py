@@ -16,6 +16,7 @@ import ans
 import arlon
 import aywaille
 import bastogne
+import besace
 import capsciences
 import chaudfontaine
 import ciney
@@ -34,6 +35,7 @@ import hannut
 import herstal
 import huy
 import iclub
+import jeunesse_ardente
 import jeunesses_musicales
 import lalouviere
 import letssport
@@ -81,6 +83,8 @@ SCRAPERS = [
     ("ADSL Stages", adsl_stages),
     ("Forest", forest),
     ("Uccle", uccle),
+    ("Besace ASBL", besace),
+    ("Jeunesse Ardente", jeunesse_ardente),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque

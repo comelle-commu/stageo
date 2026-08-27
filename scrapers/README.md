@@ -145,6 +145,8 @@ un socle mutualisé pour cette famille de sites (voir
 | ADSL Stages (organisme privé, ~40 localités Hainaut/Luxembourg/Namur/BW) | Site sur-mesure | HTML statique, une carte par stage avec tout (âge/lieu/dates/prix) déjà dessus - pagination par "région" (liste figée d'IDs) | `adsl_stages.py` |
 | Forest (commune bruxelloise) | Drupal | HTML statique, texte en prose (pas de balisage sémantique par activité) - une ligne "plaine" bornée sur l'ensemble des périodes citées + une ligne par stage nommé | `forest.py` |
 | Uccle (commune bruxelloise) | Drupal | HTML statique, texte en prose, une seule offre ("plaine de jeux") avec 4 profils de prix selon la résidence | `uccle.py` |
+| Besace ASBL (Liège, 2,5-6 ans) | Wix | HTML très fragmenté (DOM Wix), extraction sur texte à plat scopé à la section "Prochains stages" | `besace.py` |
+| Jeunesse Ardente (annuaire Ville de Liège, multi-organisateurs) | WordPress sur-mesure | HTML statique, DOM propre par carte (`div.areas`) - agrège ~15 petites structures (écoles de sport, ASBL culturelles...) après filtrage des organisateurs déjà couverts ailleurs (ADEPS, Let's Sport) pour éviter les doublons | `jeunesse_ardente.py` |
 
 ### Sites 100% JavaScript : `common.fetch_rendered_html()`
 
