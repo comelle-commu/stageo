@@ -2,6 +2,8 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trouvéo — Stages et activités de vacances pour enfants</title>
 <meta name="description" content="Tous les stages, plaines et activités de vacances pour enfants en Wallonie et à Bruxelles, réunis au même endroit. Alerte gratuite avant que la place ne parte.">
@@ -215,6 +217,26 @@
   }
   .hero-badge img{width:100%;height:100%;object-fit:contain;border-radius:50%;}
 
+  /* ---- Founder (réassurance) ---- */
+  section.founder{padding:50px 0;background:var(--mint);}
+  .founder-card{
+    max-width:680px;margin:0 auto;display:flex;gap:20px;align-items:flex-start;
+    background:var(--paper);border-radius:24px;padding:28px 30px;
+    box-shadow:0 14px 34px -20px rgba(1,83,128,0.25);
+  }
+  .founder-avatar{
+    flex:none;width:56px;height:56px;border-radius:50%;background:var(--teal);color:#fff;
+    font-family:'Grandstander',sans-serif;font-weight:800;font-size:22px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .founder-name{font-family:'Grandstander',sans-serif;font-weight:700;font-size:15px;color:var(--ink);margin-bottom:8px;}
+  .founder-text{font-size:15px;line-height:1.6;color:var(--ink-soft);}
+  .founder-contact{display:inline-block;margin-top:12px;font-size:13.5px;font-weight:600;color:var(--teal-deep);text-decoration:underline;}
+  @media (max-width:520px){
+    .founder-card{padding:22px 20px;gap:14px;border-radius:20px;}
+    .founder-avatar{width:44px;height:44px;font-size:18px;}
+  }
+
   /* ---- Problem section ---- */
   section.problem{padding:80px 0;background:var(--cream);}
   .problem-layout{
@@ -370,6 +392,19 @@
     </div>
   </div>
 </header>
+
+<section class="founder">
+  <div class="wrap">
+    <div class="founder-card">
+      <div class="founder-avatar" aria-hidden="true">M</div>
+      <div>
+        <div class="founder-name">Muriel, fondatrice de Trouvéo</div>
+        <p class="founder-text">Bonjour, je m'appelle Muriel. Comme beaucoup de mamans, c'est moi qui cherche les stages pour mes enfants — et c'est toujours compliqué. Le bouche-à-oreille aide, mais parfois on l'apprend trop tard. Et les enfants grandissent : ils ont envie d'essayer autre chose que ce qu'on connaît déjà. Plutôt que de perdre deux heures à fouiller des dizaines de sites différents, en ratant sûrement plein de bonnes options parce que je ne connais que les grands organismes, j'ai eu envie de tout rassembler au même endroit. C'est comme ça qu'est né Trouvéo.</p>
+        <a class="founder-contact" href="mailto:hello@trouveo.be">Une question ? Écrivez-moi directement →</a>
+      </div>
+    </div>
+  </div>
+</section>
 
 <section class="problem">
   <div class="wrap problem-layout">
