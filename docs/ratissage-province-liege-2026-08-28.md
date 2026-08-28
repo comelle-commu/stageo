@@ -46,18 +46,17 @@ Wasseiges, Oupeye, Hamoir.
   que de l'infrastructure physique - la vraie donnée est dans le PDF lié
   depuis l'actualité "Découvrez la brochure extrascolaire 2026-2027".
 
-### C2. Restants — pages vérifiées mais contenu insuffisant/périmé sur la page elle-même
+### C2. Confirmées comme impasses (28/08/2026)
 
-Vérifié en détail (28/08/2026) : sur ces 4 communes, la page "stages"
-trouvée par recherche ne contient PAS de dates exploitables directement
-(contrairement à Stavelot/Faimes, aucune actualité récente avec PDF
-brochure trouvée en cherchant sur la page elle-même - **mais cette piste
-"chercher dans les actualités récentes" n'a pas été systématiquement
-retentée pour ces 4-là, à refaire avant d'abandonner**) :
+La piste "chercher dans les actualités récentes" (qui a fonctionné pour
+Stavelot/Faimes) a été retentée systématiquement sur ces 4 communes -
+aucune n'a de brochure PDF récente. À ne pas retenter sans nouvelle
+information (ex. un article publié après le 28/08).
 
-- **Malmedy** — `https://www.malmedy.be/vivre-a-malmedy/enfance/plaines-de-jeux` — juste une liste de localités avec plaine "extérieure"/"couverte", aucune date.
-- **Verlaine** — `https://www.verlaine.be/loisirs/stages-enfants` — texte périmé (mentionne juillet-août **2021**), renvoie vers une brochure "en cliquant ici" dont le lien PDF n'a pas été retrouvé sur la page.
-- **Dalhem** — `https://www.dalhem.be/loisirs/stages-de-vacances` — page quasiment vide (18 caractères de contenu : juste le titre).
+- **Malmedy** — `https://www.malmedy.be/vivre-a-malmedy/enfance/plaines-de-jeux` — juste une liste de localités avec plaine "extérieure"/"couverte", aucune date. Rien trouvé dans `/actualites` non plus.
+- **Verlaine** — `https://www.verlaine.be/loisirs/stages-enfants` — texte périmé (mentionne juillet-août **2021**). Une actualité "Stages - Congés été 2026" existe mais son contenu réel est vide (seuls des PDF de navigation hors-sujet, guide des aînés etc., apparaissent sur la page).
+- **Dalhem** — `https://www.dalhem.be/loisirs/stages-de-vacances` — page quasiment vide (18 caractères de contenu : juste le titre). Rien de neuf dans `/actualites`.
+- **Wanze** — a une "Brochure Sports et Loisirs" décrite en détail sur sa page dédiée, mais s'avère être un répertoire de clubs à l'année (enfants/ados/adultes), pas des stages de vacances datés - et aucun lien PDF n'est même présent sur cette page.
 - **Wanze** — `https://www.wanze.be/commune/education/stages` — texte de présentation générale du dispositif, aucune date/activité listée.
 
 ## D. Jamais vérifiées (ni robots.txt, ni contenu)
@@ -106,8 +105,10 @@ fonctionne sans aucune authentification.
 
 ## Prochaines étapes recommandées, par ordre de rentabilité
 
-1. **Malmedy, Verlaine, Dalhem, Wanze** (section C2) - chercher une actualité récente avec brochure PDF (comme trouvé pour Stavelot/Faimes) avant de conclure qu'il n'y a rien.
-2. Suivre les liens externes de **Sport Fun Activ'** et finir la lecture de **Le Moderne** et **La Ferme des Enfants** (section F) - proches d'être exploitables.
-3. Vérifier **iClub/CSM** pour éviter un doublon potentiel avant d'aller plus loin dessus.
-4. Vérifier les ~23 communes de la section D (jamais checkées) - probablement le plus gros gisement restant, mais coûteux en temps (une vérification à la fois).
-5. Republier ce document mis à jour à chaque session de ratissage, pour ne pas reperdre le fil.
+1. Suivre les liens externes de **Sport Fun Activ'** et finir la lecture de **Le Moderne** et **La Ferme des Enfants** (section F) - proches d'être exploitables.
+2. Construire **iClub/CSM** (confirmé nouveau, pas de doublon) une fois la structure de `iclubsport.biz`/`iclubsport.academy` vérifiée.
+3. Vérifier les ~23 communes de la section D (jamais checkées) - probablement le plus gros gisement restant, mais coûteux en temps (une vérification à la fois).
+4. Republier ce document mis à jour à chaque session de ratissage, pour ne pas reperdre le fil.
+
+*(Malmedy, Verlaine, Dalhem, Wanze : confirmées comme impasses le
+28/08/2026, voir section C2 - retirées de cette liste.)*
