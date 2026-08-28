@@ -96,6 +96,10 @@ IMIO_DOMAINS = {
     "www.wasseiges.be",
     "www.hamoir.be",
     "www.awans.be",
+    # Section C du ratissage (page trouvée mais pas de widget Omnia) -
+    # scraper dédié construit (stavelot.py, faimes.py).
+    "www.faimes.be",
+    "www.stavelot.be",
 }
 CRAWL_DELAYS = {domain: IMIO_CRAWL_DELAY for domain in IMIO_DOMAINS}
 # Organismes hors socle communal (voir

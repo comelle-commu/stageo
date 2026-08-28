@@ -26,6 +26,7 @@ import cote_campagne
 import crie_liege
 import dimension_sport
 import esneux
+import faimes
 import ferme_de_roloux
 import fleron
 import floreffe
@@ -48,6 +49,7 @@ import oupeye
 import ottignieslln
 import seraing
 import sprimont
+import stavelot
 import supabase_client
 import uccle
 import verviers
@@ -87,6 +89,8 @@ SCRAPERS = [
     ("Besace ASBL", besace),
     ("Jeunesse Ardente", jeunesse_ardente),
     ("Agenda Omnia (multi-communes)", agenda_omnia),
+    ("Stavelot", stavelot),
+    ("Faimes", faimes),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque

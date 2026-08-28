@@ -16,7 +16,11 @@ Herstal, Herve, Huy, Liège (+ Jeunesse Ardente : 30 activités/14
 organismes, + Besace ASBL : 1 activité), Marchin, Nandrin, Neupré, Olne,
 Saint-Georges-sur-Meuse, Seraing, Spa, Sprimont, Verviers, Waremme,
 Welkenraedt, Henri-Chapelle/Herbesthal/Heusy/Tiège/La Calamine (Dimension
-Sport), Geer (Agenda Omnia : 8 activités Toussaint).
+Sport), Geer (Agenda Omnia : 8 activités Toussaint), **Stavelot (13
+activités, Toussaint + Noël, brochure PDF)**, **Faimes (9 activités,
+Toussaint/Noël/Détente/Printemps, brochure PDF)** - ces deux dernières
+ajoutées après la rédaction initiale de ce document, voir section C mise
+à jour.
 
 ## B. Enregistrées dans `agenda_omnia.py` mais 0 activité pour l'instant
 
@@ -28,18 +32,33 @@ Ferrières, Blegny, Trooz, Villers-le-Bouillet, Amay, Dison, Flémalle,
 Juprelle, Pepinster, Remicourt, Saint-Nicolas, Theux, Thimister-Clermont,
 Wasseiges, Oupeye, Hamoir.
 
-## C. Page trouvée, PAS de widget Omnia → scraper dédié à construire
+## C. Page trouvée, PAS de widget Omnia
 
-Confirmé légalement OK (iMio) et une page "stages"/"plaines" identifiée,
-mais sans le carrousel Omnia - nécessite un scraper individuel comme
-`forest.py`/`uccle.py`/`besace.py`. **Prochaine étape la plus rentable.**
+### C1. Construits (28/08/2026)
 
-- Malmedy — `https://www.malmedy.be/vivre-a-malmedy/enfance/plaines-de-jeux`
-- Verlaine — `https://www.verlaine.be/loisirs/stages-enfants`
-- Dalhem — `https://www.dalhem.be/loisirs/stages-de-vacances`
-- Wanze — `https://www.wanze.be/commune/education/stages`
-- Faimes — `https://www.faimes.be/loisirs/stages-et-plaines/plaine-de-jeux-du-cortil`
-- Stavelot — `https://www.stavelot.be/actualites/coordination-accueil-temps-libre-septembre-decembre-2026-brochure-des-stages-animations` (brochure PDF probable)
+- **Stavelot** ✅ `stavelot.py` — 13 activités (Toussaint + Noël). La page
+  web "Plaines de jeux" elle-même était vide ; la vraie donnée était dans
+  un PDF lié depuis une actualité séparée ("Coordination Accueil Temps
+  Libre"). Voir README pour le détail de l'extraction (flyer 2 colonnes,
+  pas de tableau propre).
+- **Faimes** ✅ `faimes.py` — 9 activités (Toussaint x2, Noël, Détente,
+  Printemps x2). Même leçon : la page "Plaine de jeux du Cortil" ne parle
+  que de l'infrastructure physique - la vraie donnée est dans le PDF lié
+  depuis l'actualité "Découvrez la brochure extrascolaire 2026-2027".
+
+### C2. Restants — pages vérifiées mais contenu insuffisant/périmé sur la page elle-même
+
+Vérifié en détail (28/08/2026) : sur ces 4 communes, la page "stages"
+trouvée par recherche ne contient PAS de dates exploitables directement
+(contrairement à Stavelot/Faimes, aucune actualité récente avec PDF
+brochure trouvée en cherchant sur la page elle-même - **mais cette piste
+"chercher dans les actualités récentes" n'a pas été systématiquement
+retentée pour ces 4-là, à refaire avant d'abandonner**) :
+
+- **Malmedy** — `https://www.malmedy.be/vivre-a-malmedy/enfance/plaines-de-jeux` — juste une liste de localités avec plaine "extérieure"/"couverte", aucune date.
+- **Verlaine** — `https://www.verlaine.be/loisirs/stages-enfants` — texte périmé (mentionne juillet-août **2021**), renvoie vers une brochure "en cliquant ici" dont le lien PDF n'a pas été retrouvé sur la page.
+- **Dalhem** — `https://www.dalhem.be/loisirs/stages-de-vacances` — page quasiment vide (18 caractères de contenu : juste le titre).
+- **Wanze** — `https://www.wanze.be/commune/education/stages` — texte de présentation générale du dispositif, aucune date/activité listée.
 
 ## D. Jamais vérifiées (ni robots.txt, ni contenu)
 
@@ -87,7 +106,7 @@ fonctionne sans aucune authentification.
 
 ## Prochaines étapes recommandées, par ordre de rentabilité
 
-1. **Malmedy, Verlaine, Dalhem, Wanze, Faimes, Stavelot** (section C) - pages déjà identifiées, scraper individuel à construire comme Forest/Uccle.
+1. **Malmedy, Verlaine, Dalhem, Wanze** (section C2) - chercher une actualité récente avec brochure PDF (comme trouvé pour Stavelot/Faimes) avant de conclure qu'il n'y a rien.
 2. Suivre les liens externes de **Sport Fun Activ'** et finir la lecture de **Le Moderne** et **La Ferme des Enfants** (section F) - proches d'être exploitables.
 3. Vérifier **iClub/CSM** pour éviter un doublon potentiel avant d'aller plus loin dessus.
 4. Vérifier les ~23 communes de la section D (jamais checkées) - probablement le plus gros gisement restant, mais coûteux en temps (une vérification à la fois).

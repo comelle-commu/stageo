@@ -148,6 +148,8 @@ un socle mutualisé pour cette famille de sites (voir
 | Besace ASBL (Liège, 2,5-6 ans) | Wix | HTML très fragmenté (DOM Wix), extraction sur texte à plat scopé à la section "Prochains stages" | `besace.py` |
 | Jeunesse Ardente (annuaire Ville de Liège, multi-organisateurs) | WordPress sur-mesure | HTML statique, DOM propre par carte (`div.areas`) - agrège ~15 petites structures (écoles de sport, ASBL culturelles...) après filtrage des organisateurs déjà couverts ailleurs (ADEPS, Let's Sport) pour éviter les doublons | `jeunesse_ardente.py` |
 | Agenda Omnia (18 communes iMio de la province de Liège) | iMio, widget "Agenda"/Omnia partagé | HTML statique (carrousel serveur en page d'accueil), filtré sur catégorie "Stages et cours" + type "Activité" - voir section dédiée plus bas | `agenda_omnia.py` |
+| Stavelot (iMio, sans widget Omnia) | Brochure PDF (mise en page libre, pas de tableau exploitable) | Extraction sur le texte de chaque page individuelle, gabarit "organisateur / dates / titre / âge / prix" repéré empiriquement - voir section dédiée plus bas | `stavelot.py` |
+| Faimes (iMio, sans widget Omnia) | Brochure PDF (texte natif, propre) | Une page couvre toute l'année scolaire, format répété "Semaine du D au D + thème(s) petits/grands" | `faimes.py` |
 
 ### Sites 100% JavaScript : `common.fetch_rendered_html()`
 
@@ -279,6 +281,38 @@ suffisait pas : Oupeye ("Table de conversation") et Ferrières ("Espace
 Public Numérique") sont tagués "Stages et cours" mais sont en réalité des
 événements adultes, révélés par leur `Event type` réel ("Événementiel")
 une fois la fiche détail consultée - d'où le double filtre catégorie + type.
+
+## Stavelot / Faimes : la vraie donnée était dans un PDF lié depuis une actualité, pas la page "stages" elle-même
+
+Les deux pages web dédiées ("Plaines de jeux" à Stavelot, "Plaine de jeux
+du Cortil" à Faimes) ne contiennent quasiment rien - la donnée utile est
+en réalité dans une brochure PDF liée depuis une **actualité séparée**
+(`decouvrez-la-brochure-extrascolaire-2026-2027` pour Faimes, un article
+"Coordination Accueil Temps Libre" pour Stavelot). Leçon pour le
+ratissage : quand la page "stages" habituelle est vide, chercher aussi du
+côté des actualités récentes de la commune avant de conclure qu'il n'y a
+rien.
+
+Les deux PDF sont du texte natif (pas d'image scannée) mais avec des mises
+en page très différentes de Herstal (le seul autre PDF déjà géré dans ce
+dossier, qui a un vrai tableau propre) :
+
+- **Stavelot** : un flyer à deux colonnes par activité (« Qui/Où/Quand »
+  d'un côté, « Informations complémentaires » de l'autre) -
+  `extract_tables()` ne renvoie que des fragments de cellules décoratives
+  inexploitables. Extraction sur `extract_text()` **page par page**, avec
+  un gabarit répété (organisateur, puis "Du D au D <mois>", puis le titre)
+  repéré empiriquement. Limite assumée : sur une page qui fusionne deux
+  activités en colonnes (1 page sur 12 dans le run testé), seule la
+  première est extraite plutôt que de risquer d'associer les mauvais
+  champs entre elles.
+- **Faimes** : une seule page de texte propre couvre toute l'année
+  scolaire (Toussaint, Noël, Détente, Printemps), format répété "Semaine
+  du D au D <mois> <année> :" suivi du ou des thèmes ("pour les petits" /
+  "pour les grands" / unique pour les deux tranches). Piège rencontré : le
+  bloc de texte capturé entre deux "Semaine du" embarquait parfois le
+  titre de la section suivante ("STAGE DE DETENTE") faute de séparateur -
+  filtré explicitement.
 
 ## Forest / Uccle : pages communales mises à jour uniquement à l'approche de la période
 
