@@ -117,12 +117,63 @@ cherchée au mauvais domaine (`www.limbourg.be` n'existe pas ; le vrai
 site est `ville-limbourg.be`, pas encore vérifié).
 
 Jalhay est également maintenant couverte (voir section A, `jalhay.py`) -
-retirée de la liste. Les 13 autres restent non vérifiées :
+retirée de la liste.
 
-Bassenge, Beyne-Heusay, Burdinne, Crisnée, Donceel, Lontzen, Modave,
-Plombières, Trois-Ponts, Lincent (timeout), Lierneux (statut 202, à
-réessayer), Stoumont (timeout), Limbourg (vrai domaine `ville-
-limbourg.be` à essayer).
+### D3. Les 13 dernières communes de la section D, toutes vérifiées (3e passage, 28/08/2026)
+
+La liste des "jamais vérifiées" est maintenant vide. Aucune n'a donné de
+scraper cette fois (que des impasses ou des cas à revérifier), mais
+toutes sont désormais documentées pour ne pas reperdre de temps dessus :
+
+- **⚠️ Modave — SITE COMPROMIS, NE PAS SCRAPER.** `www.modave.be`
+  (page d'accueil ET page stages) sert actuellement du contenu de
+  spam/gambling injecté ("POMPA4D", redirections vers
+  `modave-amp.pages.dev`, ressources chargées depuis un domaine Shopify
+  sans rapport `blog.marzipants.co.uk`) mélangé au vrai contenu de la
+  page - reproductible sur plusieurs requêtes, donc pas un artefact
+  réseau ponctuel. La page "stages" elle-même contenait par ailleurs un
+  programme Automne 2026 réel et exploitable (19-23/10 et 26-30/10,
+  Complexe sportif communal) - à reconstruire une fois le site assaini,
+  pas avant.
+- **Burdinne** et **Plombières** - même plateforme Nuxt.js côté client
+  (SPA, rien dans le HTML brut ni via WebFetch), non vérifiable dans ce
+  bac à sable (réseau Playwright limité à GitHub Actions, voir README).
+  Les résultats de recherche suggèrent des pages "stages" à jour mais le
+  contenu réel (dates) n'a pas pu être confirmé. À revérifier sur GitHub
+  Actions.
+- **Trois-Ponts** - le domaine `trois-ponts.be` (avec tiret) est une
+  page de parking du registrar LWS, PAS le vrai site : le vrai domaine
+  est `troisponts.be` (sans tiret), iMio confirmé. Une actualité
+  "Brochure ATL Saison 2026/2027" existe mais son contenu n'est qu'une
+  image de couverture décorative (bambous, pas de programme) - le widget
+  d'actualités lui-même (`<smartweb-news>`, chargé depuis
+  `actualites.enwallonie.be`) est rendu en JS, potentiel autre
+  composant partagé iMio à creuser plus tard si le temps le permet.
+- **Limbourg** - le domaine `www.limbourg.be` n'existe pas, le vrai
+  site est `ville-limbourg.be` (iMio confirmé). Page "Animations"
+  trouvée mais seulement descriptive (tarifs et horaires génériques),
+  aucune date précise ni PDF/brochure lié.
+- **Beyne-Heusay**, **Lincent** - stages uniquement en été (juillet-
+  août), rien pour Toussaint/Noël. Le "livret ATL" de Beyne-Heusay est
+  en fait un annuaire de clubs à l'année (comme Wanze), pas un programme
+  de plaines daté.
+- **Donceel** - page trouvée mais un des stages listés date encore de
+  2024 ; rien pour Toussaint/Noël 2026.
+- **Crisnée** - page "Stages" dédiée trouvée mais vide (même symptôme
+  que Dalhem : uniquement le fil d'Ariane, pas de corps d'article).
+- **Stoumont** - pages ATL/AES trouvées mais aucune ne liste de
+  programme daté, juste des coordonnées de contact.
+- **Bassenge** - page trouvée non concluante (contenu pas accessible
+  via fetch simple, à revérifier avec un fetch direct plutôt qu'un
+  résumé).
+- **Lontzen** - page d'accueil en allemand, aucune page stages trouvée.
+  À vérifier si cette commune dépend bien de la FWB (comme supposé
+  jusqu'ici) ou de la Communauté germanophone (comme les 9 communes de
+  la section E) avant d'investiguer plus loin - pas tranché ce passage-ci.
+
+Aucune de ces impasses n'est nécessairement définitive (plusieurs
+publient bien des stages en saison, juste pas pour Toussaint/Noël au
+28/08) - à revérifier début septembre comme pour Mes Temps Libres.
 
 ### D2. Soumagne : contenu exploitable trouvé, mais chemin interdit par robots.txt
 
@@ -183,14 +234,31 @@ fonctionne sans aucune authentification.
 
 ## Prochaines étapes recommandées, par ordre de rentabilité
 
-1. Vérifier les 14 communes restantes de la section D1 (jamais checkées) - probablement le plus gros gisement restant, mais coûteux en temps (une vérification à la fois). Essayer `ville-limbourg.be` (pas `www.limbourg.be`) pour Limbourg.
-2. Revérifier Berloz/Clavier/Oreye/Ouffet/Tinlot dans quelques semaines - ces communes publient bien des stages en saison (contrairement à Malmedy/Verlaine/Dalhem/Wanze), juste rien pour Toussaint/Noël au 28/08.
-3. **Liège Parkour School** et **Sportforfun** (section F) - dates pas encore alignées sur Toussaint/Noël 2026, à réessayer.
-4. Rechercher individuellement **Asbl PARI**, **École du cirque Polichinelle**, **Stage 100% Ado** (section F, jamais vérifiés).
-5. Republier ce document mis à jour à chaque session de ratissage, pour ne pas reperdre le fil.
+La section D (communes jamais vérifiées) est maintenant **entièrement
+close** - toutes les communes de la province de Liège identifiées au
+départ du ratissage ont été vérifiées au moins une fois. Ce qui reste à
+faire est du **suivi** de pistes déjà identifiées, pas de la découverte :
+
+1. **Modave** : vérifier périodiquement si le site est assaini (voir
+   D3) - programme Automne 2026 réel déjà repéré, prêt à scraper dès que
+   la compromission est nettoyée.
+2. **Burdinne** et **Plombières** : à revérifier sur GitHub Actions
+   (Playwright complet) plutôt que dans ce bac à sable - plateforme
+   Nuxt.js non vérifiable ici.
+3. Revérifier début septembre : Berloz/Clavier/Oreye/Ouffet/Tinlot
+   (section D1), Beyne-Heusay/Lincent (été seulement), Donceel/Crisnée/
+   Stoumont/Bassenge/Trois-Ponts/Limbourg (section D3) - plusieurs
+   publient leurs programmes Automne courant septembre (cf. le rythme
+   observé sur Mes Temps Libres, Jalhay).
+4. **Liège Parkour School** et **Sportforfun** (section F) - dates pas encore alignées sur Toussaint/Noël 2026, à réessayer.
+5. Rechercher individuellement **Asbl PARI**, **École du cirque Polichinelle**, **Stage 100% Ado** (section F, jamais vérifiés).
+6. Clarifier le statut FWB vs Communauté germanophone de **Lontzen**
+   avant d'investiguer plus loin (voir D3).
+7. Republier ce document mis à jour à chaque session de ratissage, pour ne pas reperdre le fil.
 
 *(Malmedy, Verlaine, Dalhem, Wanze, Le Moderne, iClub/CSM, Soumagne
-(chemin PDF interdit par robots.txt) : confirmées comme impasses le
-28/08/2026, voir sections C2/D2/F - retirées de cette liste. Sport Fun
-Activ', La Ferme des Enfants, Aubel, Mes Temps Libres (Anthisnes +
-Comblain-au-Pont) et Jalhay : construits le 28/08/2026, voir section A.)*
+(chemin PDF interdit par robots.txt), et les 13 communes de la section
+D3 : confirmées comme impasses (temporaires pour la plupart) le
+28/08/2026, voir sections C2/D2/D3/F. Sport Fun Activ', La Ferme des
+Enfants, Aubel, Mes Temps Libres (Anthisnes + Comblain-au-Pont) et
+Jalhay : construits le 28/08/2026, voir section A.)*
