@@ -481,16 +481,30 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   // Semaines de vacances scolaires FWB (source : calendrier officiel
   // 2026-2027 - RTBF/L'Avenir, août 2026). Bornes élargies au dimanche
   // suivant pour ne pas exclure une activité qui déborde sur le week-end.
+  //
+  // Noms selon le référentiel FWB en vigueur depuis la réforme des rythmes
+  // scolaires (2022) : les périodes sont désignées par saison plutôt que
+  // par leur ancien nom (Toussaint -> Automne, Noël -> Hiver, Carnaval ->
+  // Détente, Pâques -> Printemps).
+  function fmtDate(d){
+    return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0');
+  }
+  // Dates affichées dérivées de start/end plutôt que retapées à la main,
+  // pour ne jamais désynchroniser le texte affiché des bornes réellement
+  // utilisées par le filtre.
   const VACATION_WEEKS = [
-    { key: 'toussaint-1', label: 'Toussaint · sem. 1', start: new Date(2026,9,19), end: new Date(2026,9,25,23,59,59) },
-    { key: 'toussaint-2', label: 'Toussaint · sem. 2', start: new Date(2026,9,26), end: new Date(2026,10,1,23,59,59) },
-    { key: 'noel-1', label: 'Noël · sem. 1', start: new Date(2026,11,21), end: new Date(2026,11,27,23,59,59) },
-    { key: 'noel-2', label: 'Noël · sem. 2', start: new Date(2026,11,28), end: new Date(2027,0,3,23,59,59) },
-    { key: 'carnaval-1', label: 'Carnaval · sem. 1', start: new Date(2027,1,22), end: new Date(2027,1,28,23,59,59) },
-    { key: 'carnaval-2', label: 'Carnaval · sem. 2', start: new Date(2027,2,1), end: new Date(2027,2,7,23,59,59) },
-    { key: 'paques-1', label: 'Pâques · sem. 1', start: new Date(2027,3,26), end: new Date(2027,4,2,23,59,59) },
-    { key: 'paques-2', label: 'Pâques · sem. 2', start: new Date(2027,4,3), end: new Date(2027,4,9,23,59,59) },
-  ];
+    { key: 'toussaint-1', base: 'Automne · sem. 1', start: new Date(2026,9,19), end: new Date(2026,9,25,23,59,59) },
+    { key: 'toussaint-2', base: 'Automne · sem. 2', start: new Date(2026,9,26), end: new Date(2026,10,1,23,59,59) },
+    { key: 'noel-1', base: 'Hiver · sem. 1', start: new Date(2026,11,21), end: new Date(2026,11,27,23,59,59) },
+    { key: 'noel-2', base: 'Hiver · sem. 2', start: new Date(2026,11,28), end: new Date(2027,0,3,23,59,59) },
+    { key: 'carnaval-1', base: 'Détente · sem. 1', start: new Date(2027,1,22), end: new Date(2027,1,28,23,59,59) },
+    { key: 'carnaval-2', base: 'Détente · sem. 2', start: new Date(2027,2,1), end: new Date(2027,2,7,23,59,59) },
+    { key: 'paques-1', base: 'Printemps · sem. 1', start: new Date(2027,3,26), end: new Date(2027,4,2,23,59,59) },
+    { key: 'paques-2', base: 'Printemps · sem. 2', start: new Date(2027,4,3), end: new Date(2027,4,9,23,59,59) },
+  ].map(function(w){
+    w.label = w.base + ' (' + fmtDate(w.start) + ' - ' + fmtDate(w.end) + '/' + String(w.end.getFullYear()).slice(-2) + ')';
+    return w;
+  });
 
   function matchesPeriod(r, periodKey){
     if (periodKey === 'ALL') return true;
