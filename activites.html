@@ -174,6 +174,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   .label-period::before{content:'📅';}
   .label-age::before{content:'🎂';}
   .label-type::before{content:'🎨';}
+  .label-province::before{content:'🗺️';}
   .label-commune::before{content:'📍';}
   .label-org::before{content:'🏫';}
   .chip-row{display:flex;flex-wrap:wrap;gap:8px;}
@@ -319,6 +320,10 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
       <span class="filter-label label-type">Type d'activité</span>
       <div class="chip-row" id="typeChips"></div>
     </div>
+    <div class="filter-group">
+      <span class="filter-label label-province">Province</span>
+      <div class="chip-row" id="provinceChips"></div>
+    </div>
     <details class="filters-more">
       <summary>Plus de filtres (période, commune, organisme)</summary>
       <div class="filter-group">
@@ -364,6 +369,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   const ageChipsEl = document.getElementById('ageChips');
   const periodChipsEl = document.getElementById('periodChips');
   const typeChipsEl = document.getElementById('typeChips');
+  const provinceChipsEl = document.getElementById('provinceChips');
   const communeChipsEl = document.getElementById('communeChips');
   const orgChipsEl = document.getElementById('orgChips');
   const communeLabelEl = document.getElementById('communeLabel');
@@ -602,6 +608,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   let activeGroup = 'ALL';
   let activeAge = 'ALL';
   let activeType = 'ALL';
+  let activeProvince = 'ALL';
   let activePeriod = 'ALL';
   let showPast = false;
   let visibleLimit = PAGE_SIZE;
@@ -655,6 +662,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     if (except !== 'group' && activeGroup !== 'ALL' && g !== activeGroup) return false;
     if (except !== 'age' && !matchesAge(r, activeAge)) return false;
     if (except !== 'type' && activeType !== 'ALL' && r.type_activite !== activeType) return false;
+    if (except !== 'province' && activeProvince !== 'ALL' && provinceOf(r.commune) !== activeProvince) return false;
     if (except !== 'period' && !matchesPeriod(r, activePeriod)) return false;
     if (q){
       // ageLabel(r) volontairement exclu : le format "X-Y ans" contient le
@@ -803,6 +811,19 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     });
     typeChipsEl.innerHTML = typeHtml;
 
+    // Province : même logique, en ignorant le filtre de province lui-même.
+    // 'Autre' volontairement inclus même à 0 (comme Type/Âge, liste fixe)
+    // pour ne jamais faire disparaître silencieusement une commune que
+    // provinceOf() ne saurait pas classer.
+    let provinceHtml = '';
+    PROVINCE_ORDER.forEach(function(p){
+      const count = data.filter(function(r){
+        return matchesFilters(r, q, 'province') && provinceOf(r.commune) === p && (showPast || !isPast(r));
+      }).length;
+      provinceHtml += chipHtml(p, count, activeProvince === p, 'data-province="' + esc(p) + '"', 'province-chip');
+    });
+    provinceChipsEl.innerHTML = provinceHtml;
+
     // Communes / organismes : compte en ignorant le filtre de source lui-même,
     // ET en ignorant le filtre "dates passées" - toutes les sources connues
     // doivent apparaître dans la liste, même si leurs seules données sont
@@ -835,7 +856,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     orgChipsEl.innerHTML = orgHtml;
     orgLabelEl.textContent = 'Organismes (' + Object.keys(orgCounts).length + ')';
 
-    chipAllBtn.classList.toggle('active', activeGroup === 'ALL' && activeAge === 'ALL' && activeType === 'ALL' && activePeriod === 'ALL');
+    chipAllBtn.classList.toggle('active', activeGroup === 'ALL' && activeAge === 'ALL' && activeType === 'ALL' && activePeriod === 'ALL' && activeProvince === 'ALL');
   }
 
   function renderStats(){
@@ -866,11 +887,17 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     activeAge = 'ALL';
     activeType = 'ALL';
     activePeriod = 'ALL';
+    activeProvince = 'ALL';
   }));
   periodChipsEl.addEventListener('click', resetPageAnd(function(e){
     const btn = e.target.closest('.chip');
     if (!btn) return;
     activePeriod = (activePeriod === btn.dataset.period) ? 'ALL' : btn.dataset.period;
+  }));
+  provinceChipsEl.addEventListener('click', resetPageAnd(function(e){
+    const btn = e.target.closest('.chip');
+    if (!btn) return;
+    activeProvince = (activeProvince === btn.dataset.province) ? 'ALL' : btn.dataset.province;
   }));
   communeChipsEl.addEventListener('click', resetPageAnd(function(e){
     const btn = e.target.closest('.chip');
