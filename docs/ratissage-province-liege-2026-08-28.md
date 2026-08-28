@@ -37,6 +37,19 @@ Ajoutées lors du 2e passage (28/08/2026, section F) :
   encore à venir). Donnée en deux temps : liste/prix/stock via l'API
   publique WooCommerce Store, dates/âge/lieu réels seulement dans le HTML
   de chaque page produit (bloc constructeur Divi).
+- **Aubel** ✅ `aubel.py` - 4 activités (Toussaint 2026), trouvée en
+  vérifiant les communes jamais checkées de la section D. Dates et âges
+  directement sur la page hub "Stages de vacances", lieu récupéré via un
+  fetch supplémentaire par stage sur sa page évènement.
+- **Mes Temps Libres** (plateforme mutualisée Anthisnes + Comblain-au-
+  Pont, exclut Esneux déjà couvert ailleurs) ✅ `mestempslibres.py` - 5
+  activités actuellement, mais ATTENTION : ce sont les dates de la saison
+  **Automne-Hiver 2025** (le dépliant 2026 n'est pas encore republié sur
+  Anthisnes au 28/08/2026 ; Comblain-au-Pont n'a aucun PDF lié pour
+  l'instant). La découverte du lien PDF est dynamique (nom de fichier
+  variable par saison) donc ça se remettra à jour tout seul dès que les
+  communes republient - probablement début septembre vu le rythme de
+  l'an dernier (post équivalent publié le 02/09/2025).
 
 ## B. Enregistrées dans `agenda_omnia.py` mais 0 activité pour l'instant
 
@@ -77,11 +90,55 @@ information (ex. un article publié après le 28/08).
 
 ## D. Jamais vérifiées (ni robots.txt, ni contenu)
 
-Anthisnes, Aubel, Bassenge, Berloz, Beyne-Heusay, Burdinne, Clavier,
-Crisnée, Donceel, Jalhay, Lontzen, Modave, Oreye, Ouffet, Plombières,
-Soumagne, Tinlot, Trois-Ponts, Comblain-au-Pont (erreur proxy au moment du
-check, à réessayer), Limbourg (timeout), Lincent (timeout), Lierneux
-(statut 202, à réessayer), Stoumont (timeout).
+### D1. Vérifiées lors du 2e passage (28/08/2026)
+
+6 des 23 communes de cette liste se sont révélées iMio (robots.txt
+redirigé vers l'infra partagée, `Crawl-delay: 120`), sans widget Omnia :
+
+- **Aubel** ✅ `aubel.py` - page "Stages de vacances" à jour, dates ET
+  âges directement dessus (4 stages, Toussaint 2026). Voir section A.
+- **Berloz, Clavier, Oreye, Ouffet, Tinlot** - confirmées comme impasses
+  pour l'instant : soit aucune page dédiée trouvée (Berloz), soit une
+  page dédiée existe mais sans dates/programme publié pour l'instant
+  (Ouffet - juste un contact à qui écrire), soit seul du contenu "Été
+  2026" déjà périmé est indexé (Clavier, Oreye, Tinlot - rien pour
+  Toussaint/Noël au 28/08/2026). À revérifier plus tard plutôt
+  qu'abandonner : ces communes publient bien des stages quand la saison
+  est active (contrairement à Malmedy/Verlaine/Dalhem/Wanze, où même le
+  contenu passé était absent).
+
+Anthisnes et Comblain-au-Pont sont maintenant couvertes (voir section A,
+`mestempslibres.py`) - retirées de cette liste. Limbourg avait été
+cherchée au mauvais domaine (`www.limbourg.be` n'existe pas ; le vrai
+site est `ville-limbourg.be`, pas encore vérifié).
+
+Les 14 autres restent non vérifiées :
+
+Bassenge, Beyne-Heusay, Burdinne, Crisnée, Donceel, Jalhay, Lontzen,
+Modave, Plombières, Trois-Ponts, Lincent (timeout), Lierneux (statut 202,
+à réessayer), Stoumont (timeout), Limbourg (vrai domaine `ville-
+limbourg.be` à essayer).
+
+### D2. Soumagne : contenu exploitable trouvé, mais chemin interdit par robots.txt
+
+Pas iMio (plateforme sur-mesure, `index.php?pg=NNN`). Une brochure PDF
+« Stages et plaines de vacances 2026-2027 » très complète a été trouvée
+(liée depuis `index.php?pg=343`) - programme Toussaint/Noël/Carnaval/
+Printemps/Été 26-27 avec dates, âges et lieux pour chaque stage. Mise en
+page en grille 4 colonnes ; la technique de reconstruction par police
+(`pdfplumber.extract_words(extra_attrs=['fontname'])` - titre en
+`FloodStd` 14pt, description en `FranklinGothic-Book` 9pt, lieu en
+`FranklinGothic-Demi` 9pt semi-gras) permet de re-linéariser le texte
+sans mélanger les blocs, contrairement à `extract_text()` seul qui
+entrelace les 4 colonnes de façon illisible - technique à retenir pour
+d'autres brochures en grille similaires.
+
+**Mais** : le PDF vit sous `/manager/upload/files/PDF/...`, et le
+`robots.txt` de soumagne.be interdit explicitement `Disallow: /manager/`
+pour `User-Agent: *` (tous les bots, pas seulement ClaudeBot). Impasse
+confirmée par respect du robots.txt, pas par manque de donnée - ne pas
+retenter sauf si le PDF est un jour republié à un autre chemin non
+interdit.
 
 ## E. Hors périmètre : communes germanophones
 
@@ -121,12 +178,14 @@ fonctionne sans aucune authentification.
 
 ## Prochaines étapes recommandées, par ordre de rentabilité
 
-1. Vérifier les ~23 communes de la section D (jamais checkées) - probablement le plus gros gisement restant, mais coûteux en temps (une vérification à la fois).
-2. **Liège Parkour School** et **Sportforfun** (section F) - dates pas encore alignées sur Toussaint/Noël 2026, à réessayer.
-3. Rechercher individuellement **Asbl PARI**, **École du cirque Polichinelle**, **Stage 100% Ado** (section F, jamais vérifiés).
-4. Republier ce document mis à jour à chaque session de ratissage, pour ne pas reperdre le fil.
+1. Vérifier les 14 communes restantes de la section D1 (jamais checkées) - probablement le plus gros gisement restant, mais coûteux en temps (une vérification à la fois). Essayer `ville-limbourg.be` (pas `www.limbourg.be`) pour Limbourg.
+2. Revérifier Berloz/Clavier/Oreye/Ouffet/Tinlot dans quelques semaines - ces communes publient bien des stages en saison (contrairement à Malmedy/Verlaine/Dalhem/Wanze), juste rien pour Toussaint/Noël au 28/08.
+3. **Liège Parkour School** et **Sportforfun** (section F) - dates pas encore alignées sur Toussaint/Noël 2026, à réessayer.
+4. Rechercher individuellement **Asbl PARI**, **École du cirque Polichinelle**, **Stage 100% Ado** (section F, jamais vérifiés).
+5. Republier ce document mis à jour à chaque session de ratissage, pour ne pas reperdre le fil.
 
-*(Malmedy, Verlaine, Dalhem, Wanze, Le Moderne, iClub/CSM : confirmées
-comme impasses le 28/08/2026, voir sections C2/F - retirées de cette
-liste. Sport Fun Activ' et La Ferme des Enfants : construits le
-28/08/2026, voir section A.)*
+*(Malmedy, Verlaine, Dalhem, Wanze, Le Moderne, iClub/CSM, Soumagne
+(chemin PDF interdit par robots.txt) : confirmées comme impasses le
+28/08/2026, voir sections C2/D2/F - retirées de cette liste. Sport Fun
+Activ', La Ferme des Enfants, Aubel et Mes Temps Libres (Anthisnes +
+Comblain-au-Pont) : construits le 28/08/2026, voir section A.)*

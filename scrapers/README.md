@@ -136,6 +136,7 @@ un socle mutualisé pour cette famille de sites (voir
 | Ciney | Plone (iMio) | HTML statique, prose (organisé avec Ocarina Dinant) | `ciney.py` |
 | La Louvière | Plone (iMio, sous-domaine `atl.`) | HTML statique, page permanente sans dates chiffrées | `lalouviere.py` |
 | Ottignies-LLN | Plone (iMio, domaine réel `olln.be`) | HTML statique, prose | `ottignieslln.py` |
+| Aubel | Plone (iMio) | HTML statique, hub "Stages de vacances" avec dates/âges groupés par période - un fetch en plus par stage pour le lieu (page évènement liée) | `aubel.py` |
 | Ferme de Roloux (organisme privé, Fexhe-le-Haut-Clocher) | Constructeur onlc.be | HTML statique, pas d'obstacle JS | `ferme_de_roloux.py` |
 | Let's Sport (organisme privé, ~15 sites Liège/Luxembourg) | Site sur-mesure | HTML statique, structuré (classes CSS explicites) | `letssport.py` |
 | Côté Campagne (organisme privé, Awans) | Constructeur générique | **SPA JS pur** - liens réels cachés derrière `onclick`, nécessite `fetch_rendered_html()` (Playwright) | `cote_campagne.py` |
@@ -151,6 +152,7 @@ un socle mutualisé pour cette famille de sites (voir
 | Stavelot (iMio, sans widget Omnia) | Brochure PDF (mise en page libre, pas de tableau exploitable) | Extraction sur le texte de chaque page individuelle, gabarit "organisateur / dates / titre / âge / prix" repéré empiriquement - voir section dédiée plus bas | `stavelot.py` |
 | Faimes (iMio, sans widget Omnia) | Brochure PDF (texte natif, propre) | Une page couvre toute l'année scolaire, format répété "Semaine du D au D + thème(s) petits/grands" | `faimes.py` |
 | La Ferme des Enfants de Liège (organisme privé, Liège) | WordPress/WooCommerce | Liste + prix/stock via l'API publique WooCommerce Store (`/wp-json/wc/store/v1/products`), mais les vraies dates ne sont que dans le HTML de la page produit (bloc constructeur Divi "Dates/Age/Lieu") - un appel API + un fetch HTML par stage | `ferme_des_enfants.py` |
+| Mes Temps Libres (plateforme mutualisée, Anthisnes + Comblain-au-Pont) | WordPress | Dépliant PDF au nom variable par saison, lien caché derrière un attribut HTML url-encodé contenant du JSON échappé - découverte dynamique en deux temps (`unquote()` puis regex `"link":"...pdf"`) | `mestempslibres.py` |
 
 ### Sites 100% JavaScript : `common.fetch_rendered_html()`
 

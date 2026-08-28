@@ -15,6 +15,7 @@ import adsl_stages
 import agenda_omnia
 import ans
 import arlon
+import aubel
 import aywaille
 import bastogne
 import besace
@@ -42,6 +43,7 @@ import jeunesse_ardente
 import jeunesses_musicales
 import lalouviere
 import letssport
+import mestempslibres
 import mons
 import namur
 import neupre
@@ -71,6 +73,7 @@ SCRAPERS = [
     ("Chaudfontaine", chaudfontaine),
     ("Mons", mons),
     ("Arlon", arlon),
+    ("Aubel", aubel),
     ("Bastogne", bastogne),
     ("Ferme de Roloux", ferme_de_roloux),
     ("Côté Campagne", cote_campagne),
@@ -93,6 +96,7 @@ SCRAPERS = [
     ("Stavelot", stavelot),
     ("Faimes", faimes),
     ("La Ferme des Enfants de Liège", ferme_des_enfants),
+    ("Mes Temps Libres (Anthisnes, Comblain-au-Pont)", mestempslibres),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque

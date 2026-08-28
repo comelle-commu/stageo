@@ -100,6 +100,10 @@ IMIO_DOMAINS = {
     # scraper dédié construit (stavelot.py, faimes.py).
     "www.faimes.be",
     "www.stavelot.be",
+    # Section D du ratissage (jamais vérifiées) : Aubel confirmée iMio,
+    # ni widget Omnia ni PDF - scraper dédié (aubel.py) sur la page hub
+    # "Stages de vacances" elle-même (dates/âges directement dessus).
+    "www.aubel.be",
 }
 CRAWL_DELAYS = {domain: IMIO_CRAWL_DELAY for domain in IMIO_DOMAINS}
 # Organismes hors socle communal (voir
