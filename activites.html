@@ -192,6 +192,17 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   .chip.age-chip.active{background:var(--orange-deep);border-color:var(--orange-deep);box-shadow:0 8px 18px -8px rgba(226,162,14,0.55);}
   .chip.type-chip.active{background:var(--blue);border-color:var(--blue);box-shadow:0 8px 18px -8px rgba(1,124,202,0.55);}
   .filters hr.filter-sep{width:100%;border:none;border-top:1px solid var(--line-soft);margin:0;}
+  .filters-more{width:100%;}
+  .filters-more > summary{
+    display:flex;align-items:center;gap:6px;list-style:none;cursor:pointer;
+    font-family:'Grandstander',sans-serif;font-size:13px;font-weight:700;color:var(--teal-deep);
+    padding:4px 0;
+  }
+  .filters-more > summary::-webkit-details-marker{display:none;}
+  .filters-more > summary::before{content:'▸';transition:transform .15s ease;font-size:11px;}
+  .filters-more[open] > summary::before{transform:rotate(90deg);}
+  .filters-more .filter-group{margin-top:16px;}
+  .filters-more .filter-group + .filter-group{margin-top:18px;}
 
   .status-line{font-size:13px;color:var(--ink-soft);margin:14px 0;min-height:1.4em;}
   .load-more{
@@ -301,10 +312,6 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     </div>
     <hr class="filter-sep">
     <div class="filter-group">
-      <span class="filter-label label-period">Période de vacances</span>
-      <div class="chip-row" id="periodChips"></div>
-    </div>
-    <div class="filter-group">
       <span class="filter-label label-age">Âge</span>
       <div class="chip-row" id="ageChips"></div>
     </div>
@@ -312,14 +319,21 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
       <span class="filter-label label-type">Type d'activité</span>
       <div class="chip-row" id="typeChips"></div>
     </div>
-    <div class="filter-group">
-      <span class="filter-label label-commune" id="communeLabel">Communes</span>
-      <div class="chip-row" id="communeChips"></div>
-    </div>
-    <div class="filter-group">
-      <span class="filter-label label-org" id="orgLabel">Organismes</span>
-      <div class="chip-row" id="orgChips"></div>
-    </div>
+    <details class="filters-more">
+      <summary>Plus de filtres (période, commune, organisme)</summary>
+      <div class="filter-group">
+        <span class="filter-label label-period">Période de vacances</span>
+        <div class="chip-row" id="periodChips"></div>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label label-commune" id="communeLabel">Communes</span>
+        <div class="chip-row" id="communeChips"></div>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label label-org" id="orgLabel">Organismes</span>
+        <div class="chip-row" id="orgChips"></div>
+      </div>
+    </details>
   </div>
 
   <p class="status-line" id="statusLine">Chargement des activités…</p>
