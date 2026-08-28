@@ -243,6 +243,14 @@ tarif existe probablement dans un des deux PDF joints ("Règlement d'ordre
 intérieur", "Projet pédagogique") ou sur le portail d'inscription lui-même,
 non explorés cette session.
 
+## Ratissage province de Liège : état des lieux et prochaines étapes
+
+Suivi complet (communes couvertes, en attente de publication, à
+construire, jamais vérifiées, ASBL candidates) dans
+`docs/ratissage-province-liege-2026-08-28.md` - à consulter/mettre à jour
+avant toute nouvelle session de recherche de sources sur cette province,
+pour ne pas repartir de zéro.
+
 ## Agenda Omnia : un widget partagé découvert en ratissant la province de Liège
 
 En cherchant à couvrir plus systématiquement la province de Liège (84
