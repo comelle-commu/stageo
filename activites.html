@@ -116,7 +116,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   }
 
   /* ---- Intro ---- */
-  header.intro{padding:8px 0 36px;position:relative;overflow:hidden;}
+  header.intro{padding-top:8px;padding-bottom:36px;position:relative;overflow:hidden;}
   .blob{position:absolute;border-radius:50%;opacity:.4;filter:blur(2px);pointer-events:none;}
   .blob1{width:180px;height:180px;background:var(--mint);top:-40px;right:6%;}
   .blob2{width:110px;height:110px;background:var(--blush);bottom:-20px;left:0;}
@@ -357,6 +357,59 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   const loadMoreBtn = document.getElementById('loadMore');
 
   const PAGE_SIZE = 30;
+
+  // Ordre d'affichage des provinces (Bruxelles en dernier, comme une
+  // région à part) - les chips "Communes" sont triés par province puis
+  // par commune, pas juste alphabétiquement par commune : sinon un stage
+  // à Ans (Liège) et un à Ath (Hainaut) se retrouvent voisins par pur
+  // hasard alphabétique, ce qui ne dit rien de leur proximité réelle.
+  const PROVINCE_ORDER = ['Liège', 'Hainaut', 'Namur', 'Brabant wallon', 'Luxembourg', 'Bruxelles', 'Autre'];
+  const PROVINCE_OF = {
+    // Liège
+    'Ans': 'Liège', 'Anthisnes': 'Liège', 'Aubel': 'Liège', 'Awans': 'Liège',
+    'Braives': 'Liège', 'Chaudfontaine': 'Liège', 'Comblain-au-Pont': 'Liège',
+    'Engis': 'Liège', 'Esneux': 'Liège', 'Faimes': 'Liège',
+    'Fexhe-le-Haut-Clocher': 'Liège', 'Geer': 'Liège', 'Grace-Hollogne': 'Liège',
+    'Henri-Chapelle': 'Liège', 'Herbesthal': 'Liège', 'Heron': 'Liège',
+    'Herstal': 'Liège', 'Herve': 'Liège', 'Heusy': 'Liège', 'Huy': 'Liège',
+    'Jalhay': 'Liège', 'La Calamine': 'Liège', 'Liege': 'Liège', 'Liège': 'Liège',
+    'Marchin': 'Liège', 'Nandrin': 'Liège', 'Neupre': 'Liège', 'Olne': 'Liège',
+    'Saint-Georges-sur-Meuse': 'Liège', 'Seraing': 'Liège', 'Spa': 'Liège',
+    'Sprimont': 'Liège', 'Stavelot': 'Liège', 'Tiège': 'Liège', 'Trooz': 'Liège',
+    'Verviers': 'Liège', 'Waremme': 'Liège', 'Welkenraedt': 'Liège',
+    // Hainaut
+    'Ath': 'Hainaut', 'Beaumont': 'Hainaut', 'Beloeil': 'Hainaut',
+    'Charleroi': 'Hainaut', 'Enghien': 'Hainaut', 'Estaimpuis': 'Hainaut',
+    'Forchies': 'Hainaut', 'Gosselies': 'Hainaut', 'Jurbise': 'Hainaut',
+    'Loverval': 'Hainaut', 'Mons': 'Hainaut', 'Mouscron': 'Hainaut',
+    'Quevaucamps': 'Hainaut', 'Saint-Ghislain': 'Hainaut', 'Tournai': 'Hainaut',
+    // Namur
+    'Champion': 'Namur', 'Dinant': 'Namur', 'Eghezée': 'Namur', 'Erpent': 'Namur',
+    'Fernelmont': 'Namur', 'Floreffe': 'Namur', 'Florennes': 'Namur',
+    'Gedinne': 'Namur', 'Gembloux': 'Namur', 'Jambes': 'Namur', 'Lonzée': 'Namur',
+    'Mettet': 'Namur', 'Namur': 'Namur', 'Ohey': 'Namur',
+    // Brabant wallon
+    "Braine-l'Alleud": 'Brabant wallon', 'Louvain-la-Neuve': 'Brabant wallon',
+    'Nivelles': 'Brabant wallon', 'Ottignies-Louvain-la-Neuve': 'Brabant wallon',
+    'Waterloo': 'Brabant wallon', 'Wavre': 'Brabant wallon',
+    // Luxembourg
+    'Arlon': 'Luxembourg', 'Bastogne': 'Luxembourg', 'Etalle': 'Luxembourg',
+    'Habay-la-Neuve': 'Luxembourg', 'Libramont': 'Luxembourg',
+    'Marche-en-Famenne': 'Luxembourg', 'Rouvroy': 'Luxembourg',
+    // Bruxelles
+    'Etterbeek': 'Bruxelles', 'Forest': 'Bruxelles', 'Ixelles': 'Bruxelles',
+    'Laeken': 'Bruxelles', 'Schaerbeek': 'Bruxelles', 'Uccle': 'Bruxelles',
+    'Wol.-St-Lambert': 'Bruxelles', 'Wol.-St-Pierre': 'Bruxelles',
+  };
+  function provinceOf(commune){
+    const base = (commune || '').replace(/\s+Extrascolaire$/i, '').replace(/\s+Parascolaire$/i, '').trim();
+    return PROVINCE_OF[base] || 'Autre';
+  }
+  function communeSortKey(commune){
+    const p = provinceOf(commune);
+    const pIndex = PROVINCE_ORDER.indexOf(p);
+    return [pIndex === -1 ? PROVINCE_ORDER.length : pIndex, commune];
+  }
 
   const AGE_BRACKETS = [
     { key: '0-3', label: '0-3 ans', min: 0, max: 3 },
@@ -648,7 +701,11 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     });
 
     let communeHtml = '';
-    Object.keys(communeCounts).sort().forEach(function(c){
+    Object.keys(communeCounts).sort(function(a, b){
+      const ka = communeSortKey(a), kb = communeSortKey(b);
+      if (ka[0] !== kb[0]) return ka[0] - kb[0];
+      return ka[1].localeCompare(kb[1]);
+    }).forEach(function(c){
       communeHtml += chipHtml(c, communeCounts[c], activeGroup === c, 'data-group="' + esc(c) + '"');
     });
     communeChipsEl.innerHTML = communeHtml;
