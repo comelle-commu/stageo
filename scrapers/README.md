@@ -137,6 +137,7 @@ un socle mutualisé pour cette famille de sites (voir
 | La Louvière | Plone (iMio, sous-domaine `atl.`) | HTML statique, page permanente sans dates chiffrées | `lalouviere.py` |
 | Ottignies-LLN | Plone (iMio, domaine réel `olln.be`) | HTML statique, prose | `ottignieslln.py` |
 | Aubel | Plone (iMio) | HTML statique, hub "Stages de vacances" avec dates/âges groupés par période - un fetch en plus par stage pour le lieu (page évènement liée) | `aubel.py` |
+| Jalhay | WordPress (pas iMio) | HTML statique, une seule page couvre toutes les périodes de l'année, format répété "Semaine ID : du D au D / Thème : NOM / Lieu / Prix" - thème en majuscules extrait par tokenisation (pas d'emoji fiable comme délimiteur) | `jalhay.py` |
 | Ferme de Roloux (organisme privé, Fexhe-le-Haut-Clocher) | Constructeur onlc.be | HTML statique, pas d'obstacle JS | `ferme_de_roloux.py` |
 | Let's Sport (organisme privé, ~15 sites Liège/Luxembourg) | Site sur-mesure | HTML statique, structuré (classes CSS explicites) | `letssport.py` |
 | Côté Campagne (organisme privé, Awans) | Constructeur générique | **SPA JS pur** - liens réels cachés derrière `onclick`, nécessite `fetch_rendered_html()` (Playwright) | `cote_campagne.py` |

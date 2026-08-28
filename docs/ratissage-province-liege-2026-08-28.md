@@ -50,6 +50,10 @@ Ajoutées lors du 2e passage (28/08/2026, section F) :
   variable par saison) donc ça se remettra à jour tout seul dès que les
   communes republient - probablement début septembre vu le rythme de
   l'an dernier (post équivalent publié le 02/09/2025).
+- **Jalhay** ✅ `jalhay.py` - 11 activités sur toute l'année (dont 2 pour
+  Toussaint 2026 : "KPOP Demon Hunter" 19-23/10, "Mercredi" 26-30/10).
+  Trouvée via recherche ciblée sur les communes de la section D. Page
+  unique WordPress (pas iMio), un format répété par semaine très propre.
 
 ## B. Enregistrées dans `agenda_omnia.py` mais 0 activité pour l'instant
 
@@ -112,11 +116,12 @@ Anthisnes et Comblain-au-Pont sont maintenant couvertes (voir section A,
 cherchée au mauvais domaine (`www.limbourg.be` n'existe pas ; le vrai
 site est `ville-limbourg.be`, pas encore vérifié).
 
-Les 14 autres restent non vérifiées :
+Jalhay est également maintenant couverte (voir section A, `jalhay.py`) -
+retirée de la liste. Les 13 autres restent non vérifiées :
 
-Bassenge, Beyne-Heusay, Burdinne, Crisnée, Donceel, Jalhay, Lontzen,
-Modave, Plombières, Trois-Ponts, Lincent (timeout), Lierneux (statut 202,
-à réessayer), Stoumont (timeout), Limbourg (vrai domaine `ville-
+Bassenge, Beyne-Heusay, Burdinne, Crisnée, Donceel, Lontzen, Modave,
+Plombières, Trois-Ponts, Lincent (timeout), Lierneux (statut 202, à
+réessayer), Stoumont (timeout), Limbourg (vrai domaine `ville-
 limbourg.be` à essayer).
 
 ### D2. Soumagne : contenu exploitable trouvé, mais chemin interdit par robots.txt
@@ -187,5 +192,5 @@ fonctionne sans aucune authentification.
 *(Malmedy, Verlaine, Dalhem, Wanze, Le Moderne, iClub/CSM, Soumagne
 (chemin PDF interdit par robots.txt) : confirmées comme impasses le
 28/08/2026, voir sections C2/D2/F - retirées de cette liste. Sport Fun
-Activ', La Ferme des Enfants, Aubel et Mes Temps Libres (Anthisnes +
-Comblain-au-Pont) : construits le 28/08/2026, voir section A.)*
+Activ', La Ferme des Enfants, Aubel, Mes Temps Libres (Anthisnes +
+Comblain-au-Pont) et Jalhay : construits le 28/08/2026, voir section A.)*

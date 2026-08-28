@@ -39,6 +39,7 @@ import hannut
 import herstal
 import huy
 import iclub
+import jalhay
 import jeunesse_ardente
 import jeunesses_musicales
 import lalouviere
@@ -74,6 +75,7 @@ SCRAPERS = [
     ("Mons", mons),
     ("Arlon", arlon),
     ("Aubel", aubel),
+    ("Jalhay", jalhay),
     ("Bastogne", bastogne),
     ("Ferme de Roloux", ferme_de_roloux),
     ("Côté Campagne", cote_campagne),
