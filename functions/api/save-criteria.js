@@ -38,7 +38,7 @@ export async function onRequestPost(context) {
     return jsonResponse(400, { error: "Requête invalide." });
   }
 
-  const { email, enfants, commune, types_activites: typesActivites } = body || {};
+  const { email, enfants, commune } = body || {};
 
   if (typeof email !== "string" || !EMAIL_RE.test(email)) {
     return jsonResponse(400, { error: "Adresse email invalide." });
@@ -46,18 +46,22 @@ export async function onRequestPost(context) {
   if (!Array.isArray(enfants) || enfants.length === 0 || enfants.length > MAX_ENFANTS) {
     return jsonResponse(400, { error: `Merci d'indiquer entre 1 et ${MAX_ENFANTS} enfant(s).` });
   }
+  // Chaque enfant porte ses propres types d'activités (pas un choix
+  // partagé pour toute la fratrie) - un enfant peut vouloir du sport
+  // pendant qu'un autre préfère l'art, d'où ce champ par enfant plutôt
+  // qu'un `types_activites` unique au niveau de la famille.
   for (const enfant of enfants) {
     const age = enfant && enfant.age;
     if (typeof age !== "number" || Number.isNaN(age) || age < 2 || age > 18) {
       return jsonResponse(400, { error: "Chaque âge doit être compris entre 2 et 18 ans." });
     }
+    const types = Array.isArray(enfant.types_activites) ? enfant.types_activites : [];
+    if (!types.every((t) => VALID_TYPES.has(t))) {
+      return jsonResponse(400, { error: "Type d'activité invalide." });
+    }
   }
   if (typeof commune !== "string" || !commune.trim() || commune.trim().length > 120) {
     return jsonResponse(400, { error: "Merci d'indiquer une localité." });
-  }
-  const types = Array.isArray(typesActivites) ? typesActivites : [];
-  if (!types.every((t) => VALID_TYPES.has(t))) {
-    return jsonResponse(400, { error: "Type d'activité invalide." });
   }
 
   try {
@@ -72,10 +76,12 @@ export async function onRequestPost(context) {
       body: JSON.stringify([
         {
           email,
-          enfants: enfants.map((e) => ({ age: e.age })),
+          enfants: enfants.map((e) => ({
+            age: e.age,
+            types_activites: Array.isArray(e.types_activites) ? e.types_activites : [],
+          })),
           commune: commune.trim(),
           rayon_km: 15,
-          types_activites: types,
           updated_at: new Date().toISOString(),
         },
       ]),

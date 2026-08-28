@@ -119,17 +119,19 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   input:focus, select:focus{border-color:var(--teal);}
   select#nbEnfants{max-width:120px;}
 
-  .enfant-row{
-    display:flex;align-items:center;gap:12px;margin-top:10px;
-    background:var(--surface-tint);border-radius:14px;padding:12px 16px;
+  .enfant-card{
+    margin-top:12px;background:var(--surface-tint);border-radius:16px;padding:16px 18px;
   }
-  .enfant-row span.enfant-label{font-size:14px;font-weight:600;color:var(--ink-soft);flex:none;min-width:78px;}
-  .enfant-row input[type=number]{max-width:100px;}
+  .enfant-card-head{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+  .enfant-card-head span.enfant-label{font-size:14px;font-weight:700;color:var(--ink);flex:none;font-family:'Grandstander',sans-serif;}
+  .enfant-card-head input[type=number]{max-width:90px;}
+  .enfant-card-head span.age-suffix{font-size:13px;color:var(--ink-soft);}
+  .enfant-card-sub{font-size:12.5px;color:var(--ink-soft);margin:0 0 8px;}
 
-  .type-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px;}
+  .type-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
   .type-chip{
-    display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:600;
-    padding:10px 16px;border-radius:100px;border:1.5px solid var(--line);
+    display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;
+    padding:8px 14px;border-radius:100px;border:1.5px solid var(--line);
     background:var(--paper);color:var(--ink-soft);cursor:pointer;user-select:none;
     transition:background .15s ease, border-color .15s ease, color .15s ease;
   }
@@ -172,7 +174,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   <header class="intro">
     <span class="eyebrow">Vos critères de recherche</span>
     <h1 class="headline">Aidez-nous à cibler nos recherches pour vous</h1>
-    <p class="sub">Avec l'âge de vos enfants, votre localité et vos activités préférées, on pourra vous prévenir des places qui correspondent vraiment — au lieu d'un email générique pour tout le monde.</p>
+    <p class="sub">Avec l'âge de chaque enfant, ses activités préférées à lui et votre localité, on pourra vous prévenir des places qui correspondent vraiment — au lieu d'un email générique pour tout le monde.</p>
   </header>
 
   <form id="criteresForm" novalidate>
@@ -190,6 +192,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
         <option value="4">4</option>
         <option value="5">5</option>
       </select>
+      <p class="field-help">Chaque enfant a ses propres goûts — indiquez son âge et les activités qui l'intéressent, lui ou elle.</p>
       <div id="enfantsRows"></div>
     </div>
 
@@ -197,18 +200,6 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
       <label class="field-label" for="commune">Votre localité</label>
       <input type="text" id="commune" name="commune" placeholder="Ex : Liège, Namur, Wavre…" required>
       <p class="field-help">On cherchera les activités dans un rayon de 15 km autour de cette localité.</p>
-    </div>
-
-    <div class="field">
-      <label class="field-label">Types d'activités qui vous intéressent</label>
-      <p class="field-help" style="margin:0 0 10px;">Laissez tout décoché si vous êtes ouvert·e à tout.</p>
-      <div class="type-grid" id="typeGrid">
-        <label class="type-chip"><input type="checkbox" value="Sport"> Sport</label>
-        <label class="type-chip"><input type="checkbox" value="Art & créativité"> Art &amp; créativité</label>
-        <label class="type-chip"><input type="checkbox" value="Sciences & nature"> Sciences &amp; nature</label>
-        <label class="type-chip"><input type="checkbox" value="Langues"> Langues</label>
-        <label class="type-chip"><input type="checkbox" value="Multi-activités"> Multi-activités</label>
-      </div>
     </div>
 
     <button type="submit" class="submit" id="submitBtn">Enregistrer mes critères</button>
@@ -244,24 +235,51 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   const emailParam = params.get('email');
   if (emailParam) emailEl.value = emailParam;
 
+  const TYPE_CHOICES = ['Sport', 'Art & créativité', 'Sciences & nature', 'Langues', 'Multi-activités'];
+
+  function typeGridHtml(childIndex){
+    return TYPE_CHOICES.map(function(t){
+      return '<label class="type-chip"><input type="checkbox" value="' + t.replace(/"/g,'&quot;') + '" data-enfant-type="' + childIndex + '"> ' + t + '</label>';
+    }).join('');
+  }
+
   function renderEnfantsRows(){
     const n = Number(nbEnfantsEl.value);
-    const previous = Array.from(enfantsRowsEl.querySelectorAll('input[type=number]')).map(function(i){ return i.value; });
+    // Conserve les valeurs déjà saisies (âge + types cochés) pour les
+    // enfants qui restent affichés si on change juste le nombre total.
+    const previousAges = Array.from(enfantsRowsEl.querySelectorAll('input[data-enfant-age]')).map(function(i){ return i.value; });
+    const previousTypes = [];
+    for (let i = 0; i < n; i++){
+      previousTypes.push(Array.from(enfantsRowsEl.querySelectorAll('input[data-enfant-type="' + i + '"]:checked')).map(function(i2){ return i2.value; }));
+    }
+
     let html = '';
     for (let i = 0; i < n; i++){
-      const val = previous[i] ? ' value="' + previous[i].replace(/"/g,'') + '"' : '';
-      html += '<div class="enfant-row">' +
-        '<span class="enfant-label">Enfant ' + (i + 1) + '</span>' +
-        '<input type="number" min="2" max="18" step="0.5" placeholder="Âge"' + val + ' data-enfant-age required>' +
-        '<span style="font-size:13px;color:var(--ink-soft);">ans</span>' +
+      const val = previousAges[i] ? ' value="' + previousAges[i].replace(/"/g,'') + '"' : '';
+      html += '<div class="enfant-card">' +
+        '<div class="enfant-card-head">' +
+          '<span class="enfant-label">Enfant ' + (i + 1) + '</span>' +
+          '<input type="number" min="2" max="18" step="0.5" placeholder="Âge"' + val + ' data-enfant-age required>' +
+          '<span class="age-suffix">ans</span>' +
+        '</div>' +
+        '<p class="enfant-card-sub">Activités qui l\'intéressent (laissez tout décoché si ouvert·e à tout) :</p>' +
+        '<div class="type-grid">' + typeGridHtml(i) + '</div>' +
         '</div>';
     }
     enfantsRowsEl.innerHTML = html;
+
+    // Réapplique les types précédemment cochés + la classe visuelle active.
+    enfantsRowsEl.querySelectorAll('input[data-enfant-type]').forEach(function(input){
+      const idx = Number(input.dataset.enfantType);
+      const wasChecked = (previousTypes[idx] || []).indexOf(input.value) !== -1;
+      input.checked = wasChecked;
+      input.closest('.type-chip').classList.toggle('active', wasChecked);
+    });
   }
   nbEnfantsEl.addEventListener('change', renderEnfantsRows);
   renderEnfantsRows();
 
-  document.getElementById('typeGrid').addEventListener('click', function(e){
+  enfantsRowsEl.addEventListener('click', function(e){
     const chip = e.target.closest('.type-chip');
     if (!chip) return;
     // Laisse la case à cocher native basculer, puis synchronise la classe visuelle.
@@ -276,8 +294,12 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
 
     const email = emailEl.value.trim();
     const commune = document.getElementById('commune').value.trim();
-    const ages = Array.from(enfantsRowsEl.querySelectorAll('input[data-enfant-age]')).map(function(i){ return Number(i.value); });
-    const types = Array.from(document.querySelectorAll('#typeGrid input:checked')).map(function(i){ return i.value; });
+    const enfants = Array.from(enfantsRowsEl.querySelectorAll('.enfant-card')).map(function(card, i){
+      return {
+        age: Number(card.querySelector('input[data-enfant-age]').value),
+        types_activites: Array.from(card.querySelectorAll('input[data-enfant-type="' + i + '"]:checked')).map(function(t){ return t.value; })
+      };
+    });
 
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
       errorEl.textContent = "Merci d'indiquer une adresse email valide.";
@@ -289,7 +311,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
       errorEl.style.display = 'block';
       return;
     }
-    if (ages.some(function(a){ return !a || a < 2 || a > 18; })){
+    if (enfants.some(function(e){ return !e.age || e.age < 2 || e.age > 18; })){
       errorEl.textContent = "Merci d'indiquer un âge valide (entre 2 et 18 ans) pour chaque enfant.";
       errorEl.style.display = 'block';
       return;
@@ -303,9 +325,8 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: email,
-        enfants: ages.map(function(age){ return { age: age }; }),
-        commune: commune,
-        types_activites: types
+        enfants: enfants,
+        commune: commune
       })
     })
       .then(function(res){

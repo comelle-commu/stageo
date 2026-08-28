@@ -9,15 +9,15 @@ create table if not exists criteres_parents (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   email text not null unique,
-  -- [{"age": 6}, {"age": 9.5}] - un objet par enfant, jamais juste un
-  -- tableau de nombres : laisse la place à d'autres attributs par enfant
-  -- plus tard (ex. besoins spécifiques) sans migration supplémentaire.
+  -- [{"age": 6, "types_activites": ["Sport"]}, {"age": 9.5, "types_activites": []}]
+  -- Un objet par enfant, avec ses PROPRES types d'activités (pas un choix
+  -- unique pour toute la fratrie - deux enfants d'âges différents n'ont
+  -- pas forcément les mêmes goûts). Types = sous-ensemble de
+  -- TYPE_ACTIVITE_CHOICES (voir scrapers/common.py) ; tableau vide = pas
+  -- de préférence pour cet enfant, toutes les catégories conviennent.
   enfants jsonb not null,
   commune text not null,
-  rayon_km integer not null default 15,
-  -- Sous-ensemble de TYPE_ACTIVITE_CHOICES (voir scrapers/common.py) -
-  -- tableau vide = pas de préférence, toutes les catégories conviennent.
-  types_activites text[] not null default '{}'
+  rayon_km integer not null default 15
 );
 
 alter table criteres_parents enable row level security;
