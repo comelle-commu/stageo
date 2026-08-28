@@ -534,9 +534,10 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     if (!visible.length){
       const hiddenPastCount = showPast ? 0 : matching.filter(isPast).length;
       if (hiddenPastCount > 0){
-        resultsEl.innerHTML = '<div class="empty-state">Rien à venir pour ce filtre en ce moment' +
-          ' - mais ' + hiddenPastCount + ' activité' + (hiddenPastCount !== 1 ? 's' : '') + ' déjà passée' + (hiddenPastCount !== 1 ? 's' : '') +
-          ' correspond' + (hiddenPastCount !== 1 ? 'ent' : '') + ' à cette recherche. ' +
+        resultsEl.innerHTML = '<div class="empty-state">Rien à venir pour ce filtre en ce moment — ' +
+          "probablement parce que l'organisme n'a pas encore publié ses prochaines dates, pas parce qu'il n'organise plus rien. " +
+          'On a déjà repéré ' + hiddenPastCount + ' activité' + (hiddenPastCount !== 1 ? 's' : '') + ' passée' + (hiddenPastCount !== 1 ? 's' : '') +
+          ' de sa part, pour se faire une idée du type de programme proposé. ' +
           '<button class="empty-reveal" id="emptyReveal" type="button">Les afficher quand même →</button></div>';
         const revealBtn = document.getElementById('emptyReveal');
         if (revealBtn) revealBtn.addEventListener('click', function(){
