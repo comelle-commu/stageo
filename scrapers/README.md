@@ -147,6 +147,7 @@ un socle mutualisé pour cette famille de sites (voir
 | Uccle (commune bruxelloise) | Drupal | HTML statique, texte en prose, une seule offre ("plaine de jeux") avec 4 profils de prix selon la résidence | `uccle.py` |
 | Besace ASBL (Liège, 2,5-6 ans) | Wix | HTML très fragmenté (DOM Wix), extraction sur texte à plat scopé à la section "Prochains stages" | `besace.py` |
 | Jeunesse Ardente (annuaire Ville de Liège, multi-organisateurs) | WordPress sur-mesure | HTML statique, DOM propre par carte (`div.areas`) - agrège ~15 petites structures (écoles de sport, ASBL culturelles...) après filtrage des organisateurs déjà couverts ailleurs (ADEPS, Let's Sport) pour éviter les doublons | `jeunesse_ardente.py` |
+| Agenda Omnia (18 communes iMio de la province de Liège) | iMio, widget "Agenda"/Omnia partagé | HTML statique (carrousel serveur en page d'accueil), filtré sur catégorie "Stages et cours" + type "Activité" - voir section dédiée plus bas | `agenda_omnia.py` |
 
 ### Sites 100% JavaScript : `common.fetch_rendered_html()`
 
@@ -241,6 +242,35 @@ est confirmé - mais **aucun prix n'est indiqué nulle part sur la page**
 tarif existe probablement dans un des deux PDF joints ("Règlement d'ordre
 intérieur", "Projet pédagogique") ou sur le portail d'inscription lui-même,
 non explorés cette session.
+
+## Agenda Omnia : un widget partagé découvert en ratissant la province de Liège
+
+En cherchant à couvrir plus systématiquement la province de Liège (84
+communes, dont ~30 déjà couvertes directement), l'investigation de Geer a
+révélé qu'une bonne partie du réseau iMio embarque, sur sa page d'accueil,
+un carrousel d'actualités ("Omnia") entièrement rendu côté serveur : chaque
+élément porte une catégorie ("Stages et cours", "Fête et folklore"...) et un
+type ("Activité" vs "Événementiel"). Piste alternative explorée d'abord :
+une API de recherche filtrée sur `agenda.enwallonie.be` (le CDN d'images
+partagé de ce widget) - abandonnée après investigation : le endpoint
+`/@@omnia-api` de chaque commune redirige vers une authentification
+Keycloak (pas public), et la recherche classique Plone (`@@search`) renvoie
+0 résultat quel que soit le paramétrage essayé. Le carrousel de la page
+d'accueil, lui, fonctionne sans aucune authentification ni JS.
+
+Sur 19 communes de la province testées pour la présence de ce widget, 18 en
+disposent réellement (`agenda_omnia.py`) - mais au 27/08/2026, **seule Geer
+a des stages déjà publiés et correctement catégorisés** (8, tous pour la
+Toussaint). Les autres communes de la liste sont conservées quand même :
+le run hebdomadaire les réextraira automatiquement dès qu'elles publieront,
+sans changement de code (même logique que Forest/Uccle).
+
+Piège rencontré : le carrousel liste TOUTE l'actualité communale, pas
+seulement les stages - un simple filtre sur la catégorie affichée ne
+suffisait pas : Oupeye ("Table de conversation") et Ferrières ("Espace
+Public Numérique") sont tagués "Stages et cours" mais sont en réalité des
+événements adultes, révélés par leur `Event type` réel ("Événementiel")
+une fois la fiche détail consultée - d'où le double filtre catégorie + type.
 
 ## Forest / Uccle : pages communales mises à jour uniquement à l'approche de la période
 

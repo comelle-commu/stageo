@@ -76,6 +76,26 @@ IMIO_DOMAINS = {
     # trois (robots.txt + /gdpr-view).
     "www.olln.be",
     "atl.lalouviere.be",
+    # Ratissage province de Liège (27/08/2026) - iMio confirmé (robots.txt
+    # signature identique) sur l'ensemble de ces communes, utilisées par
+    # agenda_omnia.py (widget "Agenda" partagé, voir ce module).
+    "www.geer.be",
+    "www.ferrieres.be",
+    "www.blegny.be",
+    "www.trooz.be",
+    "www.villers-le-bouillet.be",
+    "www.amay.be",
+    "www.dison.be",
+    "www.flemalle.be",
+    "www.juprelle.be",
+    "www.pepinster.be",
+    "www.remicourt.be",
+    "www.saint-nicolas.be",
+    "www.theux.be",
+    "www.thimister-clermont.be",
+    "www.wasseiges.be",
+    "www.hamoir.be",
+    "www.awans.be",
 }
 CRAWL_DELAYS = {domain: IMIO_CRAWL_DELAY for domain in IMIO_DOMAINS}
 # Organismes hors socle communal (voir

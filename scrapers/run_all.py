@@ -12,6 +12,7 @@ from pathlib import Path
 
 import adeps
 import adsl_stages
+import agenda_omnia
 import ans
 import arlon
 import aywaille
@@ -85,6 +86,7 @@ SCRAPERS = [
     ("Uccle", uccle),
     ("Besace ASBL", besace),
     ("Jeunesse Ardente", jeunesse_ardente),
+    ("Agenda Omnia (multi-communes)", agenda_omnia),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque
