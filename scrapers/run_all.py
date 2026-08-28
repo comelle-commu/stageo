@@ -28,6 +28,7 @@ import dimension_sport
 import esneux
 import faimes
 import ferme_de_roloux
+import ferme_des_enfants
 import fleron
 import floreffe
 import forest
@@ -91,6 +92,7 @@ SCRAPERS = [
     ("Agenda Omnia (multi-communes)", agenda_omnia),
     ("Stavelot", stavelot),
     ("Faimes", faimes),
+    ("La Ferme des Enfants de Liège", ferme_des_enfants),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque

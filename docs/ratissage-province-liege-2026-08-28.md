@@ -22,6 +22,22 @@ Toussaint/Noël/Détente/Printemps, brochure PDF)** - ces deux dernières
 ajoutées après la rédaction initiale de ce document, voir section C mise
 à jour.
 
+Ajoutées lors du 2e passage (28/08/2026, section F) :
+
+- **Sport Fun Activ'** ✅ (via `iclub.py`, plateforme MyiClub `www7.iclub.be`
+  ClubID=712) - 40 activités sur 4 implantations distinctes, chacune
+  rattachée à sa vraie commune : Sprimont (Dolembreux), Trooz (Fraipont),
+  Seraing, Esneux. Découverte importante : iClub est lui-même une
+  plateforme de réservation MUTUALISÉE entre plusieurs clubs, comme le
+  widget Omnia pour les communes - la structure HTML (`register.asp?
+  ClubID=...`) déjà supportée par `iclub.py` a fonctionné sans adaptation,
+  seul le format d'âge "X an(s) et Y mois" a nécessité un nouveau regex.
+- **La Ferme des Enfants de Liège** ✅ `ferme_des_enfants.py` - 14
+  activités (toutes saisons confondues, dont Toussaint x2 + Noël x1
+  encore à venir). Donnée en deux temps : liste/prix/stock via l'API
+  publique WooCommerce Store, dates/âge/lieu réels seulement dans le HTML
+  de chaque page produit (bloc constructeur Divi).
+
 ## B. Enregistrées dans `agenda_omnia.py` mais 0 activité pour l'instant
 
 Ces 17 communes ont le widget "Agenda" partagé (voir README) mais n'ont
@@ -87,12 +103,12 @@ non ratissées.
 | SportFinder (sport-finder.com) | Exclu | 403 sur toutes les requêtes, même robots.txt |
 | IFAPME, Le Forem, Culture.be | Hors sujet | "Stage" = stage professionnel/formation, pas activité enfant |
 | B3 (Province de Liège) | Écarté | Un seul événement ponctuel trouvé ("Stage vidéo"), pas un programme récurrent |
-| Sport Fun Activ' (sportfunactiv.be) | À approfondir | ASBL réelle (2,5-12 ans, sport/cirque/magie) mais sa page "Nos stages" renvoie vers un outil de réservation externe sans dates visibles directement dessus - trouver ce lien externe |
-| Théâtre Le Moderne (lemoderne.be) | À approfondir | Petit atelier théâtre à partir de 5 ans, page stages trouvée mais dates pas encore lues jusqu'au bout |
-| La Ferme des Enfants (lafermedesenfantsdeliege.be) | À approfondir | Page "Les stages" est un index de catégories (dont "Stages d'automne") sans dates directes - suivre le lien de la sous-catégorie Toussaint |
+| Sport Fun Activ' (sportfunactiv.be) | ✅ Construit | Le lien externe menait à `www7.iclub.be` ClubID=712 (plateforme MyiClub) - ajouté à `CLUBS` dans `iclub.py`, 40 activités sur 4 communes (Sprimont, Trooz, Seraing, Esneux) |
+| Théâtre Le Moderne (lemoderne.be) | Confirmé impasse (28/08/2026) | Page "Stages" entièrement lue : ne liste que la "Saison 25-26" (dernière date 09-13/08/2026, déjà passée). Rien publié pour Toussaint/Noël 2026 au 28/08 - à revérifier plus tard, pas de PDF/actualité alternative trouvée |
+| La Ferme des Enfants (lafermedesenfantsdeliege.be) | ✅ Construit | Catalogue WooCommerce, voir section A - `ferme_des_enfants.py` |
 | Liège Parkour School | À approfondir | Stages réels (Parkour/Multisports, 114-115€) mais dates encore affichées sur juillet-août 2026, pas Toussaint |
 | Sportforfun (sportforfun.be) | À surveiller | Plateforme de stages avec lieux listés, affiche "Aucune activité pour le moment" - à réessayer plus tard |
-| iClub / CSM asbl (www16.iclub.be) | Confirmé NOUVEAU (pas de doublon) | `iclub.py` ne couvre actuellement que 2 clubs, tous deux à Uccle (Royal Léopold Club, Royal Racing Club de Bruxelles) - CSM asbl (Embourg, Chaudfontaine, Crisnée, Grâce-Hollogne, Herstal, Liège) est un tenant distinct. Mais `www16.iclub.be` redirige vers `iclubsport.biz` (ClubID=99 sur l'ancien domaine `covid.iclub.be`) et il y a aussi un lien vers `iclubsport.academy` - domaines différents du pattern `<sous-domaine>.iclub.be` utilisé par `iclub.py`, structure de page à revérifier avant d'ajouter à `CLUBS` |
+| iClub / CSM asbl (www16.iclub.be) | Confirmé impasse (28/08/2026) | `www16.iclub.be` redirige maintenant vers `iclubsport.biz`, le site vitrine du LOGICIEL iClub lui-même (plus une page club). Le lien historique `covid.iclub.be/register.asp?ClubID=99` redirige en cascade vers `www2.iclub.be` puis `notinproduction2.asp` - le club CSM asbl semble avoir été décommissionné/migré vers un ClubID inconnu sur cette plateforme. Pas de nouvel ID à deviner sans plus d'info (voir avertissement dans `iclub.py`) |
 | Asbl PARI, École du cirque Polichinelle, Stage 100% Ado | Non vérifiés | Noms croisés dans un article de blog (todayinliege.be), jamais recherchés individuellement |
 
 ## G. Piste explorée et abandonnée : agenda.enwallonie.be en recherche directe
@@ -105,10 +121,12 @@ fonctionne sans aucune authentification.
 
 ## Prochaines étapes recommandées, par ordre de rentabilité
 
-1. Suivre les liens externes de **Sport Fun Activ'** et finir la lecture de **Le Moderne** et **La Ferme des Enfants** (section F) - proches d'être exploitables.
-2. Construire **iClub/CSM** (confirmé nouveau, pas de doublon) une fois la structure de `iclubsport.biz`/`iclubsport.academy` vérifiée.
-3. Vérifier les ~23 communes de la section D (jamais checkées) - probablement le plus gros gisement restant, mais coûteux en temps (une vérification à la fois).
+1. Vérifier les ~23 communes de la section D (jamais checkées) - probablement le plus gros gisement restant, mais coûteux en temps (une vérification à la fois).
+2. **Liège Parkour School** et **Sportforfun** (section F) - dates pas encore alignées sur Toussaint/Noël 2026, à réessayer.
+3. Rechercher individuellement **Asbl PARI**, **École du cirque Polichinelle**, **Stage 100% Ado** (section F, jamais vérifiés).
 4. Republier ce document mis à jour à chaque session de ratissage, pour ne pas reperdre le fil.
 
-*(Malmedy, Verlaine, Dalhem, Wanze : confirmées comme impasses le
-28/08/2026, voir section C2 - retirées de cette liste.)*
+*(Malmedy, Verlaine, Dalhem, Wanze, Le Moderne, iClub/CSM : confirmées
+comme impasses le 28/08/2026, voir sections C2/F - retirées de cette
+liste. Sport Fun Activ' et La Ferme des Enfants : construits le
+28/08/2026, voir section A.)*

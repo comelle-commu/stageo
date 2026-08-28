@@ -150,6 +150,7 @@ un socle mutualisé pour cette famille de sites (voir
 | Agenda Omnia (18 communes iMio de la province de Liège) | iMio, widget "Agenda"/Omnia partagé | HTML statique (carrousel serveur en page d'accueil), filtré sur catégorie "Stages et cours" + type "Activité" - voir section dédiée plus bas | `agenda_omnia.py` |
 | Stavelot (iMio, sans widget Omnia) | Brochure PDF (mise en page libre, pas de tableau exploitable) | Extraction sur le texte de chaque page individuelle, gabarit "organisateur / dates / titre / âge / prix" repéré empiriquement - voir section dédiée plus bas | `stavelot.py` |
 | Faimes (iMio, sans widget Omnia) | Brochure PDF (texte natif, propre) | Une page couvre toute l'année scolaire, format répété "Semaine du D au D + thème(s) petits/grands" | `faimes.py` |
+| La Ferme des Enfants de Liège (organisme privé, Liège) | WordPress/WooCommerce | Liste + prix/stock via l'API publique WooCommerce Store (`/wp-json/wc/store/v1/products`), mais les vraies dates ne sont que dans le HTML de la page produit (bloc constructeur Divi "Dates/Age/Lieu") - un appel API + un fetch HTML par stage | `ferme_des_enfants.py` |
 
 ### Sites 100% JavaScript : `common.fetch_rendered_html()`
 

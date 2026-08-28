@@ -106,6 +106,7 @@ CRAWL_DELAYS = {domain: IMIO_CRAWL_DELAY for domain in IMIO_DOMAINS}
 # docs/investigation-technique-organismes-2026-08-24.md) : Crawl-delay
 # propre à chaque domaine, déclaré explicitement dans son robots.txt.
 CRAWL_DELAYS["www.capsciences.be"] = 10
+CRAWL_DELAYS["www.lafermedesenfantsdeliege.be"] = 10
 DEFAULT_MIN_DELAY = 2  # pause minimale de courtoisie entre requêtes, même sans Crawl-delay déclaré
 
 _last_request_at: dict[str, float] = {}
