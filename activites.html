@@ -161,24 +161,37 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   }
   .toggle-past.active{background:var(--ink);border-color:var(--ink);color:#fff;}
 
-  .filters{padding:16px 0 4px;display:flex;flex-direction:column;gap:14px;}
-  .filter-group{display:flex;flex-direction:column;gap:8px;}
+  .filters{
+    margin:16px 0 4px;padding:22px 24px;display:flex;flex-direction:column;gap:18px;
+    background:var(--paper);border-radius:22px;border:1px solid var(--line-soft);
+    box-shadow:0 16px 40px -28px rgba(1,83,128,0.35);
+  }
+  .filter-group{display:flex;flex-direction:column;gap:9px;align-items:flex-start;}
   .filter-label{
-    font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-faint);
+    display:flex;align-items:center;gap:6px;
+    font-family:'Grandstander',sans-serif;font-size:13px;font-weight:700;color:var(--ink);
   }
-  .chip-row{display:flex;flex-wrap:wrap;gap:7px;}
+  .label-period::before{content:'📅';}
+  .label-age::before{content:'🎂';}
+  .label-type::before{content:'🎨';}
+  .label-commune::before{content:'📍';}
+  .label-org::before{content:'🏫';}
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;}
   .chip{
-    font-size:13px;font-weight:600;padding:7px 13px;border-radius:100px;
-    background:var(--paper);border:1px solid var(--line);color:var(--ink-soft);cursor:pointer;
+    font-size:13px;font-weight:600;padding:8px 14px;border-radius:100px;
+    background:var(--surface-tint);border:1.5px solid transparent;color:var(--ink-soft);cursor:pointer;
     display:inline-flex;align-items:center;gap:6px;
+    transition:transform .12s ease, background .15s ease, border-color .15s ease, color .15s ease;
   }
-  .chip .n{opacity:.7;}
-  .chip:hover{border-color:var(--teal);color:var(--ink);}
-  .chip.active{background:var(--teal);border-color:var(--teal);color:#fff;}
-  .chip.chip-all{font-weight:700;}
-  .chip.chip-all.active{background:var(--ink);border-color:var(--ink);}
-  .chip.age-chip.active{background:var(--orange-deep);border-color:var(--orange-deep);}
-  .chip.type-chip.active{background:var(--blue);border-color:var(--blue);}
+  .chip .n{opacity:.65;font-variant-numeric:tabular-nums;}
+  .chip:hover{border-color:var(--teal);color:var(--ink);transform:translateY(-1px);}
+  .chip.active{background:var(--teal);border-color:var(--teal);color:#fff;box-shadow:0 8px 18px -8px rgba(1,151,175,0.6);}
+  .chip.active .n{opacity:.85;}
+  .chip.chip-all{font-weight:700;background:var(--mint);}
+  .chip.chip-all.active{background:var(--ink);border-color:var(--ink);box-shadow:0 8px 18px -8px rgba(1,83,128,0.6);}
+  .chip.age-chip.active{background:var(--orange-deep);border-color:var(--orange-deep);box-shadow:0 8px 18px -8px rgba(226,162,14,0.55);}
+  .chip.type-chip.active{background:var(--blue);border-color:var(--blue);box-shadow:0 8px 18px -8px rgba(1,124,202,0.55);}
+  .filters hr.filter-sep{width:100%;border:none;border-top:1px solid var(--line-soft);margin:0;}
 
   .status-line{font-size:13px;color:var(--ink-soft);margin:14px 0;min-height:1.4em;}
   .load-more{
@@ -247,7 +260,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     <img src="trouveo-logo.png" alt="Trouvéo" class="logo-img">
   </a>
   <a href="/#top-form" class="nav-cta">
-    <span class="cta-full">Rejoindre la liste d'attente</span>
+    <span class="cta-full">Recevoir des alertes</span>
     <span class="cta-short">S'inscrire</span>
   </a>
 </nav>
@@ -255,14 +268,13 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
 <header class="intro wrap">
   <div class="blob blob1"></div>
   <div class="blob blob2"></div>
-  <span class="eyebrow">En préparation · Aperçu en direct</span>
+  <span class="eyebrow">Mis à jour chaque semaine · Aperçu en direct</span>
   <h1 class="headline">Tous les stages et activités pour enfants déjà repérés</h1>
   <p class="sub">
-    Trouvéo est encore en construction : <strong>voici un aperçu honnête et en direct</strong>
-    de ce que notre outil récolte déjà automatiquement — stages, plaines de vacances et autres
-    activités pour enfants — commune par commune et organisme par organisme, à travers la Wallonie
-    et Bruxelles. Ce n'est pas encore personnalisé par âge ou par alerte — c'est justement ce
-    qu'on est en train de construire.
+    <strong>Voici tout ce que Trouvéo récolte automatiquement</strong> — stages, plaines de
+    vacances et autres activités pour enfants — commune par commune et organisme par organisme,
+    à travers la Wallonie et Bruxelles. Pour des recherches personnalisées par âge et par famille,
+    <a href="/criteres">laissez-nous vos critères</a>.
   </p>
 </header>
 
@@ -283,24 +295,25 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     <div class="filter-group">
       <button class="chip chip-all active" id="chipAll" type="button">Toutes les sources</button>
     </div>
+    <hr class="filter-sep">
     <div class="filter-group">
-      <span class="filter-label">Période de vacances</span>
+      <span class="filter-label label-period">Période de vacances</span>
       <div class="chip-row" id="periodChips"></div>
     </div>
     <div class="filter-group">
-      <span class="filter-label">Âge</span>
+      <span class="filter-label label-age">Âge</span>
       <div class="chip-row" id="ageChips"></div>
     </div>
     <div class="filter-group">
-      <span class="filter-label">Type d'activité</span>
+      <span class="filter-label label-type">Type d'activité</span>
       <div class="chip-row" id="typeChips"></div>
     </div>
     <div class="filter-group">
-      <span class="filter-label" id="communeLabel">Communes</span>
+      <span class="filter-label label-commune" id="communeLabel">Communes</span>
       <div class="chip-row" id="communeChips"></div>
     </div>
     <div class="filter-group">
-      <span class="filter-label" id="orgLabel">Organismes</span>
+      <span class="filter-label label-org" id="orgLabel">Organismes</span>
       <div class="chip-row" id="orgChips"></div>
     </div>
   </div>
@@ -312,8 +325,8 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
 
 <section class="final wrap">
   <h2>Envie d'être prévenu·e dès l'ouverture des inscriptions ?</h2>
-  <p>La liste ci-dessus grandit chaque semaine. Rejoins la liste d'attente pour être alerté·e automatiquement dès qu'une place correspond à ton enfant, sans devoir revenir vérifier ici.</p>
-  <a href="/#top-form" class="nav-cta">Rejoindre la liste d'attente</a>
+  <p>La liste ci-dessus grandit chaque semaine. Laissez votre email et vos critères, et on vous aide à ne pas rater la bonne place, sans devoir revenir vérifier ici.</p>
+  <a href="/#top-form" class="nav-cta">Recevoir des alertes</a>
 </section>
 
 <footer>
