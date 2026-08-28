@@ -166,6 +166,16 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     max-width:44ch;margin-bottom:30px;
   }
 
+  .primary-cta{
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--teal);color:#fff;text-decoration:none;
+    font-weight:700;font-size:16px;padding:15px 26px;border-radius:100px;
+    margin-bottom:22px;
+    box-shadow:0 14px 30px -10px rgba(1,151,175,0.55);
+    transition:transform .15s ease, background .15s ease;
+  }
+  .primary-cta:hover{transform:translateY(-1px);background:var(--teal-deep);}
+
   .signup-badge{
     display:inline-flex;align-items:center;gap:6px;
     font-size:13.5px;font-weight:800;color:var(--orange-deep);
@@ -372,8 +382,9 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     <img src="trouveo-logo.png" alt="Trouvéo" class="logo-img">
   </div>
   <div class="nav-links">
+    <a href="/activites" class="nav-link">Activités</a>
     <a href="#top-form" class="nav-cta">
-      <span class="cta-full">Rejoindre la liste d'attente</span>
+      <span class="cta-full">Recevoir des alertes</span>
       <span class="cta-short">S'inscrire</span>
     </a>
   </div>
@@ -384,18 +395,20 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   <div class="blob blob2"></div>
   <div class="wrap hero-grid">
     <div>
-      <span class="eyebrow">Bientôt disponible · Wallonie &amp; Bruxelles</span>
-      <h1 class="headline">Trouvez bientôt le <span class="hi">bon stage de vacances</span> avant qu'il ne soit complet.</h1>
-      <p class="sub">Les stages, plaines de vacances et autres activités pour enfants sont éparpillés partout : sites communaux, organisateurs privés... Trouvéo regroupera tout au même endroit, pour vous faire gagner un temps fou.</p>
+      <span class="eyebrow">1800+ activités en ligne · Wallonie &amp; Bruxelles</span>
+      <h1 class="headline">Trouvez le <span class="hi">bon stage de vacances</span> avant qu'il ne soit complet.</h1>
+      <p class="sub">Les stages, plaines de vacances et autres activités pour enfants sont éparpillés partout : sites communaux, organisateurs privés... Trouvéo regroupe tout au même endroit, pour vous faire gagner un temps fou.</p>
 
-      <span class="signup-badge">🔔 Laissez votre email pour être prévenu·e en priorité du lancement</span>
+      <a href="/activites" class="primary-cta">Voir les activités disponibles →</a>
+
+      <span class="signup-badge">🔔 Envie d'alertes personnalisées ? Laissez votre email</span>
       <form class="signup" id="signupForm" novalidate>
         <input type="email" name="email" placeholder="votre@email.be" required aria-label="Adresse email">
         <button type="submit">Je m'inscris</button>
       </form>
-      <div class="confirm" id="confirmMsg" role="status">C'est noté ! On vous contactera dès que la plateforme sera lancée.</div>
+      <div class="confirm" id="confirmMsg" role="status">C'est noté ! Vérifiez votre boîte mail pour préciser vos critères.</div>
       <div class="error" id="errorMsg" role="alert"></div>
-      <p class="form-note">Gratuit, accès prioritaire au lancement. Vous recevrez un email à l'ouverture de la plateforme, et pourrez alors chercher vous-même les activités adaptées à l'âge et à la commune de votre enfant. Pas de spam, désinscription en un clic.</p>
+      <p class="form-note">Gratuit. Vous recevrez un email pour préciser les critères de votre famille (âge, localité, activités préférées), et on vous recontacte dès qu'une offre correspond. Pas de spam, désinscription en un clic.</p>
     </div>
 
     <div class="hero-visual">
@@ -449,28 +462,28 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
 <section class="how">
   <div class="wrap">
     <div class="how-head">
-      <h2>Comment ça marchera</h2>
+      <h2>Comment ça marche</h2>
     </div>
     <div class="timeline">
       <div class="tstep">
         <div class="tdot">1</div>
         <div class="tcontent">
-          <h3>Vous nous direz ce que vous cherchez</h3>
-          <p>Âge de l'enfant, commune ou rayon de recherche, périodes de vacances, centres d'intérêt.</p>
+          <h3>Vous parcourez les activités</h3>
+          <p>1800+ stages et activités déjà recensés, mis à jour chaque semaine — librement, sans inscription.</p>
         </div>
       </div>
       <div class="tstep">
         <div class="tdot">2</div>
         <div class="tcontent">
-          <h3>On scannera pour vous</h3>
-          <p>Communes, ASBL et organisateurs privés — rassemblés et mis à jour en continu.</p>
+          <h3>Vous nous laissez vos critères</h3>
+          <p>Âge de chaque enfant, localité, activités préférées — pour qu'on sache quoi chercher pour vous.</p>
         </div>
       </div>
       <div class="tstep">
         <div class="tdot">3</div>
         <div class="tcontent">
-          <h3>Vous serez alerté·e</h3>
-          <p>Par email dès qu'une offre correspondra à vos critères, avant l'ouverture officielle des inscriptions quand ce sera possible.</p>
+          <h3>On revient vers vous</h3>
+          <p>Avec les meilleures options pour votre famille, avant que les places ne partent.</p>
         </div>
       </div>
     </div>
@@ -480,8 +493,8 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
 <section class="scope">
   <div class="wrap scope-grid">
     <div class="scope-card">
-      <h2>Ce qu'on couvrira au lancement</h2>
-      <p>On préfère avancer pas à pas plutôt que de s'éparpiller. Au lancement, ça voudra dire : la Wallonie et Bruxelles, toutes les périodes de vacances scolaires, et les enfants de 2,5 à 15 ans.</p>
+      <h2>Ce qu'on couvre</h2>
+      <p>On préfère avancer pas à pas plutôt que de s'éparpiller. Pour l'instant, ça veut dire : la Wallonie et Bruxelles, toutes les périodes de vacances scolaires, et les enfants de 2,5 à 15 ans.</p>
       <div class="tag-row">
         <span class="tag">Activités communales</span>
         <span class="tag">Organisateurs privés</span>
@@ -510,13 +523,13 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
 <section class="final">
   <div class="wrap">
     <h2>Ne ratez plus la prochaine ouverture des inscriptions.</h2>
-    <p>Rejoignez la liste d'attente — c'est gratuit et ça prend dix secondes.</p>
-    <span class="signup-badge">🔔 Priorité au lancement pour les premiers inscrits</span>
+    <p>Laissez votre email pour des alertes personnalisées — c'est gratuit et ça prend dix secondes.</p>
+    <span class="signup-badge">🔔 Zéro spam, désinscription en un clic</span>
     <form class="signup" id="signupForm2" novalidate>
       <input type="email" name="email" placeholder="votre@email.be" required aria-label="Adresse email">
       <button type="submit">Je m'inscris</button>
     </form>
-    <div class="confirm" id="confirmMsg2" role="status">C'est noté ! On vous écrit dès que c'est prêt.</div>
+    <div class="confirm" id="confirmMsg2" role="status">C'est noté ! Vérifiez votre boîte mail pour préciser vos critères.</div>
     <div class="error" id="errorMsg2" role="alert"></div>
   </div>
 </section>
