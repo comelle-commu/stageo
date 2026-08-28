@@ -166,15 +166,13 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     max-width:44ch;margin-bottom:30px;
   }
 
-  .primary-cta{
-    display:inline-flex;align-items:center;gap:8px;
-    background:var(--teal);color:#fff;text-decoration:none;
-    font-weight:700;font-size:16px;padding:15px 26px;border-radius:100px;
-    margin-bottom:22px;
-    box-shadow:0 14px 30px -10px rgba(1,151,175,0.55);
-    transition:transform .15s ease, background .15s ease;
+  .secondary-link{
+    display:inline-block;margin-top:16px;
+    color:var(--ink-soft);text-decoration:underline;text-decoration-color:var(--line);
+    font-weight:600;font-size:14.5px;
+    transition:color .15s ease;
   }
-  .primary-cta:hover{transform:translateY(-1px);background:var(--teal-deep);}
+  .secondary-link:hover{color:var(--teal-deep);text-decoration-color:currentColor;}
 
   .signup-badge{
     display:inline-flex;align-items:center;gap:6px;
@@ -395,20 +393,20 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   <div class="blob blob2"></div>
   <div class="wrap hero-grid">
     <div>
-      <span class="eyebrow">1800+ activités en ligne · Wallonie &amp; Bruxelles</span>
-      <h1 class="headline">Trouvez le <span class="hi">bon stage de vacances</span> avant qu'il ne soit complet.</h1>
-      <p class="sub">Les stages, plaines de vacances et autres activités pour enfants sont éparpillés partout : sites communaux, organisateurs privés... Trouvéo regroupe tout au même endroit, pour vous faire gagner un temps fou.</p>
+      <span class="eyebrow">1800+ activités déjà repérées · Wallonie &amp; Bruxelles</span>
+      <h1 class="headline">Une <span class="hi">alerte</span> dès qu'un stage correspond à votre enfant.</h1>
+      <p class="sub">Trouvéo surveille en continu les stages, plaines de vacances et activités pour enfants de toute la Wallonie et Bruxelles. Donnez-nous l'âge de votre enfant, sa commune et ses activités préférées : nous vous prévenons dès qu'une place correspond, sans que vous ayez à fouiller des dizaines de sites vous-même.</p>
 
-      <a href="/activites" class="primary-cta">Voir les activités déjà répertoriées →</a>
-
-      <span class="signup-badge">🔔 Envie d'alertes personnalisées ? Laissez votre email</span>
+      <span class="signup-badge">🔔 Gratuit · Zéro spam · Désinscription en un clic</span>
       <form class="signup" id="signupForm" novalidate>
         <input type="email" name="email" placeholder="votre@email.be" required aria-label="Adresse email">
         <button type="submit">Je m'inscris</button>
       </form>
       <div class="confirm" id="confirmMsg" role="status">C'est noté ! Vérifiez votre boîte mail pour préciser vos critères.</div>
       <div class="error" id="errorMsg" role="alert"></div>
-      <p class="form-note">Gratuit. Vous recevrez un email pour préciser les critères de votre famille (âge, localité, activités préférées), et nous vous recontactons dès qu'une offre correspond. Pas de spam, désinscription en un clic.</p>
+      <p class="form-note">Vous recevrez un email pour préciser les critères de votre famille (âge, localité, activités préférées).</p>
+
+      <a href="/activites" class="secondary-link">Ou parcourez déjà les activités en ligne →</a>
     </div>
 
     <div class="hero-visual">
