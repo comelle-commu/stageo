@@ -325,7 +325,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
 
 <section class="final wrap">
   <h2>Envie d'être prévenu·e dès l'ouverture des inscriptions ?</h2>
-  <p>La liste ci-dessus grandit chaque semaine. Laissez votre email et vos critères, et on vous aide à ne pas rater la bonne place, sans devoir revenir vérifier ici.</p>
+  <p>La liste ci-dessus grandit chaque semaine. Laissez votre email et vos critères, et nous vous aidons à ne pas rater la bonne place, sans devoir revenir vérifier ici.</p>
   <a href="/#top-form" class="nav-cta">Recevoir des alertes</a>
 </section>
 
@@ -558,7 +558,11 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     if (except !== 'type' && activeType !== 'ALL' && r.type_activite !== activeType) return false;
     if (except !== 'period' && !matchesPeriod(r, activePeriod)) return false;
     if (q){
-      const hay = [r.nom_activite, r.commune, r.organisateur, r.dates, r.lieu, ageLabel(r)].join(' ').toLowerCase();
+      // ageLabel(r) volontairement exclu : le format "X-Y ans" contient le
+      // mot "ans" sur quasiment CHAQUE activité (l'âge en français), ce qui
+      // polluait toute recherche sur la commune d'Ans (Liège) - la
+      // recherche par âge a de toute façon déjà son propre filtre dédié.
+      const hay = [r.nom_activite, r.commune, r.organisateur, r.dates, r.lieu].join(' ').toLowerCase();
       if (hay.indexOf(q) === -1) return false;
     }
     return true;
@@ -589,7 +593,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
       if (hiddenPastCount > 0){
         resultsEl.innerHTML = '<div class="empty-state">Rien à venir pour ce filtre en ce moment — ' +
           "probablement parce que l'organisme n'a pas encore publié ses prochaines dates, pas parce qu'il n'organise plus rien. " +
-          'On a déjà repéré ' + hiddenPastCount + ' activité' + (hiddenPastCount !== 1 ? 's' : '') + ' passée' + (hiddenPastCount !== 1 ? 's' : '') +
+          'Nous avons déjà repéré ' + hiddenPastCount + ' activité' + (hiddenPastCount !== 1 ? 's' : '') + ' passée' + (hiddenPastCount !== 1 ? 's' : '') +
           ' de sa part, pour se faire une idée du type de programme proposé. ' +
           '<button class="empty-reveal" id="emptyReveal" type="button">Les afficher quand même →</button></div>';
         const revealBtn = document.getElementById('emptyReveal');
