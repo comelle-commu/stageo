@@ -63,7 +63,7 @@ jobs:
         # personnalisées, et inversement.
 
       - name: Envoyer l'email hebdomadaire (nouvelles activités)
-        if: inputs.skip_scrape == true || steps.scrape.outcome == 'success'
+        if: inputs.skip_scrape != true && steps.scrape.outcome == 'success'
         working-directory: scrapers
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -72,9 +72,12 @@ jobs:
           BREVO_LIST_ID: ${{ secrets.BREVO_LIST_ID }}
           BREVO_SENDER_EMAIL: ${{ secrets.BREVO_SENDER_EMAIL }}
         run: python brevo_digest.py
-        # Ne tourne que si le scrape ci-dessus a réussi (ou a été
-        # volontairement sauté via skip_scrape) : on ne veut pas prévenir
-        # les abonnés sur base d'un run en échec/incomplet.
+        # Ne tourne que si le scrape ci-dessus a réussi : on ne veut pas
+        # prévenir les abonnés sur base d'un run en échec/incomplet. Exclu
+        # de skip_scrape volontairement (contrairement aux alertes ci-
+        # dessous) : c'est une campagne groupée vers toute la liste Brevo,
+        # pas un test personnalisé restreint - on ne veut pas qu'un test
+        # rapide déclenche accidentellement un envoi à tout le monde.
 
       - name: Envoyer les alertes personnalisées (critères parents)
         if: inputs.skip_scrape == true || steps.scrape.outcome == 'success'
