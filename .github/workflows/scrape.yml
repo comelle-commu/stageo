@@ -12,6 +12,11 @@ on:
         description: "Si rempli, les alertes personnalisées ne sont envoyées qu'à cette adresse (test sans risquer d'écrire aux vraies familles inscrites)."
         required: false
         default: ""
+      skip_scrape:
+        description: "Sauter le scrape complet des ~40 sites (plusieurs minutes) et envoyer le digest/les alertes directement sur les données déjà en base - pratique pour tester rapidement un email."
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -34,6 +39,7 @@ jobs:
         run: pip install -r scrapers/requirements.txt
 
       - name: Installer Chromium (Playwright, pour les sites 100% JS)
+        if: inputs.skip_scrape != true
         run: playwright install --with-deps chromium
         # Nécessaire pour les scrapers utilisant common.fetch_rendered_html()
         # (sites qui ne rendent rien en HTML brut, ex. Côté Campagne,
@@ -42,6 +48,7 @@ jobs:
 
       - name: Lancer le scraper (+ import Supabase + contrôle qualité)
         id: scrape
+        if: inputs.skip_scrape != true
         working-directory: scrapers
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -56,7 +63,7 @@ jobs:
         # personnalisées, et inversement.
 
       - name: Envoyer l'email hebdomadaire (nouvelles activités)
-        if: steps.scrape.outcome == 'success'
+        if: inputs.skip_scrape == true || steps.scrape.outcome == 'success'
         working-directory: scrapers
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -65,11 +72,12 @@ jobs:
           BREVO_LIST_ID: ${{ secrets.BREVO_LIST_ID }}
           BREVO_SENDER_EMAIL: ${{ secrets.BREVO_SENDER_EMAIL }}
         run: python brevo_digest.py
-        # Ne tourne que si le scrape ci-dessus a réussi : on ne veut pas
-        # prévenir les abonnés sur base d'un run en échec/incomplet.
+        # Ne tourne que si le scrape ci-dessus a réussi (ou a été
+        # volontairement sauté via skip_scrape) : on ne veut pas prévenir
+        # les abonnés sur base d'un run en échec/incomplet.
 
       - name: Envoyer les alertes personnalisées (critères parents)
-        if: steps.scrape.outcome == 'success'
+        if: inputs.skip_scrape == true || steps.scrape.outcome == 'success'
         working-directory: scrapers
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
