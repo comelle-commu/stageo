@@ -36,6 +36,7 @@ jobs:
         # dans les volumes actuels de GitHub Actions.
 
       - name: Lancer le scraper (+ import Supabase + contrôle qualité)
+        id: scrape
         working-directory: scrapers
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -44,8 +45,13 @@ jobs:
         # Code de sortie non nul (erreur d'import Supabase OU chute de plus
         # de 50% du nombre d'activités par rapport au dernier run sain) ->
         # ce step échoue -> le job est rouge dans l'onglet Actions.
+        # `id` posé ici pour que les deux étapes d'email ci-dessous puissent
+        # se déclencher indépendamment l'une de l'autre (voir leurs `if:`) :
+        # l'échec du digest hebdo ne doit pas empêcher l'envoi des alertes
+        # personnalisées, et inversement.
 
       - name: Envoyer l'email hebdomadaire (nouvelles activités)
+        if: steps.scrape.outcome == 'success'
         working-directory: scrapers
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -54,9 +60,22 @@ jobs:
           BREVO_LIST_ID: ${{ secrets.BREVO_LIST_ID }}
           BREVO_SENDER_EMAIL: ${{ secrets.BREVO_SENDER_EMAIL }}
         run: python brevo_digest.py
-        # Ne tourne que si le scrape ci-dessus a réussi (comportement par
-        # défaut de GitHub Actions) : on ne veut pas prévenir les abonnés
-        # sur base d'un run en échec/incomplet.
+        # Ne tourne que si le scrape ci-dessus a réussi : on ne veut pas
+        # prévenir les abonnés sur base d'un run en échec/incomplet.
+
+      - name: Envoyer les alertes personnalisées (critères parents)
+        if: steps.scrape.outcome == 'success'
+        working-directory: scrapers
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          BREVO_SENDER_EMAIL: ${{ secrets.BREVO_SENDER_EMAIL }}
+        run: python criteres_alertes.py
+        # Volontairement indépendant du step précédent (`if` basé sur
+        # steps.scrape, pas sur le digest) : un souci ponctuel sur la
+        # campagne groupée ne doit pas priver les familles qui attendent
+        # une alerte individuelle sur une place qui part vite.
 
       - name: Conserver la sortie du run (debug)
         if: always() # même si le step précédent a échoué - c'est justement quand on veut inspecter la sortie
