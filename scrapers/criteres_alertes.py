@@ -19,13 +19,20 @@ déjà été signalé à qui, pour ne jamais renvoyer la même activité deux fo
 Usage :
   venv/bin/python3 criteres_alertes.py            # envoi réel
   venv/bin/python3 criteres_alertes.py --dry-run  # affiche les matches, n'envoie rien et ne touche pas alertes_envoyees
+
+Variable d'environnement ALERTES_TEST_EMAIL (optionnelle) : si définie, ne
+traite que ce parent (ex. pour tester sans risquer d'envoyer aux vraies
+familles inscrites) - voir l'input `test_email` du workflow_dispatch dans
+.github/workflows/scrape.yml.
 """
 from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import unicodedata
+from datetime import date, datetime, timezone
 from math import asin, cos, radians, sin, sqrt
 from pathlib import Path
 
@@ -37,10 +44,76 @@ from supabase_client import SUPABASE_URL, _headers
 BREVO_API_KEY = os.environ.get("BREVO_API_KEY", "")
 BREVO_SENDER_EMAIL = os.environ.get("BREVO_SENDER_EMAIL", "")
 BREVO_SENDER_NAME = os.environ.get("BREVO_SENDER_NAME", "Trouvéo")
+TEST_EMAIL = os.environ.get("ALERTES_TEST_EMAIL", "").strip().lower()
 SITE_URL = "https://stageo.netlify.app"
 
 COORDS_PATH = Path(__file__).parent / "data" / "commune_coords.json"
 MAX_ITEMS_PER_EMAIL = 8  # au-delà, on résume - même logique que brevo_digest.py
+
+# Pour exclure les stages déjà terminés des alertes (voir extract_end_date
+# ci-dessous) - `dates` est un texte libre écrit par ~40 sites communaux
+# différents, jamais une vraie colonne date structurée sur `activites`.
+MOIS = {
+    "janvier": 1, "février": 2, "fevrier": 2, "mars": 3, "avril": 4, "mai": 5, "juin": 6,
+    "juillet": 7, "août": 8, "aout": 8, "septembre": 9, "octobre": 10, "novembre": 11,
+    "décembre": 12, "decembre": 12,
+}
+_MOIS_RE = "|".join(MOIS.keys())
+
+
+def extract_end_date(dates_str: str) -> date | None:
+    """Extrait la date de fin d'une activité à partir du texte libre
+    `dates` (ex. "Du 19/10/2026 au 23/10/2026", "6 juillet au 14 août
+    2026"). Retourne None si aucune date exploitable n'est trouvée (texte
+    purement descriptif type "dates non précisées sur cette page") - ces
+    activités sont alors exclues des alertes plutôt qu'incluses par
+    défaut : mieux vaut rater une alerte que d'en envoyer une sur un stage
+    déjà terminé.
+
+    Cherche, dans cet ordre, le DERNIER motif trouvé (la date de fin est
+    toujours mentionnée en dernier dans ces formulations "Du X au Y") :
+    1. DD/MM/YYYY
+    2. DD <mois en toutes lettres> YYYY
+    3. DD/MM suivi plus loin d'une année entre parenthèses, ex.
+       "du 19 au 21/10 (2026)" - format utilisé par plusieurs sites iMio.
+    """
+    if not dates_str:
+        return None
+
+    matches = re.findall(r"(\d{1,2})\s*/\s*(\d{1,2})\s*/\s*(\d{4})", dates_str)
+    if matches:
+        d, m, y = matches[-1]
+        try:
+            return date(int(y), int(m), int(d))
+        except ValueError:
+            pass
+
+    matches = re.findall(rf"(\d{{1,2}})\s+({_MOIS_RE})\s+(\d{{4}})", dates_str, re.IGNORECASE)
+    if matches:
+        d, mois, y = matches[-1]
+        try:
+            return date(int(y), MOIS[mois.lower()], int(d))
+        except ValueError:
+            pass
+
+    paren = re.search(r"\((\d{4})\)", dates_str)
+    if paren:
+        year = int(paren.group(1))
+        before = dates_str[: paren.start()]
+        dm = re.findall(r"(\d{1,2})\s*/\s*(\d{1,2})\b", before)
+        if dm:
+            d, m = dm[-1]
+            try:
+                return date(year, int(m), int(d))
+            except ValueError:
+                pass
+
+    return None
+
+
+def is_upcoming(activite: dict, today: date) -> bool:
+    end = extract_end_date(activite.get("dates", ""))
+    return end is not None and end >= today
 
 
 def is_configured() -> bool:
@@ -263,7 +336,14 @@ def main() -> int:
     activites = fetch_activites()
     already_sent = fetch_already_sent()
 
-    print(f"{len(parents)} critère(s) enregistré(s), {len(activites)} activité(s) en base.")
+    today = datetime.now(timezone.utc).date()
+    activites = [a for a in activites if is_upcoming(a, today)]
+
+    if TEST_EMAIL:
+        parents = [p for p in parents if p["email"].strip().lower() == TEST_EMAIL]
+        print(f"[test] restreint à {TEST_EMAIL} ({len(parents)} profil trouvé).")
+
+    print(f"{len(parents)} critère(s) à traiter, {len(activites)} activité(s) encore à venir.")
 
     total_emails = 0
     for parent in parents:

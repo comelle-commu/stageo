@@ -6,7 +6,12 @@ on:
   schedule:
     # Tous les lundis à 06h00 UTC (07h/08h heure belge selon l'heure d'été).
     - cron: "0 6 * * 1"
-  workflow_dispatch: {} # bouton "Run workflow" dans l'onglet Actions, pour tester sans attendre le cron
+  workflow_dispatch: # bouton "Run workflow" dans l'onglet Actions, pour tester sans attendre le cron
+    inputs:
+      test_email:
+        description: "Si rempli, les alertes personnalisées ne sont envoyées qu'à cette adresse (test sans risquer d'écrire aux vraies familles inscrites)."
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -71,6 +76,7 @@ jobs:
           SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           BREVO_SENDER_EMAIL: ${{ secrets.BREVO_SENDER_EMAIL }}
+          ALERTES_TEST_EMAIL: ${{ inputs.test_email }}
         run: python criteres_alertes.py
         # Volontairement indépendant du step précédent (`if` basé sur
         # steps.scrape, pas sur le digest) : un souci ponctuel sur la
