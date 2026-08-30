@@ -15,6 +15,7 @@ import adsl_stages
 import agenda_omnia
 import ans
 import arlon
+import aubange
 import aubel
 import aywaille
 import bastogne
@@ -75,6 +76,7 @@ SCRAPERS = [
     ("Chaudfontaine", chaudfontaine),
     ("Mons", mons),
     ("Arlon", arlon),
+    ("Aubange", aubange),
     ("Aubel", aubel),
     ("Jalhay", jalhay),
     ("Bastogne", bastogne),
