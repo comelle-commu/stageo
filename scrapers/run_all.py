@@ -57,6 +57,7 @@ import seraing
 import sprimont
 import rhcv
 import stavelot
+import tccb
 import supabase_client
 import uccle
 import verviers
@@ -102,6 +103,7 @@ SCRAPERS = [
     ("Agenda Omnia (multi-communes)", agenda_omnia),
     ("Stavelot", stavelot),
     ("Royal Hockey Club Verviers", rhcv),
+    ("TC Cheval Blanc", tccb),
     ("Faimes", faimes),
     ("La Ferme des Enfants de Liège", ferme_des_enfants),
     ("Mes Temps Libres (Anthisnes, Comblain-au-Pont)", mestempslibres),
