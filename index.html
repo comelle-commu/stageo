@@ -183,9 +183,14 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   form.signup{
     display:flex;gap:8px;max-width:480px;
     background:var(--paper);
-    padding:7px;border-radius:100px;
-    border:2px solid var(--orange);
-    box-shadow:0 16px 40px -18px rgba(36,49,60,0.35), 0 0 0 6px rgba(253,186,24,0.15);
+    padding:6px;border-radius:100px;
+    border:1px solid var(--line);
+    box-shadow:0 12px 28px -18px rgba(1,83,128,0.3);
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  form.signup:focus-within{
+    border-color:var(--teal);
+    box-shadow:0 12px 28px -18px rgba(1,83,128,0.3), 0 0 0 3px rgba(1,151,175,0.14);
   }
   form.signup input[type=email]{
     flex:1;border:none;background:transparent;
