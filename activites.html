@@ -757,8 +757,8 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
       let html = '';
       if (proximityOrigin){
         html += proximityHasLiteral
-          ? '<p class="proximity-note">Stages à « ' + esc(proximityOrigin) + ' », puis dans les environs.</p>'
-          : '<p class="proximity-note">Voici les stages présents dans un rayon proche de « ' + esc(proximityOrigin) + ' ».</p>';
+          ? '<p class="proximity-note">Stages à « ' + esc(proximityOrigin) + ' », puis dans un rayon de ' + RADIUS_KM + ' km autour.</p>'
+          : '<p class="proximity-note">Voici les stages dans un rayon de ' + RADIUS_KM + ' km autour de « ' + esc(proximityOrigin) + ' ».</p>';
       }
       html += '<div class="grid">';
       page.forEach(function(r){
