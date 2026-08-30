@@ -35,6 +35,7 @@ import unicodedata
 from datetime import date, datetime, timezone
 from math import asin, cos, radians, sin, sqrt
 from pathlib import Path
+from urllib.parse import urlencode
 
 import requests
 
@@ -45,7 +46,7 @@ BREVO_API_KEY = os.environ.get("BREVO_API_KEY", "")
 BREVO_SENDER_EMAIL = os.environ.get("BREVO_SENDER_EMAIL", "")
 BREVO_SENDER_NAME = os.environ.get("BREVO_SENDER_NAME", "Trouvéo")
 TEST_EMAIL = os.environ.get("ALERTES_TEST_EMAIL", "").strip().lower()
-SITE_URL = "https://stageo.netlify.app"
+SITE_URL = "https://trouveo.be"
 
 COORDS_PATH = Path(__file__).parent / "data" / "commune_coords.json"
 MAX_ITEMS_PER_EMAIL = 8  # au-delà, on résume - même logique que brevo_digest.py
@@ -223,7 +224,43 @@ def _esc(s: str) -> str:
     return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def build_email_html(matches: list[dict], commune: str) -> tuple[str, str]:
+# Doit rester synchronisé avec AGE_BRACKETS dans activites.html - sert
+# uniquement à construire le lien "Voir le détail" (voir build_detail_link).
+AGE_BRACKETS = [
+    ("0-3", 0, 3),
+    ("3-6", 3, 6),
+    ("6-9", 6, 9),
+    ("9-12", 9, 12),
+    ("12+", 12, float("inf")),
+]
+
+
+def build_detail_link(parent: dict) -> str:
+    """Lien vers /activites pré-filtré avec les mêmes critères que ceux qui
+    ont produit l'alerte - voir applyFiltersFromUrl() dans activites.html.
+    Le paramètre `commune` réutilise directement la recherche par proximité
+    déjà en place côté site (voir communesWithinRadius()). Âge et type ne
+    sont ajoutés que pour une famille à un seul enfant : au-delà, un seul
+    filtre représenterait mal des critères qui diffèrent d'un enfant à
+    l'autre - mieux vaut alors laisser la vue non filtrée sur ces deux
+    dimensions plutôt que de biaiser vers un seul enfant."""
+    params = {"commune": parent["commune"]}
+    enfants = parent.get("enfants") or []
+    if len(enfants) == 1:
+        enfant = enfants[0]
+        age = enfant.get("age")
+        if isinstance(age, (int, float)):
+            for key, lo, hi in AGE_BRACKETS:
+                if lo <= age < hi:
+                    params["age"] = age
+                    break
+        types = enfant.get("types_activites") or []
+        if len(types) == 1:
+            params["type"] = types[0]
+    return f"{SITE_URL}/activites?{urlencode(params)}"
+
+
+def build_email_html(matches: list[dict], commune: str, detail_link: str) -> tuple[str, str]:
     n = len(matches)
     subject = f"{n} stage{'s' if n != 1 else ''} correspond{'ent' if n != 1 else ''} à votre recherche"
 
@@ -282,7 +319,7 @@ def build_email_html(matches: list[dict], commune: str) -> tuple[str, str]:
   <tr><td>{''.join(cards)}</td></tr>
 
   <tr><td align="center" style="padding:14px 0 28px;">
-    <a href="{SITE_URL}/activites" style="display:inline-block;background:#0197AF;color:#ffffff;text-decoration:none;
+    <a href="{detail_link}" style="display:inline-block;background:#0197AF;color:#ffffff;text-decoration:none;
       font-family:'Work Sans',Arial,sans-serif;font-weight:700;font-size:14px;padding:14px 28px;border-radius:100px;">
       Voir le détail →
     </a>
@@ -355,7 +392,7 @@ def main() -> int:
         if dry_run:
             continue
 
-        subject, html = build_email_html(matches, parent["commune"])
+        subject, html = build_email_html(matches, parent["commune"], build_detail_link(parent))
         try:
             send_transactional(parent["email"], subject, html)
         except requests.HTTPError as exc:

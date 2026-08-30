@@ -937,6 +937,24 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     render();
   });
 
+  // Pré-remplit les filtres depuis l'URL (lien "Voir le détail" des emails
+  // d'alerte personnalisée, voir scrapers/criteres_alertes.py) - pour
+  // arriver directement sur la même vue filtrée que ce qui a matché,
+  // plutôt que sur une liste générique.
+  (function applyFiltersFromUrl(){
+    const params = new URLSearchParams(window.location.search);
+    const commune = params.get('commune');
+    if (commune) searchEl.value = commune;
+    const type = params.get('type');
+    if (type && TYPE_ACTIVITE_CHOICES.indexOf(type) !== -1) activeType = type;
+    const age = params.get('age');
+    if (age !== null && age !== ''){
+      const ageNum = Number(age);
+      const bracket = AGE_BRACKETS.find(function(b){ return ageNum >= b.min && ageNum < b.max; });
+      if (bracket) activeAge = bracket.key;
+    }
+  })();
+
   fetch(SUPABASE_URL + '/rest/v1/activites?select=*&order=date_verification.desc', {
     headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
   })

@@ -38,7 +38,7 @@ BREVO_API_KEY = os.environ.get("BREVO_API_KEY", "")
 BREVO_LIST_ID = os.environ.get("BREVO_LIST_ID", "")
 BREVO_SENDER_EMAIL = os.environ.get("BREVO_SENDER_EMAIL", "")
 BREVO_SENDER_NAME = os.environ.get("BREVO_SENDER_NAME", "Trouvéo")
-SITE_URL = "https://stageo.netlify.app"
+SITE_URL = "https://trouveo.be"
 
 DIGEST_TABLE = "digest_log"
 MAX_ITEMS_PER_SOURCE = 5  # au-delà, on résume ("... et N autres") pour ne pas produire un email interminable
