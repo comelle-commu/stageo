@@ -634,6 +634,11 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   // "Alleur", sans scraper dédié) - distingue les deux dans render() pour
   // le message affiché (voir plus bas).
   let proximityHasLiteral = false;
+  // Types d'activité à faire remonter en priorité (voir applyFiltersFromUrl
+  // et le tri dans render()) - liste plutôt qu'un seul type actif, pour
+  // une famille à plusieurs enfants aux goûts différents (voir
+  // build_detail_link côté scrapers/criteres_alertes.py).
+  let preferredTypes = [];
 
   function groupKey(r){ return r.organisateur || r.commune || 'Non précisé'; }
   function groupKind(r){ return r.organisateur ? 'org' : 'commune'; }
@@ -649,15 +654,16 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     proximityNearbySet = null;
     proximityHasLiteral = false;
     if (!q) return;
-    const qLower = q.toLowerCase();
-    proximityHasLiteral = data.some(function(r){
-      const hay = [r.nom_activite, r.commune, r.organisateur, r.dates, r.lieu].join(' ').toLowerCase();
-      return hay.indexOf(qLower) !== -1;
-    });
     const nearbySet = communesWithinRadius(q, RADIUS_KM);
     if (nearbySet){
       proximityOrigin = q;
       proximityNearbySet = nearbySet;
+      // Sert uniquement au message affiché ("Stages à X, puis..." vs
+      // "Voici les stages dans un rayon...") - PAS au filtrage lui-même
+      // (voir matchesFilters : une fois le lieu reconnu, seul le rayon
+      // géographique compte, jamais un texte en sous-chaîne).
+      const qKey = normalizeName(q);
+      proximityHasLiteral = data.some(function(r){ return normalizeName(r.commune) === qKey; });
     }
   }
 
@@ -682,18 +688,21 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     if (except !== 'province' && activeProvince !== 'ALL' && provinceOf(r.commune) !== activeProvince) return false;
     if (except !== 'period' && !matchesPeriod(r, activePeriod)) return false;
     if (q){
-      // ageLabel(r) volontairement exclu : le format "X-Y ans" contient le
-      // mot "ans" sur quasiment CHAQUE activité (l'âge en français), ce qui
-      // polluait toute recherche sur la commune d'Ans (Liège) - la
-      // recherche par âge a de toute façon déjà son propre filtre dédié.
-      const hay = [r.nom_activite, r.commune, r.organisateur, r.dates, r.lieu].join(' ').toLowerCase();
-      const literalMatch = hay.indexOf(q) !== -1;
-      // Recherche par proximité : si aucune activité ne matche littéralement
-      // ce texte, updateProximityState() a peut-être résolu un rayon autour
-      // d'un lieu connu (ex. "Alleur") - dans ce cas on matche sur la
-      // commune plutôt que sur le texte littéral.
-      const proximityMatch = proximityNearbySet && proximityNearbySet.has(normalizeName(r.commune));
-      if (!literalMatch && !proximityMatch) return false;
+      if (proximityNearbySet){
+        // Le texte tapé correspond à un lieu connu (commune ou code
+        // postal) : le filtrage est PUREMENT géographique (rayon), jamais
+        // par sous-chaîne littérale - sinon chercher "Ans" matche aussi
+        // "Danse", "(3-4 ans)" (âge dans le nom de l'activité côté
+        // ADEPS/etc.), "vélo dans les bois"... ce qui ramenait des
+        // communes hors rayon comme Anderlecht ou Auderghem.
+        if (!proximityNearbySet.has(normalizeName(r.commune))) return false;
+      } else {
+        // Lieu non reconnu : recherche texte libre classique (nom
+        // d'activité, organisateur...) - ageLabel(r) volontairement exclu
+        // du hay, voir historique de ce même bug sur la commune d'Ans.
+        const hay = [r.nom_activite, r.commune, r.organisateur, r.dates, r.lieu].join(' ').toLowerCase();
+        if (hay.indexOf(q) === -1) return false;
+      }
     }
     return true;
   }
@@ -720,6 +729,14 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
         const ea = normalizeName(a.commune) === exactCommuneKey ? 0 : 1;
         const eb = normalizeName(b.commune) === exactCommuneKey ? 0 : 1;
         if (ea !== eb) return ea - eb;
+      }
+      // Préférence de type d'activité (ex. lien d'alerte email avec
+      // plusieurs enfants aux goûts différents - pas un filtre dur, juste
+      // une priorité d'affichage) - voir applyFiltersFromUrl().
+      if (preferredTypes.length){
+        const ta = preferredTypes.indexOf(a.type_activite) !== -1 ? 0 : 1;
+        const tb = preferredTypes.indexOf(b.type_activite) !== -1 ? 0 : 1;
+        if (ta !== tb) return ta - tb;
       }
       const da = lastDate(a.dates), db = lastDate(b.dates);
       const pa = da ? isPast(a) : false, pb = db ? isPast(b) : false;
@@ -975,8 +992,10 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     const params = new URLSearchParams(window.location.search);
     const commune = params.get('commune');
     if (commune) searchEl.value = commune;
-    const type = params.get('type');
-    if (type && TYPE_ACTIVITE_CHOICES.indexOf(type) !== -1) activeType = type;
+    const types = params.get('types');
+    if (types){
+      preferredTypes = types.split(',').filter(function(t){ return TYPE_ACTIVITE_CHOICES.indexOf(t) !== -1; });
+    }
     const age = params.get('age');
     if (age !== null && age !== ''){
       const ageNum = Number(age);

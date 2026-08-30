@@ -218,13 +218,16 @@ def find_matches(parent: dict, activites: list[dict], coords: dict, already_sent
         if any(enfant_matches(e, act) for e in parent["enfants"]):
             matches.append(act)
 
-    # Les activités de la commune même du parent d'abord (ex. recherche
-    # "Ans" -> les stages À Ans avant ceux des communes voisines trouvées
-    # par rayon), puis par date de fin croissante - même logique de tri
-    # que côté site (voir le tri par exactCommuneKey dans activites.html).
+    # Même logique de tri que côté site (voir exactCommuneKey/preferredTypes
+    # dans activites.html) : la commune même du parent d'abord (ex.
+    # recherche "Ans" -> les stages À Ans avant ceux des communes voisines
+    # trouvées par rayon), puis les types d'activité demandés par au moins
+    # un enfant, puis par date de fin croissante.
     own_commune = normalize_name(parent["commune"])
+    preferred_types = {t for e in parent["enfants"] for t in (e.get("types_activites") or [])}
     matches.sort(key=lambda act: (
         0 if normalize_name(act["commune"]) == own_commune else 1,
+        0 if act.get("type_activite") in preferred_types else 1,
         extract_end_date(act.get("dates", "")) or date.max,
     ))
     return matches
@@ -249,24 +252,35 @@ def build_detail_link(parent: dict) -> str:
     """Lien vers /activites pré-filtré avec les mêmes critères que ceux qui
     ont produit l'alerte - voir applyFiltersFromUrl() dans activites.html.
     Le paramètre `commune` réutilise directement la recherche par proximité
-    déjà en place côté site (voir communesWithinRadius()). Âge et type ne
-    sont ajoutés que pour une famille à un seul enfant : au-delà, un seul
-    filtre représenterait mal des critères qui diffèrent d'un enfant à
-    l'autre - mieux vaut alors laisser la vue non filtrée sur ces deux
-    dimensions plutôt que de biaiser vers un seul enfant."""
+    déjà en place côté site (voir communesWithinRadius()).
+
+    `types` (union des types de TOUS les enfants, dédupliquée) fait
+    remonter en priorité les activités qui correspondent, sans jamais les
+    exclure - contrairement à l'âge (filtre dur, un seul chip actif à la
+    fois côté site), un type de préférence peut se cumuler entre enfants
+    sans perdre de sens : "Ans, en priorité Sport ou Art" reste correct
+    même pour une fratrie aux goûts différents.
+
+    L'âge, lui, reste réservé à une famille à un seul enfant : un chip
+    d'âge unique représenterait mal des enfants d'âges différents - mieux
+    vaut alors laisser cette dimension non filtrée plutôt que de biaiser
+    vers un seul enfant."""
     params = {"commune": parent["commune"]}
     enfants = parent.get("enfants") or []
     if len(enfants) == 1:
-        enfant = enfants[0]
-        age = enfant.get("age")
+        age = enfants[0].get("age")
         if isinstance(age, (int, float)):
             for key, lo, hi in AGE_BRACKETS:
                 if lo <= age < hi:
                     params["age"] = age
                     break
-        types = enfant.get("types_activites") or []
-        if len(types) == 1:
-            params["type"] = types[0]
+    all_types: list[str] = []
+    for enfant in enfants:
+        for t in enfant.get("types_activites") or []:
+            if t not in all_types:
+                all_types.append(t)
+    if all_types:
+        params["types"] = ",".join(all_types)
     return f"{SITE_URL}/activites?{urlencode(params)}"
 
 
