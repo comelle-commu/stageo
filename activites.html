@@ -628,26 +628,32 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   // render() et renderChips() plutôt que chacune sa propre logique.
   let proximityOrigin = null;
   let proximityNearbySet = null;
+  // true si `q` a AUSSI des résultats littéraux (ex. "Ans", qui a des
+  // activités à Ans ET doit quand même s'élargir aux communes voisines) -
+  // false si la proximité est le SEUL moyen d'avoir des résultats (ex.
+  // "Alleur", sans scraper dédié) - distingue les deux dans render() pour
+  // le message affiché (voir plus bas).
+  let proximityHasLiteral = false;
 
   function groupKey(r){ return r.organisateur || r.commune || 'Non précisé'; }
   function groupKind(r){ return r.organisateur ? 'org' : 'commune'; }
 
-  // Si le texte tapé ne correspond littéralement à AUCUNE activité du jeu
-  // de données (toutes sources confondues, indépendamment des autres
-  // filtres actifs), et qu'il correspond à un lieu connu (ex. "Alleur"),
-  // on bascule sur une recherche par rayon autour de ce lieu plutôt que
-  // d'afficher "rien trouvé".
+  // Élargit toujours une recherche de lieu (commune ou code postal connu)
+  // aux communes dans un rayon de RADIUS_KM autour, en plus des résultats
+  // littéraux éventuels - une recherche sur sa propre commune (qui a des
+  // résultats) doit quand même remonter les stages des environs, pas
+  // seulement une recherche sans aucun résultat direct (ex. "Alleur").
   function updateProximityState(){
     const q = searchEl.value.trim();
     proximityOrigin = null;
     proximityNearbySet = null;
+    proximityHasLiteral = false;
     if (!q) return;
     const qLower = q.toLowerCase();
-    const hasLiteralMatch = data.some(function(r){
+    proximityHasLiteral = data.some(function(r){
       const hay = [r.nom_activite, r.commune, r.organisateur, r.dates, r.lieu].join(' ').toLowerCase();
       return hay.indexOf(qLower) !== -1;
     });
-    if (hasLiteralMatch) return;
     const nearbySet = communesWithinRadius(q, RADIUS_KM);
     if (nearbySet){
       proximityOrigin = q;
@@ -698,12 +704,23 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     const matching = data.filter(function(r){ return matchesFilters(r, q); });
     const visible = showPast ? matching : matching.filter(function(r){ return !isPast(r); });
 
+    // Si la recherche correspond au nom exact d'une commune (ex. "Ans"),
+    // ses activités passent avant celles des communes voisines trouvées
+    // par proximité - une recherche sur sa propre commune doit remonter
+    // ces résultats-là en premier, le reste ("à proximité") ensuite.
+    const exactCommuneKey = q ? normalizeName(searchEl.value.trim()) : null;
+
     // Tri : à venir (ou date illisible) triées de la plus proche à la plus
     // lointaine, TOUJOURS avant les activités passées - sinon, en activant
     // "Voir aussi les dates passées", les entrées les plus anciennes (ex.
     // janvier) remontaient en premier au lieu des plus récentes, donnant
     // l'impression que le site n'affiche que du contenu périmé.
     visible.sort(function(a, b){
+      if (exactCommuneKey){
+        const ea = normalizeName(a.commune) === exactCommuneKey ? 0 : 1;
+        const eb = normalizeName(b.commune) === exactCommuneKey ? 0 : 1;
+        if (ea !== eb) return ea - eb;
+      }
       const da = lastDate(a.dates), db = lastDate(b.dates);
       const pa = da ? isPast(a) : false, pb = db ? isPast(b) : false;
       if (pa !== pb) return pa ? 1 : -1; // passées toujours après
@@ -739,7 +756,9 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
       const page = visible.slice(0, visibleLimit);
       let html = '';
       if (proximityOrigin){
-        html += '<p class="proximity-note">Voici les stages présents dans un rayon proche de « ' + esc(proximityOrigin) + ' ».</p>';
+        html += proximityHasLiteral
+          ? '<p class="proximity-note">Stages à « ' + esc(proximityOrigin) + ' », puis dans les environs.</p>'
+          : '<p class="proximity-note">Voici les stages présents dans un rayon proche de « ' + esc(proximityOrigin) + ' ».</p>';
       }
       html += '<div class="grid">';
       page.forEach(function(r){

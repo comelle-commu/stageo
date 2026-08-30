@@ -217,6 +217,16 @@ def find_matches(parent: dict, activites: list[dict], coords: dict, already_sent
             continue
         if any(enfant_matches(e, act) for e in parent["enfants"]):
             matches.append(act)
+
+    # Les activités de la commune même du parent d'abord (ex. recherche
+    # "Ans" -> les stages À Ans avant ceux des communes voisines trouvées
+    # par rayon), puis par date de fin croissante - même logique de tri
+    # que côté site (voir le tri par exactCommuneKey dans activites.html).
+    own_commune = normalize_name(parent["commune"])
+    matches.sort(key=lambda act: (
+        0 if normalize_name(act["commune"]) == own_commune else 1,
+        extract_end_date(act.get("dates", "")) or date.max,
+    ))
     return matches
 
 
