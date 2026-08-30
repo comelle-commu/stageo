@@ -77,14 +77,26 @@ def _fetch_new_activites(since_iso: str) -> list[dict]:
     # quote() est indispensable ici : un "+" (fuseau horaire, ex.
     # "+00:00") non encodé dans une query string est interprété comme un
     # espace par PostgREST -> "invalid input syntax for type timestamp".
-    url = (
-        f"{SUPABASE_URL}/rest/v1/activites?select=*"
-        f"&premiere_apparition=gt.{quote(since_iso, safe='')}"
-        "&order=premiere_apparition.asc"
-    )
-    resp = requests.get(url, headers=_digest_headers("count=none"), timeout=30)
-    resp.raise_for_status()
-    return resp.json()
+    #
+    # Pagination par precaution (voir criteres_alertes.fetch_activites) :
+    # peu probable qu'une semaine ajoute plus de 1000 activites d'un coup,
+    # mais le plafond par defaut de PostgREST serait sinon silencieux.
+    page_size = 1000
+    offset = 0
+    rows: list[dict] = []
+    while True:
+        url = (
+            f"{SUPABASE_URL}/rest/v1/activites?select=*"
+            f"&premiere_apparition=gt.{quote(since_iso, safe='')}"
+            f"&order=premiere_apparition.asc&limit={page_size}&offset={offset}"
+        )
+        resp = requests.get(url, headers=_digest_headers("count=none"), timeout=30)
+        resp.raise_for_status()
+        page = resp.json()
+        rows.extend(page)
+        if len(page) < page_size:
+            return rows
+        offset += page_size
 
 
 def _group_key(row: dict) -> str:

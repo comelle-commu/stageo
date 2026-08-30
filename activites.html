@@ -1004,13 +1004,31 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     }
   })();
 
-  fetch(SUPABASE_URL + '/rest/v1/activites?select=*&order=date_verification.desc', {
-    headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
-  })
-    .then(function(res){
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      return res.json();
-    })
+  // PostgREST plafonne une requête sans pagination à 1000 lignes par défaut
+  // (silencieux : pas d'erreur, juste une réponse tronquée) - avec plus de
+  // 2000 activités en base, ça masquait plus de la moitié du catalogue
+  // partout (résultats, compteurs de filtres ET alertes email). On boucle
+  // avec limit/offset jusqu'à récupérer une page plus courte que PAGE_SIZE
+  // (signe qu'on a atteint la fin), plutôt que de se fier à un total
+  // renvoyé par le serveur.
+  const FETCH_PAGE_SIZE = 1000;
+
+  function fetchAllActivites(offset, acc){
+    const url = SUPABASE_URL + '/rest/v1/activites?select=*&order=date_verification.desc' +
+      '&limit=' + FETCH_PAGE_SIZE + '&offset=' + offset;
+    return fetch(url, { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY } })
+      .then(function(res){
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function(rows){
+        const combined = acc.concat(rows);
+        if (rows.length < FETCH_PAGE_SIZE) return combined;
+        return fetchAllActivites(offset + FETCH_PAGE_SIZE, combined);
+      });
+  }
+
+  fetchAllActivites(0, [])
     .then(function(rows){
       data = rows;
       renderStats();

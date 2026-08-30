@@ -150,10 +150,23 @@ def fetch_criteres() -> list[dict]:
 
 
 def fetch_activites() -> list[dict]:
-    url = f"{SUPABASE_URL}/rest/v1/activites?select=*"
-    resp = requests.get(url, headers=_headers("count=none"), timeout=30)
-    resp.raise_for_status()
-    return resp.json()
+    # PostgREST plafonne a 1000 lignes par defaut sans pagination - avec
+    # plus de 2000 activites en base, la moitie du catalogue etait ignoree
+    # silencieusement par le moteur d'alertes (meme bug que cote site, voir
+    # fetchAllActivites() dans activites.html). On boucle par pages de 1000
+    # jusqu'a une page plus courte que PAGE_SIZE.
+    page_size = 1000
+    offset = 0
+    rows: list[dict] = []
+    while True:
+        url = f"{SUPABASE_URL}/rest/v1/activites?select=*&limit={page_size}&offset={offset}"
+        resp = requests.get(url, headers=_headers("count=none"), timeout=30)
+        resp.raise_for_status()
+        page = resp.json()
+        rows.extend(page)
+        if len(page) < page_size:
+            return rows
+        offset += page_size
 
 
 def fetch_already_sent() -> set[tuple[str, int]]:
