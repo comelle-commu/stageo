@@ -40,6 +40,7 @@ import herstal
 import huy
 import iclub
 import jalhay
+import jeunesse_a_bruxelles
 import jeunesse_ardente
 import jeunesses_musicales
 import lalouviere
@@ -92,6 +93,7 @@ SCRAPERS = [
     ("ADSL Stages", adsl_stages),
     ("Forest", forest),
     ("Uccle", uccle),
+    ("Jeunesse à Bruxelles", jeunesse_a_bruxelles),
     ("Besace ASBL", besace),
     ("Jeunesse Ardente", jeunesse_ardente),
     ("Agenda Omnia (multi-communes)", agenda_omnia),

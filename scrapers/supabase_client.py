@@ -56,6 +56,7 @@ PLATEFORME_SOURCE = {
     "Cap Sciences": "WordPress",
     "Royal Léopold Club": "MyiClub",
     "Royal Racing Club de Bruxelles": "MyiClub",
+    "Jeunesse à Bruxelles": "WordPress",
 }
 
 
