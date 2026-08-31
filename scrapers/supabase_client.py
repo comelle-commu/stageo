@@ -60,6 +60,11 @@ PLATEFORME_SOURCE = {
     "PARI asbl": "WordPress",
     "Les Ateliers 04": "WordPress",
     "Hannut Education Sports et Loisirs (HESL) asbl": "WordPress",
+    "ReForm Liège": "WordPress",
+    "ReForm Hainaut": "WordPress",
+    "ReForm Bruxelles": "WordPress",
+    "ReForm Namur": "WordPress",
+    "ReForm Brabant wallon": "WordPress",
 }
 
 

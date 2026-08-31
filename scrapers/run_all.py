@@ -56,6 +56,7 @@ import nivelles
 import oupeye
 import ottignieslln
 import pari
+import reform
 import seraing
 import sprimont
 import rhcv
@@ -113,6 +114,7 @@ SCRAPERS = [
     ("PARI asbl", pari),
     ("Les Ateliers 04", ateliers04),
     ("HESL (Hannut)", hesl),
+    ("ReForm asbl (multi-régions)", reform),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque
