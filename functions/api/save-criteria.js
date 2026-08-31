@@ -110,19 +110,9 @@ export async function onRequestPost(context) {
     if (res.status === 200 || res.status === 201 || res.status === 204) {
       // Best-effort : une erreur d'envoi ne doit pas transformer un
       // enregistrement réussi en échec côté utilisateur.
-      // DEBUG TEMPORAIRE (à retirer une fois l'email de confirmation
-      // validé en prod) : ?debug=1 renvoie l'erreur d'envoi réelle au lieu
-      // de l'avaler silencieusement, pour diagnostiquer sans accès aux
-      // logs Cloudflare depuis cet environnement.
-      let debugInfo;
       await sendConfirmationEmail(env, email, enfants, commune.trim()).catch((err) => {
         console.error("Envoi de l'email de confirmation impossible", err);
-        debugInfo = String((err && err.message) || err);
       });
-      const url = new URL(request.url);
-      if (url.searchParams.get("debug") === "1") {
-        return jsonResponse(200, { ok: true, debug: debugInfo || "email envoyé sans erreur" });
-      }
       return jsonResponse(200, { ok: true });
     }
 
@@ -139,6 +129,41 @@ function esc(s) {
   return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+// Doit rester synchronisé avec AGE_BRACKETS dans activites.html et
+// criteres_alertes.py (build_detail_link) - même logique de lien
+// pré-filtré que les emails d'alerte : la commune (recherche par
+// proximité déjà en place côté site), l'âge SEULEMENT pour une famille à
+// un enfant (un chip d'âge unique représenterait mal une fratrie
+// d'âges différents), et l'union dédupliquée des types de tous les
+// enfants (une préférence qui se cumule, contrairement à l'âge).
+const AGE_BRACKETS = [
+  [0, 3],
+  [3, 6],
+  [6, 9],
+  [9, 12],
+  [12, Infinity],
+];
+
+function buildDetailLink(enfants, commune) {
+  const params = new URLSearchParams({ commune });
+  if (enfants.length === 1) {
+    const age = enfants[0].age;
+    if (typeof age === "number" && AGE_BRACKETS.some(([lo, hi]) => age >= lo && age < hi)) {
+      params.set("age", String(age));
+    }
+  }
+  const allTypes = [];
+  for (const enfant of enfants) {
+    for (const t of enfant.types_activites || []) {
+      if (!allTypes.includes(t)) allTypes.push(t);
+    }
+  }
+  if (allTypes.length) {
+    params.set("types", allTypes.join(","));
+  }
+  return `https://trouveo.be/activites?${params.toString()}`;
+}
+
 async function sendConfirmationEmail(env, email, enfants, commune) {
   const apiKey = env.BREVO_API_KEY;
   const senderEmail = env.BREVO_SENDER_EMAIL;
@@ -147,6 +172,7 @@ async function sendConfirmationEmail(env, email, enfants, commune) {
     return;
   }
   const senderName = env.BREVO_SENDER_NAME || "Trouvéo";
+  const detailLink = buildDetailLink(enfants, commune);
 
   const rows = enfants
     .map((e) => {
@@ -198,7 +224,7 @@ async function sendConfirmationEmail(env, email, enfants, commune) {
   </td></tr>
 
   <tr><td align="center" style="padding:26px 0 8px;">
-    <a href="https://trouveo.be/activites" style="display:inline-block;background:#0197AF;color:#ffffff;text-decoration:none;
+    <a href="${detailLink}" style="display:inline-block;background:#0197AF;color:#ffffff;text-decoration:none;
       font-family:'Work Sans',Arial,sans-serif;font-weight:700;font-size:14px;padding:14px 28px;border-radius:100px;">
       Parcourir les activités →
     </a>
