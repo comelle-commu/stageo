@@ -94,6 +94,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   nav.wrap{
     display:flex;align-items:center;justify-content:space-between;gap:10px;
     padding-top:24px;padding-bottom:24px;
+    position:relative;
   }
   .logo{display:flex;align-items:center;}
   .logo-img{height:58px;width:auto;display:block;}
@@ -112,14 +113,25 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   .nav-link{font-size:14.5px;font-weight:600;color:var(--ink-soft);text-decoration:none;white-space:nowrap;}
   .nav-link:hover{color:var(--ink);}
   .cta-short{display:none;}
+  .nav-toggle{
+    display:none;flex:none;border:none;background:none;color:var(--ink);
+    font-size:26px;line-height:1;padding:6px 4px;cursor:pointer;
+  }
   @media (max-width:520px){
     nav.wrap{padding-top:16px;padding-bottom:16px;}
     .logo-img{height:44px;}
-    .nav-links{gap:8px;}
-    .nav-link{font-size:12.5px;}
-    .nav-cta{font-size:13px;padding:10px 16px;}
-    .cta-full{display:none;}
-    .cta-short{display:inline;}
+    .nav-toggle{display:block;}
+    .nav-links{
+      display:none;position:absolute;top:100%;left:0;right:0;margin-top:8px;
+      flex-direction:column;align-items:stretch;gap:0;
+      background:var(--paper);border:1px solid var(--line);border-radius:16px;
+      box-shadow:0 16px 34px -20px rgba(1,83,128,0.4);padding:8px 18px 16px;z-index:20;
+    }
+    .nav-links.open{display:flex;}
+    .nav-link{padding:13px 2px;border-bottom:1px solid var(--line-soft);}
+    .nav-cta{align-self:flex-start;margin-top:14px;}
+    .cta-full{display:inline;}
+    .cta-short{display:none;}
   }
   .nav-cta:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible{
     outline:3px solid var(--blue);outline-offset:2px;
@@ -383,7 +395,8 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   <div class="logo">
     <img src="trouveo-logo.png" alt="Trouvéo" class="logo-img">
   </div>
-  <div class="nav-links">
+  <button class="nav-toggle" id="navToggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="navLinks">☰</button>
+  <div class="nav-links" id="navLinks">
     <a href="/activites" class="nav-link">
       <span class="cta-full">Voir toutes les activités</span>
       <span class="cta-short">Activités</span>
@@ -397,6 +410,18 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
       <span class="cta-short">S'inscrire</span>
     </a>
   </div>
+  <script>
+  (function(){
+    var toggle = document.getElementById('navToggle');
+    var links = document.getElementById('navLinks');
+    if (!toggle || !links) return;
+    toggle.addEventListener('click', function(){
+      var open = links.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      toggle.textContent = open ? '✕' : '☰';
+    });
+  })();
+  </script>
 </nav>
 
 <header class="hero" id="top-form">
@@ -449,7 +474,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   <div class="wrap problem-layout">
     <div class="problem-head">
       <h2>Chaque période de vacances, le même casse-tête.</h2>
-      <p>Six périodes de vacances scolaires par an, et à chaque fois il faut re-fouiller des dizaines de sites pour trouver les bons stages et activités pour son enfant. Ça se réserve parfois en quelques heures — du coup, nous finissons par réserver toujours au même endroit, par facilité, quitte à rater mieux ailleurs.</p>
+      <p>Cinq périodes de vacances scolaires par an, et à chaque fois il faut re-fouiller des dizaines de sites pour trouver les bons stages et activités pour son enfant. Ça se réserve parfois en quelques heures — du coup, nous finissons par réserver toujours au même endroit, par facilité, quitte à rater mieux ailleurs.</p>
     </div>
     <div class="stat-list">
       <div class="stat-row">

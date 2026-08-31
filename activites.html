@@ -96,7 +96,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   :focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
 
   /* ---- Nav (identique à la landing) ---- */
-  nav.wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:24px 28px;}
+  nav.wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:24px 28px;position:relative;}
   .logo{display:flex;align-items:center;text-decoration:none;flex:none;}
   .logo-img{height:28px;width:auto;display:block;}
   .nav-links{display:flex;align-items:center;gap:20px;flex:none;}
@@ -110,14 +110,25 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   }
   .nav-cta:hover{transform:translateY(-1px);background:var(--teal-deep);}
   .cta-short{display:none;}
+  .nav-toggle{
+    display:none;flex:none;border:none;background:none;color:var(--ink);
+    font-size:26px;line-height:1;padding:6px 4px;cursor:pointer;
+  }
   @media (max-width:480px){
     nav.wrap{padding:16px 20px;}
     .logo-img{height:24px;}
-    .nav-links{gap:8px;}
-    .nav-link{font-size:12.5px;}
-    .nav-cta{font-size:13px;padding:10px 16px;}
-    .cta-full{display:none;}
-    .cta-short{display:inline;}
+    .nav-toggle{display:block;}
+    .nav-links{
+      display:none;position:absolute;top:100%;left:0;right:0;margin-top:8px;
+      flex-direction:column;align-items:stretch;gap:0;
+      background:var(--paper);border:1px solid var(--line);border-radius:16px;
+      box-shadow:0 16px 34px -20px rgba(1,83,128,0.4);padding:8px 18px 16px;z-index:20;
+    }
+    .nav-links.open{display:flex;}
+    .nav-link{padding:13px 2px;border-bottom:1px solid var(--line-soft);}
+    .nav-cta{align-self:flex-start;margin-top:14px;}
+    .cta-full{display:inline;}
+    .cta-short{display:none;}
   }
 
   /* ---- Intro ---- */
@@ -290,7 +301,8 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   <a class="logo" href="/">
     <img src="trouveo-logo.png" alt="Trouvéo" class="logo-img">
   </a>
-  <div class="nav-links">
+  <button class="nav-toggle" id="navToggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="navLinks">☰</button>
+  <div class="nav-links" id="navLinks">
     <a href="partenaires.html" class="nav-link">
       <span class="cta-full">Devenir partenaire</span>
       <span class="cta-short">Partenaires</span>
@@ -301,6 +313,18 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     </a>
   </div>
 </nav>
+<script>
+(function(){
+  var toggle = document.getElementById('navToggle');
+  var links = document.getElementById('navLinks');
+  if (!toggle || !links) return;
+  toggle.addEventListener('click', function(){
+    var open = links.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    toggle.textContent = open ? '✕' : '☰';
+  });
+})();
+</script>
 
 <header class="intro wrap">
   <div class="blob blob1"></div>
@@ -829,15 +853,20 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
         const source = groupKey(r);
         const past = isPast(r);
         const premium = premiumFor(r);
+        // "Basique" (featured) : position prioritaire + encadré orange
+        // seulement. "Complet" (featured ET mise_en_avant_complete) : en
+        // plus, badge "Le choix de Trouvéo" + descriptif détaillé - voir
+        // partenaires.html, section "Mise en avant" (deux formules).
         const featured = !past && isFeatured(r);
+        const complete = featured && !!(premium && premium.mise_en_avant_complete);
         const verified = !!(premium && premium.verifie);
         html += '<article class="card' + (past ? ' is-past' : '') + (featured ? ' is-featured' : '') + '">';
         html += '<div class="card-body">';
         if (past) html += '<div class="past-badge">Édition passée</div>';
-        else if (featured) html += '<div class="featured-badge">★ Le choix de Trouvéo</div>';
+        else if (complete) html += '<div class="featured-badge">★ Le choix de Trouvéo</div>';
         html += '<div class="card-source">' + (verified && premium.logo_url ? '<img class="card-logo" src="' + esc(premium.logo_url) + '" alt="">' : '') + esc(source) + (verified ? ' <span class="verified-badge" title="Organisme vérifié">✓</span>' : '') + '</div>';
         html += '<div class="card-name">' + esc(r.nom_activite) + '</div>';
-        if (featured && premium.description_longue) html += '<div class="card-desc">' + esc(premium.description_longue) + '</div>';
+        if (complete && premium.description_longue) html += '<div class="card-desc">' + esc(premium.description_longue) + '</div>';
         html += '<div class="card-meta">';
         html += '<div class="row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M3 9h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>' + esc(r.dates || 'Dates non précisées') + '</span></div>';
         html += '<div class="row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12Z" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="9" r="2.3" stroke="currentColor" stroke-width="1.8"/></svg><span>' + esc(r.lieu || 'Lieu non précisé') + '</span></div>';
