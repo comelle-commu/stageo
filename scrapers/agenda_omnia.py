@@ -59,6 +59,27 @@ COMMUNES = [
     ("Oupeye", "www.oupeye.be"),
     ("Hamoir", "www.hamoir.be"),
     ("Awans", "www.awans.be"),
+    # Ratissage province de Luxembourg (31/08/2026) - iMio confirmé, widget
+    # "swiper" présent en page d'accueil (12 communes sur les ~26 iMio de la
+    # province testées disposent du widget - les autres en sont dépourvues,
+    # même logique que les communes de Liège ci-dessus : rien à en tirer par
+    # cette méthode). Aucun stage catégorisé "Stages et cours" trouvé au
+    # 31/08/2026 sur aucune d'elles - conservées quand même, le run
+    # hebdomadaire les réextraira dès publication. Virton, Meix-devant-Virton
+    # et Vaux-sur-Sûre volontairement absentes d'ici : elles ont leur propre
+    # scraper dédié (voir virton.py/meix_devant_virton.py/vaux_sur_sure.py).
+    ("Attert", "www.attert.be"),
+    ("Martelange", "www.martelange.be"),
+    ("Bertogne", "www.bertogne.be"),
+    ("Sainte-Ode", "www.sainte-ode.be"),
+    ("Erezee", "www.erezee.be"),
+    ("Nassogne", "www.nassogne.be"),
+    ("Herbeumont", "www.herbeumont.be"),
+    ("Neufchateau", "www.neufchateau.be"),
+    ("Tellin", "www.tellin.be"),
+    ("Wellin", "www.wellin.be"),
+    ("Musson", "www.musson.be"),
+    ("Rouvroy", "www.rouvroy.be"),
 ]
 
 DATE_RANGE_RE = re.compile(
