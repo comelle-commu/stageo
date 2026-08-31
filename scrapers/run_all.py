@@ -33,6 +33,7 @@ import crie_liege
 import dimension_sport
 import esneux
 import faimes
+import fagotin
 import ferme_de_roloux
 import ferme_des_enfants
 import fleron
@@ -120,6 +121,7 @@ SCRAPERS = [
     ("ReForm asbl (multi-régions)", reform),
     ("Le CFS asbl (Awans, Huy, Verlaine)", cfs),
     ("StageVacances (répertoire Ligue des familles, filtré Liège)", stagevacances),
+    ("Le Fagotin (Stoumont)", fagotin),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque

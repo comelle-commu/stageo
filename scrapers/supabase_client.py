@@ -68,6 +68,7 @@ PLATEFORME_SOURCE = {
     "Le CFS": "MyiClub",
     "Centre Culturel de Theux": "StageVacances (Cockpit)",
     "Académie Tennis Padel Waremmien (ATPW)": "StageVacances (Cockpit)",
+    "Le Fagotin": "WordPress",
 }
 
 
