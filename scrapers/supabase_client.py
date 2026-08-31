@@ -65,6 +65,7 @@ PLATEFORME_SOURCE = {
     "ReForm Bruxelles": "WordPress",
     "ReForm Namur": "WordPress",
     "ReForm Brabant wallon": "WordPress",
+    "Le CFS": "MyiClub",
 }
 
 

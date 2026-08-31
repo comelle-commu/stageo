@@ -24,6 +24,7 @@ import aywaille
 import bastogne
 import besace
 import capsciences
+import cfs
 import chaudfontaine
 import ciney
 import coordination_atl
@@ -116,6 +117,7 @@ SCRAPERS = [
     ("Les Ateliers 04", ateliers04),
     ("HESL (Hannut)", hesl),
     ("ReForm asbl (multi-régions)", reform),
+    ("Le CFS asbl (Awans, Huy, Verlaine)", cfs),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque
