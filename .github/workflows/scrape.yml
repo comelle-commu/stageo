@@ -22,6 +22,19 @@ on:
         required: false
         type: boolean
         default: false
+      check_email_stats:
+        description: "Diagnostic seul (lecture Brevo, n'envoie rien) : affiche qui a ouvert/cliqué les emails déjà envoyés au lieu de lancer le scrape/les envois habituels."
+        required: false
+        type: boolean
+        default: false
+      stats_email:
+        description: "check_email_stats : restreindre à un destinataire précis (vide = tous)."
+        required: false
+        default: ""
+      stats_days:
+        description: "check_email_stats : fenêtre en jours à consulter."
+        required: false
+        default: "30"
 
 permissions:
   contents: read
@@ -44,7 +57,7 @@ jobs:
         run: pip install -r scrapers/requirements.txt
 
       - name: Installer Chromium (Playwright, pour les sites 100% JS)
-        if: inputs.skip_scrape != true
+        if: inputs.skip_scrape != true && inputs.check_email_stats != true
         run: playwright install --with-deps chromium
         # Nécessaire pour les scrapers utilisant common.fetch_rendered_html()
         # (sites qui ne rendent rien en HTML brut, ex. Côté Campagne,
@@ -53,7 +66,7 @@ jobs:
 
       - name: Lancer le scraper (+ import Supabase + contrôle qualité)
         id: scrape
-        if: inputs.skip_scrape != true
+        if: inputs.skip_scrape != true && inputs.check_email_stats != true
         working-directory: scrapers
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -68,7 +81,7 @@ jobs:
         # personnalisées, et inversement.
 
       - name: Envoyer l'email hebdomadaire (nouvelles activités)
-        if: inputs.skip_scrape != true && steps.scrape.outcome == 'success'
+        if: inputs.skip_scrape != true && inputs.check_email_stats != true && steps.scrape.outcome == 'success'
         working-directory: scrapers
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -85,7 +98,7 @@ jobs:
         # rapide déclenche accidentellement un envoi à tout le monde.
 
       - name: Envoyer les alertes personnalisées (critères parents)
-        if: inputs.skip_scrape == true || steps.scrape.outcome == 'success'
+        if: inputs.check_email_stats != true && (inputs.skip_scrape == true || steps.scrape.outcome == 'success')
         working-directory: scrapers
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -100,7 +113,7 @@ jobs:
         # une alerte individuelle sur une place qui part vite.
 
       - name: Relancer les inscrit·es sans critères
-        if: inputs.skip_scrape == true || steps.scrape.outcome == 'success'
+        if: inputs.check_email_stats != true && (inputs.skip_scrape == true || steps.scrape.outcome == 'success')
         working-directory: scrapers
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -113,6 +126,21 @@ jobs:
         # Ne dépend d'aucune donnée fraîchement scrapée (juste Brevo +
         # criteres_parents) - placé ici par cohérence avec les deux autres
         # jobs d'email plutôt que pour une vraie dépendance au scrape.
+
+      - name: Consulter les statistiques email (diagnostic)
+        if: inputs.check_email_stats == true
+        working-directory: scrapers
+        env:
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+        run: >
+          python email_stats.py
+          --days "${{ inputs.stats_days }}"
+          ${{ inputs.stats_email != '' && format('--email {0}', inputs.stats_email) || '' }}
+        # Diagnostic pur, lecture seule côté Brevo (ouvertures/clics des
+        # emails déjà envoyés) - n'envoie jamais rien. Volontairement
+        # exclusif avec le reste du run (voir les `if:` ci-dessus) plutôt
+        # qu'ajouté en step supplémentaire : pas de raison de scraper/
+        # envoyer quoi que ce soit juste pour consulter des statistiques.
 
       - name: Conserver la sortie du run (debug)
         if: always() # même si le step précédent a échoué - c'est justement quand on veut inspecter la sortie
