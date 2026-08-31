@@ -42,7 +42,10 @@ permissions:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 15 # Herstal + Huy consomment ~4 min à eux seuls (Crawl-delay iMio 120s) - large marge
+    timeout-minutes: 25 # Herstal + Huy consomment ~4 min à eux seuls (Crawl-delay iMio 120s) ; porté
+    # de 15 à 25 min le 31/08/2026 - le nombre de scrapers a presque triplé depuis le premier réglage
+    # (PARI, Ateliers04, HESL, Reform, RHCV, TCCB, Aubange, Jeunesse à Bruxelles... ajoutés depuis),
+    # le run programmé du 31/08 a expiré à 15 min alors qu'aucun scraper individuel n'était en cause.
 
     steps:
       - name: Checkout
