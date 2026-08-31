@@ -9,6 +9,9 @@
 // Environment variables) :
 //   SUPABASE_URL         - même valeur que dans scrapers/.env
 //   SUPABASE_SECRET_KEY   - idem (clé secrète, PAS la clé publique côté client)
+//   BREVO_API_KEY         - idem (voir criteres_alertes.py, même clé)
+//   BREVO_SENDER_EMAIL    - idem
+//   BREVO_SENDER_NAME     - optionnel, "Trouvéo" par défaut
 //
 // Route : fichier functions/api/save-criteria.js -> disponible sur /api/save-criteria
 //
@@ -16,6 +19,17 @@
 // formulaire (ex. pour ajouter un enfant) met à jour sa ligne existante
 // plutôt que d'en créer une deuxième - même logique que updateEnabled
 // côté Brevo pour la liste d'attente simple.
+//
+// Après l'upsert, un email de confirmation récapitulatif est envoyé (API
+// transactionnelle Brevo, même mécanisme que criteres_alertes.py) : sans
+// ça, un parent qui remplit ce formulaire n'a plus AUCUN signal que
+// l'enregistrement a marché une fois quitté la page (la confirmation
+// visuelle sur criteres.html ne suffit pas si on a un doute après coup, ou
+// si on l'a rempli sur mobile sans vraiment regarder l'écran final) - voir
+// le cas d'angekellya@gmail.com qui a renvoyé ses critères par message
+// faute d'avoir eu confirmation par email. Un échec d'envoi ne doit
+// jamais faire échouer l'enregistrement : celui-ci reste la partie
+// importante, l'email n'est qu'un plus.
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const VALID_TYPES = new Set(["Sport", "Art & créativité", "Sciences & nature", "Langues", "Multi-activités"]);
@@ -88,6 +102,11 @@ export async function onRequestPost(context) {
     });
 
     if (res.status === 201 || res.status === 204) {
+      // Best-effort : une erreur d'envoi ne doit pas transformer un
+      // enregistrement réussi en échec côté utilisateur.
+      await sendConfirmationEmail(env, email, enfants, commune.trim()).catch((err) => {
+        console.error("Envoi de l'email de confirmation impossible", err);
+      });
       return jsonResponse(200, { ok: true });
     }
 
@@ -97,6 +116,103 @@ export async function onRequestPost(context) {
   } catch (err) {
     console.error("Appel à Supabase impossible", err);
     return jsonResponse(502, { error: "L'enregistrement a échoué, réessayez dans un instant." });
+  }
+}
+
+function esc(s) {
+  return String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+async function sendConfirmationEmail(env, email, enfants, commune) {
+  const apiKey = env.BREVO_API_KEY;
+  const senderEmail = env.BREVO_SENDER_EMAIL;
+  if (!apiKey || !senderEmail) {
+    console.error("BREVO_API_KEY ou BREVO_SENDER_EMAIL manquant - email de confirmation ignoré");
+    return;
+  }
+  const senderName = env.BREVO_SENDER_NAME || "Trouvéo";
+
+  const rows = enfants
+    .map((e) => {
+      const types = Array.isArray(e.types_activites) && e.types_activites.length
+        ? e.types_activites.join(", ")
+        : "tous types d'activités";
+      return (
+        '<tr><td style="padding:0 0 8px;color:#015380;font-size:14.5px;line-height:1.5;">' +
+        // age >= 2 toujours (validé plus haut) -> pluriel systématique.
+        `• ${e.age} ans — ${esc(types)}</td></tr>`
+      );
+    })
+    .join("");
+
+  const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Grandstander:wght@700;800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body style="margin:0;background:#FFFDF8;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFFDF8;">
+<tr><td align="center" style="padding:36px 16px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;font-family:'Work Sans',Arial,sans-serif;">
+
+  <tr><td style="padding-bottom:22px;">
+    <span style="font-family:'Grandstander',Arial,sans-serif;font-weight:800;font-size:22px;color:#015380;">Trouvéo</span>
+  </td></tr>
+
+  <tr><td style="padding-bottom:24px;">
+    <span style="font-family:'Grandstander',Arial,sans-serif;font-weight:700;font-size:21px;color:#015380;line-height:1.3;">
+      Vos critères sont bien enregistrés
+    </span>
+  </td></tr>
+
+  <tr><td style="padding-bottom:18px;color:#5C7A8C;font-size:14.5px;line-height:1.6;">
+    Nous surveillons désormais les nouveaux stages et activités qui correspondent à ces critères,
+    et vous préviendrons par email dès qu'une place correspond.
+  </td></tr>
+
+  <tr><td style="padding:14px 16px;background:#FFFFFF;border:1px solid rgba(1,83,128,0.12);border-radius:14px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+      <tr><td style="padding:0 0 8px;color:#93A9B5;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;">Localité</td></tr>
+      <tr><td style="padding:0 0 14px;color:#015380;font-size:14.5px;">${esc(commune)} (rayon de 15 km)</td></tr>
+      <tr><td style="padding:0 0 8px;color:#93A9B5;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;">Enfant${enfants.length > 1 ? "s" : ""}</td></tr>
+      ${rows}
+    </table>
+  </td></tr>
+
+  <tr><td align="center" style="padding:26px 0 8px;">
+    <a href="https://trouveo.be/activites" style="display:inline-block;background:#0197AF;color:#ffffff;text-decoration:none;
+      font-family:'Work Sans',Arial,sans-serif;font-weight:700;font-size:14px;padding:14px 28px;border-radius:100px;">
+      Parcourir les activités →
+    </a>
+  </td></tr>
+
+  <tr><td style="border-top:1px solid rgba(1,83,128,0.12);padding-top:18px;margin-top:14px;">
+    <p style="color:#93A9B5;font-size:12px;line-height:1.6;margin:0;text-align:center;">
+      Une erreur dans vos critères ? Remplissez à nouveau le formulaire reçu par email, ou écrivez-nous à hello@trouveo.be.
+    </p>
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+
+  const resp = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: { "api-key": apiKey, "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({
+      sender: { name: senderName, email: senderEmail },
+      to: [{ email }],
+      subject: "Vos critères sont bien enregistrés",
+      htmlContent: html,
+    }),
+  });
+  if (!resp.ok) {
+    const details = await resp.text().catch(() => "");
+    throw new Error(`Brevo ${resp.status}: ${details}`);
   }
 }
 
