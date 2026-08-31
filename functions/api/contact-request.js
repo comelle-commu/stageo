@@ -1,5 +1,5 @@
 // Relais entre les deux petits formulaires de partenaires.html
-// ("signaler un organisme" et "être recontacté pour un partenariat
+// ("suggérer un organisme" et "être recontacté pour un partenariat
 // premium/un encart pub") et la table Supabase `contact_requests`.
 //
 // Même raison d'être qu'un relais serveur (voir brevo-signup.js) : la clé
