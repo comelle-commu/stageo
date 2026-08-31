@@ -66,6 +66,8 @@ PLATEFORME_SOURCE = {
     "ReForm Namur": "WordPress",
     "ReForm Brabant wallon": "WordPress",
     "Le CFS": "MyiClub",
+    "Centre Culturel de Theux": "StageVacances (Cockpit)",
+    "Académie Tennis Padel Waremmien (ATPW)": "StageVacances (Cockpit)",
 }
 
 

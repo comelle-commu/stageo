@@ -63,6 +63,7 @@ import reform
 import seraing
 import sprimont
 import rhcv
+import stagevacances
 import stavelot
 import tccb
 import supabase_client
@@ -118,6 +119,7 @@ SCRAPERS = [
     ("HESL (Hannut)", hesl),
     ("ReForm asbl (multi-régions)", reform),
     ("Le CFS asbl (Awans, Huy, Verlaine)", cfs),
+    ("StageVacances (répertoire Ligue des familles, filtré Liège)", stagevacances),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque
