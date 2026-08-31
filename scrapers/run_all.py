@@ -39,6 +39,7 @@ import funhelangues
 import grace_hollogne
 import hannut
 import herstal
+import hesl
 import huy
 import iclub
 import jalhay
@@ -111,6 +112,7 @@ SCRAPERS = [
     ("Mes Temps Libres (Anthisnes, Comblain-au-Pont)", mestempslibres),
     ("PARI asbl", pari),
     ("Les Ateliers 04", ateliers04),
+    ("HESL (Hannut)", hesl),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque

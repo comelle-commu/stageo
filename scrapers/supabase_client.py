@@ -59,6 +59,7 @@ PLATEFORME_SOURCE = {
     "Jeunesse à Bruxelles": "WordPress",
     "PARI asbl": "WordPress",
     "Les Ateliers 04": "WordPress",
+    "Hannut Education Sports et Loisirs (HESL) asbl": "WordPress",
 }
 
 
