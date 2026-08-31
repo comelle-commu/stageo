@@ -222,6 +222,13 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   .tier-card.is-complete .tick{color:var(--orange-deep);}
   .tier-price{font-family:'Grandstander',sans-serif;font-weight:800;font-size:19px;color:var(--ink);}
   .tier-price span{font-family:'Work Sans',sans-serif;font-weight:600;font-size:11px;color:var(--ink-soft);}
+  .tier-example{margin-top:16px;padding-top:16px;border-top:1px dashed var(--line);}
+  .featured-badge{
+    display:inline-block;font-size:11px;font-weight:700;letter-spacing:.02em;
+    color:#8A5A00;background:var(--peach);padding:3px 10px;border-radius:100px;margin-bottom:10px;
+  }
+  .verified-badge{color:var(--teal-deep);font-weight:700;}
+  .card-desc{font-size:13px;color:var(--ink-soft);line-height:1.5;margin:0 0 10px;}
 
   .mock-label{font-size:12.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;display:block;}
   .card{
@@ -463,71 +470,65 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
 
     <div class="offer-zone offer-zone-mid">
       <span class="zone-badge">Mise en avant</span>
-      <div class="zone-grid">
-        <div class="zone-copy">
-          <h3>Deux formules, selon votre budget</h3>
-          <p class="zone-lead">Disponible sur demande, dès maintenant — sans jamais remplacer l'inscription de base, qui reste gratuite.</p>
+      <div class="zone-copy">
+        <h3>Deux formules, selon votre budget</h3>
+        <p class="zone-lead">Disponible sur demande, dès maintenant — sans jamais remplacer l'inscription de base, qui reste gratuite.</p>
+      </div>
 
-          <div class="tier-grid">
-            <div class="tier-card">
-              <div class="tier-name">Basique</div>
-              <ul class="tier-list">
-                <li><span class="tick">✓</span> Position prioritaire dans les résultats</li>
-                <li><span class="tick">✓</span> Encadré orange qui attire l'œil</li>
-              </ul>
-              <div class="tier-price">10€ <span>/mois</span></div>
-            </div>
-            <div class="tier-card is-complete">
-              <div class="tier-name">Complet</div>
-              <ul class="tier-list">
-                <li><span class="tick">✓</span> Tout ce qui est dans Basique</li>
-                <li><span class="tick">✓</span> Badge « Le choix de Trouvéo »</li>
-                <li><span class="tick">✓</span> Descriptif plus riche</li>
-                <li><span class="tick">✓</span> Badge "Organisme vérifié" (logo + lien direct vers votre page d'inscription)</li>
-              </ul>
-              <div class="tier-price">20€ <span>/mois</span></div>
+      <div class="tier-grid">
+        <div class="tier-card">
+          <div class="tier-name">Priorité</div>
+          <ul class="tier-list">
+            <li><span class="tick">✓</span> Position prioritaire dans les résultats</li>
+            <li><span class="tick">✓</span> Encadré orange qui attire l'œil</li>
+          </ul>
+          <div class="tier-price">10€ <span>/mois</span></div>
+          <div class="tier-example">
+            <span class="mock-label">Aperçu</span>
+            <div class="priority-mock">
+              <div class="mini-card is-boosted">
+                <div class="mini-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
+                <div class="mini-meta">GRACE-HOLLOGNE · 4–5 ans</div>
+              </div>
+              <div class="mini-card">
+                <div class="mini-name">Stage multisports — Sprimont</div>
+                <div class="mini-meta">SPRIMONT · 6–9 ans</div>
+              </div>
             </div>
           </div>
-
-          <div class="offer-price">
-            <div class="offer-price-num" style="font-size:15px;">Facturé sur base annuelle</div>
-            <a class="offer-cta" href="#nous-contacter">En discuter →</a>
-          </div>
-          <p class="offer-note">Sans engagement au-delà d'un an. Nous validons votre fiche ensemble avant publication - rien ne change sans votre accord. Votre inscription de base reste et restera toujours gratuite, avec ou sans mise en avant.</p>
         </div>
-        <div class="zone-mock">
-          <span class="mock-label">Basique — position + encadré orange</span>
-          <div class="priority-mock">
-            <div class="mini-card is-boosted">
-              <div class="mini-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
-              <div class="mini-meta">GRACE-HOLLOGNE · 4–5 ans</div>
+
+        <div class="tier-card is-complete">
+          <div class="tier-name">Le choix de Trouvéo</div>
+          <ul class="tier-list">
+            <li><span class="tick">✓</span> Tout ce qui est dans Priorité</li>
+            <li><span class="tick">✓</span> Badge « Le choix de Trouvéo »</li>
+            <li><span class="tick">✓</span> Descriptif plus riche</li>
+            <li><span class="tick">✓</span> Badge "Organisme vérifié" (logo + lien direct vers votre page d'inscription)</li>
+          </ul>
+          <div class="tier-price">20€ <span>/mois</span></div>
+          <div class="tier-example">
+            <span class="mock-label">Aperçu</span>
+            <div class="card is-partner" style="margin-top:0;margin-bottom:0;">
+              <div class="featured-badge">★ Le choix de Trouvéo</div>
+              <div class="card-source">GRACE-HOLLOGNE <span class="verified-badge" title="Organisme vérifié">✓</span> · S'inscrire ↗</div>
+              <div class="card-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
+              <div class="card-desc">Fouilles pédagogiques, ateliers de restauration et visite des collections - une semaine pour découvrir l'archéologie en s'amusant.</div>
+              <div class="card-meta">
+                <div class="row">📅 Du 6 juillet au 7 août 2026, de 9h à 16h</div>
+                <div class="row">📍 Ecole Sinibaldo Basile, Rue Paul Janson, 187</div>
+              </div>
+              <div class="card-foot"><span class="pill-ok">4–5 ans</span></div>
             </div>
-            <div class="mini-card">
-              <div class="mini-name">Stage multisports — Sprimont</div>
-              <div class="mini-meta">SPRIMONT · 6–9 ans</div>
-            </div>
-          </div>
-          <span class="mock-label" style="margin-top:20px;">Complet — + badge et descriptif</span>
-          <div class="priority-mock">
-            <div class="mini-card is-boosted">
-              <span class="mini-tag">★ Le choix de Trouvéo</span>
-              <div class="mini-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
-              <div class="mini-meta">GRACE-HOLLOGNE · 4–5 ans</div>
-            </div>
-          </div>
-          <span class="mock-label" style="margin-top:20px;">Complet — badge "Organisme vérifié"</span>
-          <div class="card is-partner">
-            <span class="partner-ribbon">Organisme vérifié</span>
-            <div class="card-source">GRACE-HOLLOGNE · S'INSCRIRE ↗</div>
-            <div class="card-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
-            <div class="card-meta">
-              <div class="row">📅 Du 6 juillet au 7 août 2026, de 9h à 16h</div>
-              <div class="row">📍 Ecole Sinibaldo Basile, Rue Paul Janson, 187</div>
-            </div>
-            <div class="card-foot"><span class="pill-ok">4–5 ans</span></div>
           </div>
         </div>
       </div>
+
+      <div class="offer-price">
+        <div class="offer-price-num" style="font-size:15px;">Facturé sur base annuelle</div>
+        <a class="offer-cta" href="#nous-contacter">En discuter →</a>
+      </div>
+      <p class="offer-note">Sans engagement au-delà d'un an. Nous validons votre fiche ensemble avant publication - rien ne change sans votre accord. Votre inscription de base reste et restera toujours gratuite, avec ou sans mise en avant.</p>
     </div>
 
     <div class="offer-zone offer-zone-later">
