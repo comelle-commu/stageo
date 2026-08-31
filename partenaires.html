@@ -336,7 +336,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     <p class="lede">Trouvéo prévient les parents de Wallonie et de Bruxelles dès qu'une place de stage ou de plaine correspond à leur enfant. Que vos activités y soient déjà ou pas encore, nous pouvons les rendre visibles ensemble.</p>
     <div class="stat-strip">
       <div class="stat-cell"><span class="stat-num">25</span><span class="stat-label">sources actives (communes, ASBL, organismes)</span></div>
-      <div class="stat-cell"><span class="stat-num">1800+</span><span class="stat-label">activités actuellement recensées</span></div>
+      <div class="stat-cell"><span class="stat-num" id="statCount">1800+</span><span class="stat-label">activités actuellement recensées</span></div>
       <div class="stat-cell"><span class="stat-num stat-num-text">Chaque semaine</span><span class="stat-label">vos infos publiques sont vérifiées et remises à jour automatiquement</span></div>
     </div>
   </div>
@@ -547,6 +547,25 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
 </footer>
 
 <script>
+  // Même mécanisme que index.html (voir son script équivalent) : remplace
+  // le "1800+" statique par le vrai total, arrondi à la centaine
+  // inférieure pour ne jamais surestimer.
+  (function(){
+    const SUPABASE_URL = "https://oitmxxrurvutazuqsjbl.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_BO_qv6_PsRrAP6VoVXYq7w_YoT2CfLG";
+    const el = document.getElementById('statCount');
+
+    fetch(SUPABASE_URL + '/rest/v1/activites?select=id', {
+      method: 'HEAD',
+      headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, Prefer: 'count=exact' }
+    }).then(function(res){
+      const range = res.headers.get('content-range');
+      const total = range && Number(range.split('/')[1]);
+      if (!total) return;
+      el.textContent = (Math.floor(total / 100) * 100) + '+';
+    }).catch(function(){});
+  })();
+
   // Relais vers functions/api/contact-request.js (jamais directement vers
   // Supabase depuis le navigateur : la clé secrète resterait exposée). Même
   // logique que le formulaire d'inscription de index.html.

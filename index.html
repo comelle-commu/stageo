@@ -397,7 +397,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   <div class="blob blob2"></div>
   <div class="wrap hero-grid">
     <div>
-      <span class="eyebrow">1800+ activités déjà repérées · Wallonie &amp; Bruxelles</span>
+      <span class="eyebrow"><span id="statCount1">1800+</span> activités déjà repérées · Wallonie &amp; Bruxelles</span>
       <h1 class="headline">Une <span class="hi">alerte</span> dès qu'un stage correspond à votre enfant.</h1>
       <p class="sub">Trouvéo surveille en continu les stages, plaines de vacances et activités pour enfants de toute la Wallonie et Bruxelles. Donnez-nous l'âge de votre enfant, sa commune et ses activités préférées : nous vous prévenons dès qu'une place correspond, sans que vous ayez à fouiller des dizaines de sites vous-même.</p>
 
@@ -471,7 +471,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
         <div class="tdot">1</div>
         <div class="tcontent">
           <h3>Vous parcourez les activités</h3>
-          <p>1800+ stages et activités déjà recensés, mis à jour chaque semaine — librement, sans inscription.</p>
+          <p><span id="statCount2">1800+</span> stages et activités déjà recensés, mis à jour chaque semaine — librement, sans inscription.</p>
         </div>
       </div>
       <div class="tstep">
@@ -544,6 +544,33 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
 </footer>
 
 <script>
+  // Nombre d'activités affiché en dur ("1800+") jusqu'ici - se périmait à
+  // chaque scrape hebdomadaire (voir activites.html, où le vrai total est
+  // déjà affiché dynamiquement via tile(data.length, ...)). Même clé
+  // publique (RLS lecture seule) déjà exposée côté client dans
+  // activites.html - HEAD + Prefer:count=exact pour ne récupérer qu'un
+  // total, pas les ~2000+ lignes elles-mêmes.
+  (function(){
+    const SUPABASE_URL = "https://oitmxxrurvutazuqsjbl.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_BO_qv6_PsRrAP6VoVXYq7w_YoT2CfLG";
+
+    fetch(SUPABASE_URL + '/rest/v1/activites?select=id', {
+      method: 'HEAD',
+      headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, Prefer: 'count=exact' }
+    }).then(function(res){
+      const range = res.headers.get('content-range'); // ex. "0-0/2113"
+      const total = range && Number(range.split('/')[1]);
+      if (!total) return; // requête échouée ou total illisible -> on garde le texte statique existant
+      // Arrondi au *dessous* le plus proche 100 : jamais surestimer, et le
+      // texte reste un nombre "rond" plutôt qu'une valeur qui change à
+      // chaque scrape (ex. 2113 -> "2100+").
+      const rounded = Math.floor(total / 100) * 100;
+      document.querySelectorAll('#statCount1, #statCount2').forEach(function(el){
+        el.textContent = rounded + '+';
+      });
+    }).catch(function(){}); // silencieux : le texte statique reste un contenu valable en secours
+  })();
+
   // Envoie l'email à la fonction Netlify (jamais directement à Brevo depuis le
   // navigateur : ça exposerait la clé API secrète). Voir
   // netlify/functions/brevo-signup.js et docs/brevo-signup-2026-08-24.md.
