@@ -15,6 +15,7 @@ import adsl_stages
 import agenda_omnia
 import ans
 import arlon
+import ateliers04
 import aubange
 import aubel
 import aywaille
@@ -109,6 +110,7 @@ SCRAPERS = [
     ("La Ferme des Enfants de Liège", ferme_des_enfants),
     ("Mes Temps Libres (Anthisnes, Comblain-au-Pont)", mestempslibres),
     ("PARI asbl", pari),
+    ("Les Ateliers 04", ateliers04),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque

@@ -58,6 +58,7 @@ PLATEFORME_SOURCE = {
     "Royal Racing Club de Bruxelles": "MyiClub",
     "Jeunesse à Bruxelles": "WordPress",
     "PARI asbl": "WordPress",
+    "Les Ateliers 04": "WordPress",
 }
 
 
