@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import csv
 import json
+import os
 import re
 import threading
 import time
@@ -143,6 +144,27 @@ def _lock_for(domain: str) -> threading.Lock:
         return _domain_locks[domain]
 
 
+# Vu en pratique sur jeunesseabruxelles.be (31/08/2026, run GitHub Actions) :
+# `requests` échoue avec "unable to get local issuer certificate" (le bundle
+# `certifi` qu'il embarque par défaut n'a pas encore la CA intermédiaire du
+# site), alors que le magasin CA du système, lui, l'a déjà - décalage connu
+# entre le rythme de release PyPI de certifi et celui d'update-ca-certificates
+# côté OS. Présent par défaut sur les runners GitHub Actions (Ubuntu) et sur
+# toute machine Debian/Ubuntu ; retombe simplement sur le comportement normal
+# de `requests` si absent (ex. autre OS). Pas de désactivation de la
+# vérification - juste une source de CA différente, tout aussi fiable.
+_SYSTEM_CA_BUNDLE = "/etc/ssl/certs/ca-certificates.crt"
+
+
+def _get_with_ssl_fallback(url: str, timeout: int) -> requests.Response:
+    try:
+        return requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=timeout)
+    except requests.exceptions.SSLError as exc:
+        if "unable to get local issuer certificate" not in str(exc) or not os.path.exists(_SYSTEM_CA_BUNDLE):
+            raise
+        return requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=timeout, verify=_SYSTEM_CA_BUNDLE)
+
+
 def respectful_get(url: str, timeout: int = 20) -> requests.Response:
     """GET avec User-Agent identifiable et respect du Crawl-delay du domaine.
 
@@ -159,7 +181,7 @@ def respectful_get(url: str, timeout: int = 20) -> requests.Response:
             wait = min_delay - elapsed
             if wait > 0:
                 time.sleep(wait)
-        resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=timeout)
+        resp = _get_with_ssl_fallback(url, timeout)
         _last_request_at[domain] = time.monotonic()
     resp.raise_for_status()
     # Certains sites communaux ne déclarent pas de charset dans leur
