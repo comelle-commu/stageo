@@ -43,6 +43,26 @@ from bs4 import BeautifulSoup
 
 from common import Activite, classify_type, fetch_pdf_bytes, is_pdf, respectful_get
 
+# GELÉ le 31/08/2026 : www.jeunesseabruxelles.be sert une chaîne de
+# certificats SSL incomplète (SSLCertVerificationError "unable to get local
+# issuer certificate"), reproduit sur les runners GitHub Actions même en
+# retentant explicitement avec le magasin CA du système (pas juste un
+# décalage de version côté certifi - un vrai problème serveur, que même curl
+# refuserait). Pas de contournement côté client sans désactiver la
+# vérification du certificat, ce qu'on ne fait jamais. run_all.py appelle
+# donc ce module comme EN_ATTENTE (aucune requête réseau) plutôt que SCRAPERS
+# - les 21 activités importées le 30/08/2026 restent en base mais ne se
+# rafraîchiront plus tant que jeunesseabruxelles.be n'a pas corrigé son
+# certificat côté serveur. `scrape()` reste intact ci-dessous : à
+# remettre dans SCRAPERS (voir run_all.py) dès que le site est réparé,
+# sans rien réécrire.
+RAISON = (
+    "www.jeunesseabruxelles.be sert une chaîne de certificats SSL "
+    "incomplète (SSLCertVerificationError, confirmé même avec le magasin CA "
+    "du système - problème serveur, pas un souci de configuration côté "
+    "scraper) - à réessayer une fois leur certificat corrigé."
+)
+
 LISTING_URL = "https://www.jeunesseabruxelles.be/site/activites-de-vacances/plaines/"
 ORGANISATEUR = "Jeunesse à Bruxelles"
 

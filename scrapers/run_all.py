@@ -103,7 +103,6 @@ SCRAPERS = [
     ("ADSL Stages", adsl_stages),
     ("Forest", forest),
     ("Uccle", uccle),
-    ("Jeunesse à Bruxelles", jeunesse_a_bruxelles),
     ("Besace ASBL", besace),
     ("Jeunesse Ardente", jeunesse_ardente),
     ("Agenda Omnia (multi-communes)", agenda_omnia),
@@ -123,6 +122,7 @@ SCRAPERS = [
 # fichier pour la raison), mais apparaissent explicitement dans le résumé
 # plutôt que d'être silencieusement absents.
 EN_ATTENTE = [
+    ("Jeunesse à Bruxelles", jeunesse_a_bruxelles),
     ("Floreffe", floreffe),
     ("Waremme", waremme),
     ("Hannut", hannut),
