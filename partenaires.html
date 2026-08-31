@@ -167,12 +167,14 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   .offer-zone{border-radius:24px;padding:36px 38px;margin-bottom:24px;}
   .offer-zone:last-child{margin-bottom:0;}
   .offer-zone-free{background:var(--mint);}
+  .offer-zone-mid{background:var(--blush);}
   .offer-zone-later{background:var(--peach);}
   .zone-badge{
     display:inline-block;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
     padding:6px 14px;border-radius:100px;margin-bottom:18px;
   }
   .offer-zone-free .zone-badge{background:var(--teal);color:#fff;}
+  .offer-zone-mid .zone-badge{background:var(--orange-deep);color:#fff;}
   .offer-zone-later .zone-badge{background:var(--orange);color:var(--ink);}
   .zone-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;}
   .zone-copy h3{font-size:clamp(19px,2.4vw,24px);margin-bottom:12px;}
@@ -184,8 +186,20 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     flex:none;width:22px;height:22px;border-radius:50%;background:var(--teal);color:#fff;
     font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:1px;
   }
+  .offer-zone-mid .ok{background:var(--orange-deep);color:#fff;}
   .offer-zone-later .ok{background:var(--orange);color:var(--ink);}
   .offer-note{margin-top:22px;font-size:13.5px;color:var(--ink-soft);background:var(--paper);padding:12px 16px;border-radius:12px;}
+  .offer-price{
+    margin-top:22px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    background:var(--paper);padding:16px 20px;border-radius:14px;
+  }
+  .offer-price-num{font-family:'Grandstander',sans-serif;font-weight:800;font-size:26px;color:var(--ink);}
+  .offer-price-num span{font-family:'Work Sans',sans-serif;font-weight:600;font-size:13px;color:var(--ink-soft);}
+  .offer-price-note{font-size:13px;color:var(--ink-soft);max-width:30ch;}
+  .offer-cta{
+    flex:none;display:inline-flex;align-items:center;gap:8px;background:var(--ink);color:#fff;
+    text-decoration:none;font-weight:700;font-size:13.5px;padding:11px 20px;border-radius:100px;
+  }
 
   .mock-label{font-size:12.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;display:block;}
   .card{
@@ -379,7 +393,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   <div class="wrap narrow">
     <div class="offer-head">
       <h2>Ce que nous vous proposons</h2>
-      <p class="lead">Apparaître sur Trouvéo est et restera toujours gratuit, que vos activités y soient déjà ou pas encore. Voici ce qui est déjà acquis, et ce que nous pourrons proposer plus tard.</p>
+      <p class="lead">Apparaître sur Trouvéo est et restera toujours gratuit, que vos activités y soient déjà ou pas encore. Voici ce qui est déjà acquis, ce qui est disponible dès maintenant, et ce que nous préparons pour la suite.</p>
     </div>
 
     <div class="offer-zone offer-zone-free">
@@ -408,15 +422,52 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
       </div>
     </div>
 
+    <div class="offer-zone offer-zone-mid">
+      <span class="zone-badge">Mise en avant</span>
+      <div class="zone-grid">
+        <div class="zone-copy">
+          <h3>Pour vous démarquer dans les résultats</h3>
+          <p class="zone-lead">Disponible sur demande, dès maintenant, pour les organismes qui veulent plus de visibilité — sans jamais remplacer l'inscription de base, qui reste gratuite.</p>
+          <ul class="offer-list">
+            <li><span class="ok">↑</span> Position prioritaire — vos activités passent en tête des résultats pertinents, avant les fiches classées par date</li>
+            <li><span class="ok">↑</span> Descriptif plus riche — un vrai texte de présentation, pas seulement les dates, l'âge et le prix</li>
+            <li><span class="ok">↑</span> Badge « Le choix de Trouvéo » — un signal de confiance pour les familles</li>
+          </ul>
+          <div class="offer-price">
+            <div class="offer-price-num">10€ <span>/mois, sur base annuelle</span></div>
+            <a class="offer-cta" href="#nous-contacter">En discuter →</a>
+          </div>
+          <p class="offer-note">Sans engagement au-delà d'un an. Votre inscription de base reste et restera toujours gratuite, avec ou sans mise en avant.</p>
+        </div>
+        <div class="zone-mock">
+          <span class="mock-label">Position prioritaire</span>
+          <div class="priority-mock">
+            <div class="mini-card is-boosted">
+              <span class="mini-tag">★ Le choix de Trouvéo</span>
+              <div class="mini-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
+              <div class="mini-meta">GRACE-HOLLOGNE · 4–5 ans</div>
+            </div>
+            <div class="mini-card">
+              <div class="mini-name">Stage multisports — Sprimont</div>
+              <div class="mini-meta">SPRIMONT · 6–9 ans</div>
+            </div>
+            <div class="mini-card">
+              <div class="mini-name">Plaine communale de Verviers</div>
+              <div class="mini-meta">VERVIERS · 3–6 ans</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="offer-zone offer-zone-later">
       <span class="zone-badge">À venir</span>
       <div class="zone-grid">
         <div class="zone-copy">
           <h3>Ce que nous préparons pour la suite</h3>
-          <p class="zone-lead">Plusieurs paliers que nous avons en tête pour financer la suite, du plus simple au plus poussé — sans date ni prix fixés pour l'instant. Nous préférons vous montrer où nous allons plutôt que de vous promettre quelque chose que nous ne pouvons pas encore tenir.</p>
+          <p class="zone-lead">Deux autres pistes que nous avons en tête pour la suite — sans date ni prix fixés pour l'instant. Nous préférons vous montrer où nous allons plutôt que de vous promettre quelque chose que nous ne pouvons pas encore tenir.</p>
           <ul class="offer-list">
             <li><span class="ok">↑</span> Badge "Organisme vérifié" — votre logo et un lien direct vers votre page d'inscription, et nous validons votre fiche ensemble avant publication (rien ne change sans votre accord)</li>
-            <li><span class="ok">↑</span> Remontée en tête des résultats — vos activités passent en premier quand un parent filtre votre commune ou une tranche d'âge</li>
             <li><span class="ok">↑</span> Encart publicitaire avec photo — décliné par région ou par catégorie d'activité, visible même en dehors des résultats de recherche</li>
           </ul>
           <p class="offer-note">Rien de tout ça n'existe encore aujourd'hui. Nous vous tiendrons au courant si et quand ça se concrétise.</p>
@@ -432,22 +483,6 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
               <div class="row">📍 Ecole Sinibaldo Basile, Rue Paul Janson, 187</div>
             </div>
             <div class="card-foot"><span class="pill-ok">4–5 ans</span></div>
-          </div>
-          <span class="mock-label" style="margin-top:20px;">Remontée en tête des résultats</span>
-          <div class="priority-mock">
-            <div class="mini-card is-boosted">
-              <span class="mini-tag">En avant</span>
-              <div class="mini-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
-              <div class="mini-meta">GRACE-HOLLOGNE · 4–5 ans</div>
-            </div>
-            <div class="mini-card">
-              <div class="mini-name">Stage multisports — Sprimont</div>
-              <div class="mini-meta">SPRIMONT · 6–9 ans</div>
-            </div>
-            <div class="mini-card">
-              <div class="mini-name">Plaine communale de Verviers</div>
-              <div class="mini-meta">VERVIERS · 3–6 ans</div>
-            </div>
           </div>
           <span class="mock-label" style="margin-top:20px;">Encart publicitaire avec photo</span>
           <div class="ad-mock-photo">
@@ -490,8 +525,8 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
       <div class="tstep">
         <div class="tdot">3</div>
         <div class="tcontent">
-          <h3>Le reste, c'est pour plus tard</h3>
-          <p>Badge "Organisme vérifié", remontée en tête des résultats, encart publicitaire avec photo : ce sont des pistes que nous préparons, montrées plus haut sur cette page — sans date ni engagement de votre part aujourd'hui.</p>
+          <h3>Envie de plus de visibilité ? C'est possible dès aujourd'hui</h3>
+          <p>La mise en avant (10€/mois) est disponible sur demande. Le badge "Organisme vérifié" et l'encart publicitaire avec photo restent des pistes que nous préparons, montrées plus haut sur cette page — sans date ni engagement de votre part aujourd'hui.</p>
         </div>
       </div>
     </div>
@@ -517,7 +552,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
       </div>
       <div class="form-card">
         <h3>Être recontacté·e</h3>
-        <p>Intéressé·e par le badge organisme vérifié, une mise en avant ou un encart publicitaire ? Laissez votre email, nous vous recontactons.</p>
+        <p>Intéressé·e par la mise en avant, le badge organisme vérifié ou un encart publicitaire ? Laissez votre email, nous vous recontactons.</p>
         <form class="contact-form" id="premiumForm" novalidate>
           <input type="email" name="email" placeholder="votre@email.be" required aria-label="Votre email">
           <textarea name="message" placeholder="Un mot sur votre besoin (optionnel)" rows="2" aria-label="Message (optionnel)"></textarea>
