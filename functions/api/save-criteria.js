@@ -110,9 +110,19 @@ export async function onRequestPost(context) {
     if (res.status === 200 || res.status === 201 || res.status === 204) {
       // Best-effort : une erreur d'envoi ne doit pas transformer un
       // enregistrement réussi en échec côté utilisateur.
+      // DEBUG TEMPORAIRE (à retirer une fois l'email de confirmation
+      // validé en prod) : ?debug=1 renvoie l'erreur d'envoi réelle au lieu
+      // de l'avaler silencieusement, pour diagnostiquer sans accès aux
+      // logs Cloudflare depuis cet environnement.
+      let debugInfo;
       await sendConfirmationEmail(env, email, enfants, commune.trim()).catch((err) => {
         console.error("Envoi de l'email de confirmation impossible", err);
+        debugInfo = String((err && err.message) || err);
       });
+      const url = new URL(request.url);
+      if (url.searchParams.get("debug") === "1") {
+        return jsonResponse(200, { ok: true, debug: debugInfo || "email envoyé sans erreur" });
+      }
       return jsonResponse(200, { ok: true });
     }
 
