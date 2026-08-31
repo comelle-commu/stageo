@@ -1,0 +1,43 @@
+name: Statistiques email (diagnostic)
+
+# Workflow séparé de scrape.yml : purement diagnostic (lecture seule côté
+# Brevo, n'envoie jamais rien), déclenché à la demande depuis l'onglet
+# Actions - voir scrapers/email_stats.py.
+on:
+  workflow_dispatch:
+    inputs:
+      email:
+        description: "Restreindre à un destinataire précis (vide = tous les évènements)."
+        required: false
+        default: ""
+      days:
+        description: "Fenêtre en jours à consulter."
+        required: false
+        default: "30"
+
+permissions:
+  contents: read
+
+jobs:
+  stats:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Installer les dépendances
+        run: pip install requests
+
+      - name: Consulter les statistiques Brevo
+        working-directory: scrapers
+        env:
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+        run: >
+          python email_stats.py
+          --days "${{ inputs.days }}"
+          ${{ inputs.email != '' && format('--email {0}', inputs.email) || '' }}
