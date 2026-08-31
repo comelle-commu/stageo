@@ -49,6 +49,17 @@ jobs:
     # à 25 min, dans les deux cas sans erreur de scraper individuel - juste le temps cumulé qui manquait.
     # Si ça expire encore à 40 min, chercher un scraper anormalement lent plutôt que remonter le chiffre
     # indéfiniment (voir timings.txt dans l'artefact "scrape-output" du run concerné).
+    env:
+      # Sans ça, stdout de Python est bufferisé par blocs (pas ligne par
+      # ligne) dès qu'il n'est pas connecté à un vrai terminal - ce qui est
+      # le cas ici. Constaté le 31/08/2026 : le step "Lancer le scraper" a
+      # tourné 40 minutes sans qu'AUCUNE ligne des print() de run_all.py
+      # (un "--- {nom} ---" par scraper) n'apparaisse dans les logs, alors
+      # que l'expiration du timeout n'a évidemment pas attendu la fin du
+      # buffer pour interrompre le process - impossible de savoir si le
+      # run avançait normalement ou était bloqué sur le tout premier
+      # scraper. Indispensable pour diagnostiquer une prochaine expiration.
+      PYTHONUNBUFFERED: "1"
 
     steps:
       - name: Checkout
