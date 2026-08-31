@@ -17,6 +17,11 @@ on:
         required: false
         type: boolean
         default: false
+      dry_run:
+        description: "Aperçu sans rien envoyer (affiche les destinataires visés dans les logs du run) - utile pour la relance critères, dont on ne peut pas se tester soi-même une fois ses critères déjà remplis."
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -71,7 +76,7 @@ jobs:
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           BREVO_LIST_ID: ${{ secrets.BREVO_LIST_ID }}
           BREVO_SENDER_EMAIL: ${{ secrets.BREVO_SENDER_EMAIL }}
-        run: python brevo_digest.py
+        run: python brevo_digest.py ${{ inputs.dry_run && '--dry-run' || '' }}
         # Ne tourne que si le scrape ci-dessus a réussi : on ne veut pas
         # prévenir les abonnés sur base d'un run en échec/incomplet. Exclu
         # de skip_scrape volontairement (contrairement aux alertes ci-
@@ -88,7 +93,7 @@ jobs:
           BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           BREVO_SENDER_EMAIL: ${{ secrets.BREVO_SENDER_EMAIL }}
           ALERTES_TEST_EMAIL: ${{ inputs.test_email }}
-        run: python criteres_alertes.py
+        run: python criteres_alertes.py ${{ inputs.dry_run && '--dry-run' || '' }}
         # Volontairement indépendant du step précédent (`if` basé sur
         # steps.scrape, pas sur le digest) : un souci ponctuel sur la
         # campagne groupée ne doit pas priver les familles qui attendent
@@ -104,7 +109,7 @@ jobs:
           BREVO_LIST_ID: ${{ secrets.BREVO_LIST_ID }}
           BREVO_SENDER_EMAIL: ${{ secrets.BREVO_SENDER_EMAIL }}
           RELANCE_TEST_EMAIL: ${{ inputs.test_email }}
-        run: python relance_criteres.py
+        run: python relance_criteres.py ${{ inputs.dry_run && '--dry-run' || '' }}
         # Ne dépend d'aucune donnée fraîchement scrapée (juste Brevo +
         # criteres_parents) - placé ici par cohérence avec les deux autres
         # jobs d'email plutôt que pour une vraie dépendance au scrape.
