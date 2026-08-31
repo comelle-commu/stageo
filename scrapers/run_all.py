@@ -53,6 +53,7 @@ import neupre
 import nivelles
 import oupeye
 import ottignieslln
+import pari
 import seraing
 import sprimont
 import rhcv
@@ -107,6 +108,7 @@ SCRAPERS = [
     ("Faimes", faimes),
     ("La Ferme des Enfants de Liège", ferme_des_enfants),
     ("Mes Temps Libres (Anthisnes, Comblain-au-Pont)", mestempslibres),
+    ("PARI asbl", pari),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque
