@@ -105,6 +105,16 @@
     border:1.5px solid var(--line);border-radius:12px;color:var(--ink);background:var(--cream);
     outline:none;transition:border-color .15s ease;
   }
+  input[type=file]{
+    width:100%;padding:11px 12px;font-size:13.5px;font-family:'Work Sans',sans-serif;
+    border:1.5px dashed var(--line);border-radius:12px;color:var(--ink-soft);background:var(--cream);
+  }
+  .shortcut-field{background:var(--mint);border-radius:16px;padding:16px 18px;margin-bottom:14px;}
+  .shortcut-field:first-of-type{margin-top:22px;}
+  .field-divider{
+    text-align:center;font-size:12.5px;font-weight:700;color:var(--ink-faint);
+    text-transform:uppercase;letter-spacing:.03em;margin:8px 0 22px;
+  }
   textarea{resize:vertical;min-height:70px;font-family:'Work Sans',sans-serif;}
   input:focus, select:focus, textarea:focus{border-color:var(--teal);}
 
@@ -159,7 +169,7 @@
   <header class="intro">
     <span class="eyebrow">Pour les organismes</span>
     <h1 class="headline">Ajoutez votre activité vous-même</h1>
-    <p class="sub">Gratuit, comme toujours. Nous relisons chaque soumission (dates, âge, tarif, modalités) avant publication — vous recevrez un email dès qu'elle sera en ligne.</p>
+    <p class="sub">Gratuit, comme toujours. Remplissez les champs ci-dessous, ou plus simple : transmettez-nous un lien ou un document et on s'occupe du reste. Nous relisons chaque soumission avant publication — vous recevrez un email dès qu'elle sera en ligne.</p>
   </header>
 
   <form id="soumissionForm" novalidate>
@@ -168,15 +178,28 @@
       <input type="text" id="organisateur" name="organisateur" placeholder="Ex : ASBL Les Petits Curieux" required maxlength="200">
     </div>
 
+    <div class="field shortcut-field">
+      <label class="field-label" for="lienSource">Vous avez déjà un lien vers votre programme ? (optionnel)</label>
+      <input type="url" id="lienSource" name="lienSource" placeholder="https://…">
+    </div>
+
+    <div class="field shortcut-field">
+      <label class="field-label" for="fichier">Ou un PDF/Word à nous transmettre ? (optionnel)</label>
+      <input type="file" id="fichier" name="fichier" accept=".pdf,.doc,.docx">
+      <p class="field-help">8 Mo max. Si vous nous donnez un lien ou un document, les champs ci-dessous deviennent optionnels — on s'occupe de les remplir à partir de ce que vous nous transmettez.</p>
+    </div>
+
+    <p class="field-divider">Ou remplissez les détails vous-même :</p>
+
     <div class="field">
-      <label class="field-label" for="nomActivite">Nom de l'activité</label>
-      <input type="text" id="nomActivite" name="nomActivite" placeholder="Ex : Stage archéologie et fouilles" required maxlength="200">
+      <label class="field-label" for="nomActivite">Nom de l'activité (optionnel si lien/document ci-dessus)</label>
+      <input type="text" id="nomActivite" name="nomActivite" placeholder="Ex : Stage archéologie et fouilles" maxlength="200">
     </div>
 
     <div class="field">
-      <label class="field-label" for="typeActivite">Type d'activité</label>
-      <select id="typeActivite" name="typeActivite" required>
-        <option value="" disabled selected>Choisir…</option>
+      <label class="field-label" for="typeActivite">Type d'activité (optionnel si lien/document ci-dessus)</label>
+      <select id="typeActivite" name="typeActivite">
+        <option value="" selected>Choisir… (ou laisser vide)</option>
         <option value="Sport">Sport</option>
         <option value="Art & créativité">Art &amp; créativité</option>
         <option value="Sciences & nature">Sciences &amp; nature</option>
@@ -186,8 +209,8 @@
     </div>
 
     <div class="field">
-      <label class="field-label" for="dates">Dates</label>
-      <input type="text" id="dates" name="dates" placeholder="Ex : Du 6 au 10 juillet 2026" required maxlength="200">
+      <label class="field-label" for="dates">Dates (optionnel si lien/document ci-dessus)</label>
+      <input type="text" id="dates" name="dates" placeholder="Ex : Du 6 au 10 juillet 2026" maxlength="200">
     </div>
 
     <div class="field">
@@ -217,11 +240,6 @@
     <div class="field">
       <label class="field-label" for="modalites">Modalités d'inscription (optionnel)</label>
       <textarea id="modalites" name="modalites" placeholder="Ex : Inscription en ligne sur notre site, places limitées"></textarea>
-    </div>
-
-    <div class="field">
-      <label class="field-label" for="lienSource">Lien vers plus d'infos / inscription (optionnel)</label>
-      <input type="url" id="lienSource" name="lienSource" placeholder="https://…">
     </div>
 
     <div class="field">
@@ -276,24 +294,10 @@
     const lienSource = document.getElementById('lienSource').value.trim();
     const description = document.getElementById('description').value.trim();
     const contactEmail = document.getElementById('contactEmail').value.trim();
+    const fichier = document.getElementById('fichier').files[0] || null;
 
     if (!organisateur){
       errorEl.textContent = "Merci d'indiquer le nom de votre organisme.";
-      errorEl.style.display = 'block';
-      return;
-    }
-    if (!nomActivite){
-      errorEl.textContent = "Merci d'indiquer le nom de l'activité.";
-      errorEl.style.display = 'block';
-      return;
-    }
-    if (!typeActivite){
-      errorEl.textContent = "Merci de choisir un type d'activité.";
-      errorEl.style.display = 'block';
-      return;
-    }
-    if (!dates){
-      errorEl.textContent = "Merci d'indiquer les dates de l'activité.";
       errorEl.style.display = 'block';
       return;
     }
@@ -302,28 +306,44 @@
       errorEl.style.display = 'block';
       return;
     }
+    // Soit les champs détaillés sont remplis, soit un lien/document nous
+    // permet d'aller chercher les infos nous-mêmes - voir le texte
+    // d'aide au-dessus du séparateur "Ou remplissez les détails vous-même".
+    const detailsRemplis = nomActivite && typeActivite && dates;
+    const raccourciFourni = lienSource || fichier;
+    if (!detailsRemplis && !raccourciFourni){
+      errorEl.textContent = "Merci de remplir le nom, le type et les dates de l'activité, ou de nous transmettre un lien/document à la place.";
+      errorEl.style.display = 'block';
+      return;
+    }
+    if (fichier && fichier.size > 8 * 1024 * 1024){
+      errorEl.textContent = "Le fichier dépasse 8 Mo - envoyez-le nous plutôt par email à hello@trouveo.be.";
+      errorEl.style.display = 'block';
+      return;
+    }
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Envoi…';
 
+    const formData = new FormData();
+    formData.set('organisateur', organisateur);
+    formData.set('nom_activite', nomActivite);
+    formData.set('type_activite', typeActivite);
+    formData.set('dates', dates);
+    if (ageMinVal !== '') formData.set('age_min', ageMinVal);
+    if (ageMaxVal !== '') formData.set('age_max', ageMaxVal);
+    formData.set('commune', commune);
+    formData.set('lieu', lieu);
+    formData.set('prix', prix);
+    formData.set('modalites_inscription', modalites);
+    formData.set('lien_source', lienSource);
+    formData.set('description_longue', description);
+    formData.set('contact_email', contactEmail);
+    if (fichier) formData.set('fichier', fichier);
+
     fetch('/api/soumettre-activite', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        organisateur: organisateur,
-        nom_activite: nomActivite,
-        type_activite: typeActivite,
-        dates: dates,
-        age_min: ageMinVal === '' ? null : Number(ageMinVal),
-        age_max: ageMaxVal === '' ? null : Number(ageMaxVal),
-        commune: commune,
-        lieu: lieu,
-        prix: prix,
-        modalites_inscription: modalites,
-        lien_source: lienSource,
-        description_longue: description,
-        contact_email: contactEmail
-      })
+      body: formData
     })
       .then(function(res){
         return res.json().catch(function(){ return {}; }).then(function(data){ return { ok: res.ok, data: data }; });
