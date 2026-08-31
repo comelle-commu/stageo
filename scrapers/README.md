@@ -154,6 +154,9 @@ un socle mutualisé pour cette famille de sites (voir
 | Faimes (iMio, sans widget Omnia) | Brochure PDF (texte natif, propre) | Une page couvre toute l'année scolaire, format répété "Semaine du D au D + thème(s) petits/grands" | `faimes.py` |
 | La Ferme des Enfants de Liège (organisme privé, Liège) | WordPress/WooCommerce | Liste + prix/stock via l'API publique WooCommerce Store (`/wp-json/wc/store/v1/products`), mais les vraies dates ne sont que dans le HTML de la page produit (bloc constructeur Divi "Dates/Age/Lieu") - un appel API + un fetch HTML par stage | `ferme_des_enfants.py` |
 | Mes Temps Libres (plateforme mutualisée, Anthisnes + Comblain-au-Pont) | WordPress | Dépliant PDF au nom variable par saison, lien caché derrière un attribut HTML url-encodé contenant du JSON échappé - découverte dynamique en deux temps (`unquote()` puis regex `"link":"...pdf"`) | `mestempslibres.py` |
+| Le CFS asbl (organisme privé, Awans/Huy/Verlaine + Brabant wallon/Bruxelles hors périmètre) | Plateforme MyiClub (variante API JSON `AjaxGetCFS.asp`, distincte de la page HTML `register.asp` des autres clubs iClub) | API JSON publique sans auth, filtrée sur les 3 lieux confirmés en province de Liège | `cfs.py` |
+| StageVacances (répertoire national multi-organismes, Ligue des familles) | Nuxt SPA + API Cockpit CMS publique (`api.stagevacances.be/camps`) | ~2300 fiches toutes régions/années, filtrées par code postal "4xxx" -> commune (table construite à la main), période future uniquement, garde-fou anti-bannière (`_MAX_PERIOD_DAYS`) - détecte automatiquement tout nouvel organisme publiant sur la plateforme | `stagevacances.py` |
+| Le Fagotin (organisme privé, parc nature Stoumont) | WordPress/Gutenberg | HTML statique, blocs `h5` "Titre \| âge" groupés par semaine, lien de réservation individuel par stage (bookwhen.com) | `fagotin.py` |
 
 ### Sites 100% JavaScript : `common.fetch_rendered_html()`
 
@@ -253,9 +256,12 @@ non explorés cette session.
 
 Suivi complet (communes couvertes, en attente de publication, à
 construire, jamais vérifiées, ASBL candidates) dans
-`docs/ratissage-province-liege-2026-08-28.md` - à consulter/mettre à jour
-avant toute nouvelle session de recherche de sources sur cette province,
-pour ne pas repartir de zéro.
+`docs/ratissage-province-liege-2026-08-28.md` et son supplément
+`docs/ratissage-liege-supplement-2026-08-31.md` (4 organismes
+supplémentaires : Le CFS, Centre Culturel de Theux, ATPW, Le Fagotin - et
+la liste des pistes rejetées pour ne pas les re-creuser) - à
+consulter/mettre à jour avant toute nouvelle session de recherche de
+sources sur cette province, pour ne pas repartir de zéro.
 
 ## Agenda Omnia : un widget partagé découvert en ratissant la province de Liège
 
