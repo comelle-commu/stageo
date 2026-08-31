@@ -85,6 +85,37 @@ IMIO_DOMAINS = {
     # trois (robots.txt + /gdpr-view).
     "www.olln.be",
     "atl.lalouviere.be",
+    # Ratissage province de Luxembourg (31/08/2026) - iMio confirmé (robots.txt
+    # redirigé vers static.imio.be) sur l'ensemble de ces communes. Virton
+    # scrapée (voir virton.py) ; les autres restent enregistrées ici même
+    # sans scraper actif (page vide ou non encore vérifiée) - voir
+    # docs/elargissement-luxembourg-2026-08-31.md pour le détail par commune.
+    "www.virton.be",
+    "www.attert.be",
+    "www.martelange.be",
+    "www.bertogne.be",
+    "www.gouvy.be",
+    "www.houffalize.be",
+    "www.sainte-ode.be",
+    "www.vaux-sur-sure.be",
+    "www.erezee.be",
+    "www.nassogne.be",
+    "www.rendeux.be",
+    "www.bouillon.be",
+    "www.daverdisse.be",
+    "www.herbeumont.be",
+    "www.neufchateau.be",
+    "www.paliseul.be",
+    "www.tellin.be",
+    "www.vresse-sur-semois.be",
+    "www.wellin.be",
+    "www.florenville.be",
+    "www.habay.be",
+    "www.meix-devant-virton.be",
+    "www.musson.be",
+    "www.rouvroy.be",
+    "www.saint-leger.be",
+    "www.tintigny.be",
     # Ratissage province de Liège (27/08/2026) - iMio confirmé (robots.txt
     # signature identique) sur l'ensemble de ces communes, utilisées par
     # agenda_omnia.py (widget "Agenda" partagé, voir ce module).

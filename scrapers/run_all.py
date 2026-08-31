@@ -52,6 +52,7 @@ import jeunesse_ardente
 import jeunesses_musicales
 import lalouviere
 import letssport
+import meix_devant_virton
 import mestempslibres
 import mons
 import namur
@@ -71,6 +72,7 @@ import supabase_client
 import uccle
 import verviers
 import village_des_benjamins
+import virton
 import vise
 import waremme
 from common import write_outputs
@@ -122,6 +124,8 @@ SCRAPERS = [
     ("Le CFS asbl (Awans, Huy, Verlaine)", cfs),
     ("StageVacances (répertoire Ligue des familles, filtré Liège)", stagevacances),
     ("Le Fagotin (Stoumont)", fagotin),
+    ("Virton", virton),
+    ("Meix-devant-Virton", meix_devant_virton),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque

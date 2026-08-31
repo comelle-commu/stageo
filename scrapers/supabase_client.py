@@ -52,6 +52,8 @@ PLATEFORME_SOURCE = {
     "Sprimont": "Plone",
     "Mons": "Plone",
     "Arlon": "Plone",
+    "Virton": "Plone",
+    "Meix-devant-Virton": "Plone",
     "ADEPS": "Drupal",
     "Cap Sciences": "WordPress",
     "Royal Léopold Club": "MyiClub",
