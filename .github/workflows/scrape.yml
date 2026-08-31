@@ -42,10 +42,13 @@ permissions:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 25 # Herstal + Huy consomment ~4 min à eux seuls (Crawl-delay iMio 120s) ; porté
-    # de 15 à 25 min le 31/08/2026 - le nombre de scrapers a presque triplé depuis le premier réglage
-    # (PARI, Ateliers04, HESL, Reform, RHCV, TCCB, Aubange, Jeunesse à Bruxelles... ajoutés depuis),
-    # le run programmé du 31/08 a expiré à 15 min alors qu'aucun scraper individuel n'était en cause.
+    timeout-minutes: 40 # Herstal + Huy consomment ~4 min à eux seuls (Crawl-delay iMio 120s). Porté de
+    # 15 à 25 min puis de 25 à 40 min le 31/08/2026 - le nombre de scrapers a presque triplé depuis le
+    # premier réglage (PARI, Ateliers04, HESL, Reform, RHCV, TCCB, Aubange, Jeunesse à Bruxelles...
+    # ajoutés depuis) ; le run programmé du 31/08 a expiré à 15 min, puis un test manuel a aussi expiré
+    # à 25 min, dans les deux cas sans erreur de scraper individuel - juste le temps cumulé qui manquait.
+    # Si ça expire encore à 40 min, chercher un scraper anormalement lent plutôt que remonter le chiffre
+    # indéfiniment (voir timings.txt dans l'artefact "scrape-output" du run concerné).
 
     steps:
       - name: Checkout
