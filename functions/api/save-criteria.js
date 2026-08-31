@@ -101,7 +101,13 @@ export async function onRequestPost(context) {
       ]),
     });
 
-    if (res.status === 201 || res.status === 204) {
+    // 201 = nouvelle ligne créée, 204 = ligne mise à jour selon les cas -
+    // mais PostgREST répond aussi 200 pour une mise à jour via
+    // on_conflict+merge-duplicates (constaté en pratique, contrairement à
+    // brevo-signup.js où seuls 201/204 apparaissent) : un email qui
+    // republie le formulaire (ex. pour corriger un âge) tombait donc à
+    // tort dans la branche d'erreur ci-dessous.
+    if (res.status === 200 || res.status === 201 || res.status === 204) {
       // Best-effort : une erreur d'envoi ne doit pas transformer un
       // enregistrement réussi en échec côté utilisateur.
       await sendConfirmationEmail(env, email, enfants, commune.trim()).catch((err) => {
@@ -200,6 +206,11 @@ async function sendConfirmationEmail(env, email, enfants, commune) {
 </body>
 </html>`;
 
+  // Timeout explicite : sans ça, un Brevo lent ou injoignable ferait
+  // traîner toute la réponse HTTP jusqu'à ce que la plateforme Cloudflare
+  // tue elle-même la requête (502 générique, sans passer par notre
+  // gestion d'erreur ci-dessus) - inacceptable pour un email qui n'est
+  // qu'un plus par rapport à l'enregistrement déjà réussi en base.
   const resp = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: { "api-key": apiKey, "Content-Type": "application/json", Accept: "application/json" },
@@ -209,6 +220,7 @@ async function sendConfirmationEmail(env, email, enfants, commune) {
       subject: "Vos critères sont bien enregistrés",
       htmlContent: html,
     }),
+    signal: AbortSignal.timeout(8000),
   });
   if (!resp.ok) {
     const details = await resp.text().catch(() => "");
