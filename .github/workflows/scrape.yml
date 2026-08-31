@@ -97,6 +97,19 @@ jobs:
         # l'échec du digest hebdo ne doit pas empêcher l'envoi des alertes
         # personnalisées, et inversement.
 
+      - name: Importer les soumissions d'organismes approuvées
+        if: inputs.check_email_stats != true
+        working-directory: scrapers
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: python import_soumissions.py
+        # Indépendant du scrape (ne lit/écrit que soumissions_activites +
+        # activites) - tourne même si skip_scrape ou si le scrape a échoué,
+        # et AVANT le digest/les alertes ci-dessous pour qu'une activité
+        # tout juste approuvée soit incluse dans les envois de cette
+        # semaine plutôt que d'attendre le run suivant.
+
       - name: Envoyer l'email hebdomadaire (nouvelles activités)
         if: inputs.skip_scrape != true && inputs.check_email_stats != true && steps.scrape.outcome == 'success'
         working-directory: scrapers

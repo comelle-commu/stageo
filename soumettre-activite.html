@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trouvéo — Soumettre une activité</title>
+<meta name="description" content="Organisme, ASBL, club ou commune : ajoutez vous-même votre activité sur Trouvéo. Nous la relisons puis la publions.">
+<meta name="robots" content="noindex,follow">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="canonical" href="https://trouveo.be/soumettre-activite">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Grandstander:wght@600;700;800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream: #FFFDF8;
+    --peach: #FDF1E1;
+    --mint: #E7F4EE;
+    --blush: #FCEAE7;
+    --paper: #FFFFFF;
+    --surface-tint: #F2F7F6;
+    --ink: #015380;
+    --ink-soft: #5C7A8C;
+    --ink-faint: #93A9B5;
+    --teal: #0197AF;
+    --teal-deep: #017089;
+    --orange: #FDBA18;
+    --orange-deep: #E2A20E;
+    --blue: #017CCA;
+    --pink: #FD6258;
+    --line: rgba(1,83,128,0.12);
+    --line-soft: rgba(1,83,128,0.07);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Grandstander', sans-serif;font-weight:700;letter-spacing:-0.01em;margin:0;}
+  p{margin:0;}
+  .wrap{max-width:640px;margin:0 auto;padding:0 28px;}
+  a{color:inherit;}
+  button{font-family:inherit;}
+  :focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
+
+  nav.wrap{max-width:1080px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:24px 28px;}
+  .logo{display:flex;align-items:center;text-decoration:none;flex:none;}
+  .logo-img{height:28px;width:auto;display:block;}
+  .nav-cta{
+    font-size:14px;font-weight:700;padding:13px 24px;border-radius:100px;
+    background:var(--teal);color:#fff;text-decoration:none;white-space:nowrap;
+    box-shadow:0 10px 24px -8px rgba(1,151,175,0.5);
+  }
+  @media (max-width:480px){
+    nav.wrap{padding:16px 20px;}
+    .logo-img{height:24px;}
+    .nav-cta{font-size:13px;padding:10px 16px;}
+  }
+
+  header.intro{padding:24px 0 30px;text-align:center;}
+  .eyebrow{
+    display:inline-block;font-size:13px;font-weight:700;color:var(--teal-deep);
+    background:var(--mint);padding:6px 14px;border-radius:100px;margin-bottom:14px;
+  }
+  h1.headline{font-size:clamp(26px,4vw,34px);line-height:1.15;color:var(--ink);margin-bottom:12px;}
+  p.sub{font-size:15.5px;line-height:1.6;color:var(--ink-soft);}
+
+  form{
+    background:var(--paper);border-radius:24px;padding:30px 28px;margin:20px 0 40px;
+    box-shadow:0 20px 50px -30px rgba(1,83,128,0.35);border:1px solid var(--line-soft);
+  }
+  .field{margin-bottom:26px;}
+  .field:last-of-type{margin-bottom:0;}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:480px){ .field-row{grid-template-columns:1fr;} }
+  label.field-label{
+    display:block;font-family:'Grandstander',sans-serif;font-weight:700;font-size:15px;
+    color:var(--ink);margin-bottom:8px;
+  }
+  .field-help{font-size:13px;color:var(--ink-soft);margin-top:6px;line-height:1.5;}
+  input[type=email], input[type=text], input[type=number], input[type=url], select, textarea{
+    width:100%;padding:12px 14px;font-size:15px;font-family:'Work Sans',sans-serif;
+    border:1.5px solid var(--line);border-radius:12px;color:var(--ink);background:var(--cream);
+    outline:none;transition:border-color .15s ease;
+  }
+  textarea{resize:vertical;min-height:70px;font-family:'Work Sans',sans-serif;}
+  input:focus, select:focus, textarea:focus{border-color:var(--teal);}
+
+  button.submit{
+    width:100%;margin-top:30px;border:none;background:var(--teal);color:#fff;
+    font-family:'Work Sans',sans-serif;font-weight:700;font-size:16px;
+    padding:16px;border-radius:14px;cursor:pointer;
+    box-shadow:0 14px 30px -12px rgba(1,151,175,0.55);
+    transition:transform .15s ease, background .15s ease;
+  }
+  button.submit:hover{transform:translateY(-1px);background:var(--teal-deep);}
+  button.submit:disabled{opacity:.6;cursor:default;transform:none;}
+
+  .confirm{
+    display:none;background:var(--mint);border-radius:20px;padding:28px 26px;text-align:center;
+    margin:20px 0 40px;
+  }
+  .confirm h2{font-size:20px;margin-bottom:8px;}
+  .confirm p{color:var(--ink-soft);font-size:14.5px;line-height:1.6;}
+  .error{display:none;background:var(--blush);color:#C23B32;border-radius:12px;padding:12px 16px;font-size:14px;margin-top:16px;}
+
+  footer{padding:30px 0 50px;text-align:center;font-size:13px;color:var(--ink-faint);}
+  footer a{text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<nav class="wrap">
+  <a class="logo" href="/">
+    <img src="trouveo-logo.png" alt="Trouvéo" class="logo-img">
+  </a>
+  <a href="/activites" class="nav-cta">Voir les activités</a>
+</nav>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="eyebrow">Pour les organismes</span>
+    <h1 class="headline">Ajoutez votre activité vous-même</h1>
+    <p class="sub">Gratuit, comme toujours. Nous relisons chaque soumission (dates, âge, tarif, modalités) avant publication — vous recevrez un email dès qu'elle sera en ligne.</p>
+  </header>
+
+  <form id="soumissionForm" novalidate>
+    <div class="field">
+      <label class="field-label" for="organisateur">Votre organisme</label>
+      <input type="text" id="organisateur" name="organisateur" placeholder="Ex : ASBL Les Petits Curieux" required maxlength="200">
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="nomActivite">Nom de l'activité</label>
+      <input type="text" id="nomActivite" name="nomActivite" placeholder="Ex : Stage archéologie et fouilles" required maxlength="200">
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="typeActivite">Type d'activité</label>
+      <select id="typeActivite" name="typeActivite" required>
+        <option value="" disabled selected>Choisir…</option>
+        <option value="Sport">Sport</option>
+        <option value="Art & créativité">Art &amp; créativité</option>
+        <option value="Sciences & nature">Sciences &amp; nature</option>
+        <option value="Langues">Langues</option>
+        <option value="Multi-activités">Multi-activités</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="dates">Dates</label>
+      <input type="text" id="dates" name="dates" placeholder="Ex : Du 6 au 10 juillet 2026" required maxlength="200">
+    </div>
+
+    <div class="field">
+      <label class="field-label">Âge (optionnel)</label>
+      <div class="field-row">
+        <input type="number" id="ageMin" name="ageMin" placeholder="Âge min." min="0" max="25" step="0.5">
+        <input type="number" id="ageMax" name="ageMax" placeholder="Âge max." min="0" max="25" step="0.5">
+      </div>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="commune">Commune</label>
+      <input type="text" id="commune" name="commune" placeholder="Ex : Namur" maxlength="120">
+      <p class="field-help">Utilisée pour la recherche par proximité côté site.</p>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="lieu">Lieu précis (optionnel)</label>
+      <input type="text" id="lieu" name="lieu" placeholder="Ex : Rue de la Halle, 5000 Namur" maxlength="200">
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="prix">Prix (optionnel)</label>
+      <input type="text" id="prix" name="prix" placeholder="Ex : 65€/semaine" maxlength="200">
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="modalites">Modalités d'inscription (optionnel)</label>
+      <textarea id="modalites" name="modalites" placeholder="Ex : Inscription en ligne sur notre site, places limitées"></textarea>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="lienSource">Lien vers plus d'infos / inscription (optionnel)</label>
+      <input type="url" id="lienSource" name="lienSource" placeholder="https://…">
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="description">Descriptif détaillé (optionnel)</label>
+      <textarea id="description" name="description" placeholder="Un texte de présentation plus complet - utile si vous êtes en mise en avant."></textarea>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="contactEmail">Votre email</label>
+      <input type="email" id="contactEmail" name="contactEmail" placeholder="votre@organisme.be" required>
+      <p class="field-help">Pour vous confirmer la réception, et vous prévenir dès que c'est en ligne.</p>
+    </div>
+
+    <button type="submit" class="submit" id="submitBtn">Envoyer pour relecture</button>
+    <div class="error" id="errorMsg" role="alert"></div>
+  </form>
+
+  <div class="confirm" id="confirmMsg">
+    <h2>C'est envoyé, merci !</h2>
+    <p>Nous relisons votre activité et vous préviendrons par email dès qu'elle sera en ligne sur Trouvéo.</p>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>Trouvéo — service indépendant, non affilié aux communes référencées.</p>
+    <p><a href="partenaires.html">← Retour à la page partenaires</a></p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const form = document.getElementById('soumissionForm');
+  const confirmEl = document.getElementById('confirmMsg');
+  const errorEl = document.getElementById('errorMsg');
+  const submitBtn = document.getElementById('submitBtn');
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    errorEl.style.display = 'none';
+
+    const organisateur = document.getElementById('organisateur').value.trim();
+    const nomActivite = document.getElementById('nomActivite').value.trim();
+    const typeActivite = document.getElementById('typeActivite').value;
+    const dates = document.getElementById('dates').value.trim();
+    const ageMinVal = document.getElementById('ageMin').value;
+    const ageMaxVal = document.getElementById('ageMax').value;
+    const commune = document.getElementById('commune').value.trim();
+    const lieu = document.getElementById('lieu').value.trim();
+    const prix = document.getElementById('prix').value.trim();
+    const modalites = document.getElementById('modalites').value.trim();
+    const lienSource = document.getElementById('lienSource').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const contactEmail = document.getElementById('contactEmail').value.trim();
+
+    if (!organisateur){
+      errorEl.textContent = "Merci d'indiquer le nom de votre organisme.";
+      errorEl.style.display = 'block';
+      return;
+    }
+    if (!nomActivite){
+      errorEl.textContent = "Merci d'indiquer le nom de l'activité.";
+      errorEl.style.display = 'block';
+      return;
+    }
+    if (!typeActivite){
+      errorEl.textContent = "Merci de choisir un type d'activité.";
+      errorEl.style.display = 'block';
+      return;
+    }
+    if (!dates){
+      errorEl.textContent = "Merci d'indiquer les dates de l'activité.";
+      errorEl.style.display = 'block';
+      return;
+    }
+    if (!contactEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)){
+      errorEl.textContent = "Merci d'indiquer une adresse email valide.";
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Envoi…';
+
+    fetch('/api/soumettre-activite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        organisateur: organisateur,
+        nom_activite: nomActivite,
+        type_activite: typeActivite,
+        dates: dates,
+        age_min: ageMinVal === '' ? null : Number(ageMinVal),
+        age_max: ageMaxVal === '' ? null : Number(ageMaxVal),
+        commune: commune,
+        lieu: lieu,
+        prix: prix,
+        modalites_inscription: modalites,
+        lien_source: lienSource,
+        description_longue: description,
+        contact_email: contactEmail
+      })
+    })
+      .then(function(res){
+        return res.json().catch(function(){ return {}; }).then(function(data){ return { ok: res.ok, data: data }; });
+      })
+      .then(function(result){
+        if (!result.ok) throw new Error((result.data && result.data.error) || "L'envoi a échoué, réessayez dans un instant.");
+        form.style.display = 'none';
+        confirmEl.style.display = 'block';
+      })
+      .catch(function(err){
+        errorEl.textContent = err.message || "L'envoi a échoué, réessayez dans un instant.";
+        errorEl.style.display = 'block';
+      })
+      .finally(function(){
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Envoyer pour relecture';
+      });
+  });
+})();
+</script>
+
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "eceefc64e8bd4505bf888cad33783426"}'></script><!-- End Cloudflare Web Analytics -->
+</body>
+</html>
