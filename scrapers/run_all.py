@@ -44,12 +44,14 @@ import grace_hollogne
 import hannut
 import herstal
 import hesl
+import hotton
 import huy
 import iclub
 import jalhay
 import jeunesse_a_bruxelles
 import jeunesse_ardente
 import jeunesses_musicales
+import la_roche_en_ardenne
 import lalouviere
 import letssport
 import meix_devant_virton
@@ -70,6 +72,7 @@ import stavelot
 import tccb
 import supabase_client
 import uccle
+import vaux_sur_sure
 import verviers
 import village_des_benjamins
 import virton
@@ -126,6 +129,9 @@ SCRAPERS = [
     ("Le Fagotin (Stoumont)", fagotin),
     ("Virton", virton),
     ("Meix-devant-Virton", meix_devant_virton),
+    ("Hotton", hotton),
+    ("La Roche-en-Ardenne", la_roche_en_ardenne),
+    ("Vaux-sur-Sûre", vaux_sur_sure),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque
