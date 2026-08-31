@@ -9,7 +9,7 @@ on:
   workflow_dispatch: # bouton "Run workflow" dans l'onglet Actions, pour tester sans attendre le cron
     inputs:
       test_email:
-        description: "Si rempli, les alertes personnalisées ne sont envoyées qu'à cette adresse (test sans risquer d'écrire aux vraies familles inscrites)."
+        description: "Si rempli, les alertes personnalisées et la relance critères ne sont envoyées qu'à cette adresse (test sans risquer d'écrire aux vraies familles inscrites)."
         required: false
         default: ""
       skip_scrape:
@@ -93,6 +93,21 @@ jobs:
         # steps.scrape, pas sur le digest) : un souci ponctuel sur la
         # campagne groupée ne doit pas priver les familles qui attendent
         # une alerte individuelle sur une place qui part vite.
+
+      - name: Relancer les inscrit·es sans critères
+        if: inputs.skip_scrape == true || steps.scrape.outcome == 'success'
+        working-directory: scrapers
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          BREVO_LIST_ID: ${{ secrets.BREVO_LIST_ID }}
+          BREVO_SENDER_EMAIL: ${{ secrets.BREVO_SENDER_EMAIL }}
+          RELANCE_TEST_EMAIL: ${{ inputs.test_email }}
+        run: python relance_criteres.py
+        # Ne dépend d'aucune donnée fraîchement scrapée (juste Brevo +
+        # criteres_parents) - placé ici par cohérence avec les deux autres
+        # jobs d'email plutôt que pour une vraie dépendance au scrape.
 
       - name: Conserver la sortie du run (debug)
         if: always() # même si le step précédent a échoué - c'est justement quand on veut inspecter la sortie
