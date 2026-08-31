@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import sys
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from typing import Optional
 
 import adeps
 import adsl_stages
@@ -140,23 +142,58 @@ OUT_DIR = Path(__file__).parent / "output"
 
 
 def run_scrapers() -> tuple[list, list[tuple[str, int, float, str]]]:
-    """Lance chaque scraper, retourne (toutes les activités, timings)."""
+    """Lance chaque scraper EN PARALLÈLE (un thread par scraper - le goulot
+    est le réseau, pas le CPU), retourne (toutes les activités, timings).
+
+    Le respect du Crawl-delay par domaine (voir common.respectful_get)
+    reste garanti même en parallèle : chaque domaine a son propre verrou,
+    donc deux scrapers visitant des domaines différents avancent en même
+    temps, mais deux requêtes vers LE MÊME domaine restent strictement
+    séquentielles avec le délai imposé - identique au comportement
+    séquentiel d'avant, juste sans attendre bêtement qu'un scraper lent
+    finisse avant de commencer le suivant.
+
+    Passage au parallélisme le 31/08/2026 après diagnostic d'un run
+    programmé qui n'aboutissait plus : Aubel (7 fetches vers aubel.be,
+    120s de Crawl-delay chacun) et Agenda Omnia (jusqu'à 18 communes,
+    plusieurs fetches par commune) consommaient à eux deux plus de 27
+    minutes en série, sans qu'aucun des deux ne soit en tort - juste
+    l'exécution séquentielle qui forçait tous les autres scrapers,
+    strictement indépendants, à attendre leur tour pour rien."""
     all_activites = []
     timings = []
 
-    for nom, module in SCRAPERS:
-        print(f"--- {nom} ---")
+    def _run_one(nom: str, module) -> tuple[str, list, float, Optional[Exception]]:
         start = time.monotonic()
         try:
             activites = module.scrape()
             elapsed = time.monotonic() - start
-            print(f"  {len(activites)} activités extraites en {elapsed:.2f}s")
-            timings.append((nom, len(activites), elapsed, "OK"))
-            all_activites.extend(activites)
+            return nom, activites, elapsed, None
         except Exception as exc:  # noqa: BLE001 - on veut que les autres communes tournent quand même
             elapsed = time.monotonic() - start
-            print(f"  ERREUR après {elapsed:.2f}s : {exc}")
-            timings.append((nom, 0, elapsed, f"ERREUR: {exc}"))
+            return nom, [], elapsed, exc
+
+    results: dict[str, tuple[int, float, str]] = {}
+
+    with ThreadPoolExecutor(max_workers=12) as executor:
+        futures = {executor.submit(_run_one, nom, module): nom for nom, module in SCRAPERS}
+        for future in as_completed(futures):
+            nom, activites, elapsed, exc = future.result()
+            print(f"--- {nom} ---")
+            if exc is None:
+                print(f"  {len(activites)} activités extraites en {elapsed:.2f}s")
+                statut = "OK"
+            else:
+                print(f"  ERREUR après {elapsed:.2f}s : {exc}")
+                statut = f"ERREUR: {exc}"
+            results[nom] = (len(activites), elapsed, statut)
+            all_activites.extend(activites)
+
+    # Résumé final dans l'ordre de SCRAPERS (pas l'ordre d'arrivée, qui
+    # varie d'un run à l'autre) - plus facile à comparer entre deux runs.
+    for nom, _module in SCRAPERS:
+        n, elapsed, statut = results[nom]
+        timings.append((nom, n, elapsed, statut))
 
     for nom, module in EN_ATTENTE:
         print(f"--- {nom} ---")

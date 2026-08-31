@@ -6,13 +6,21 @@ Politique de respect (voir docs/investigation-technique-sites-communaux-2026-08-
   entre deux requêtes vers ce même domaine (voir CRAWL_DELAYS ci-dessous).
 - Aucune boucle sur des centaines de pages : un run = une poignée de requêtes,
   une par page connue à l'avance.
+
+run_all.py lance les scrapers en parallèle (threads) depuis le 31/08/2026 -
+le respect du Crawl-delay reste garanti PAR DOMAINE (verrou dédié par
+domaine, voir _domain_lock ci-dessous) : deux scrapers visitant des domaines
+différents avancent en même temps, mais deux requêtes vers le même domaine
+restent strictement séquentielles avec le délai imposé, comme en séquentiel.
 """
 from __future__ import annotations
 
 import csv
 import json
 import re
+import threading
 import time
+from collections import defaultdict
 from dataclasses import asdict, dataclass, field
 from datetime import date
 from pathlib import Path
@@ -116,23 +124,43 @@ DEFAULT_MIN_DELAY = 2  # pause minimale de courtoisie entre requêtes, même san
 
 _last_request_at: dict[str, float] = {}
 
+# Un verrou PAR DOMAINE (pas un verrou global) : attendre le Crawl-delay
+# d'aubel.be ne doit jamais retarder une requête vers geer.be. Création
+# protégée par _domain_locks_guard pour éviter que deux threads créent
+# chacun leur propre verrou pour le même domaine (double-checked locking) -
+# ce verrou n'est tenu que le temps de la création/lookup, jamais pendant
+# une attente ou une requête réseau.
+_domain_locks: dict[str, threading.Lock] = defaultdict(threading.Lock)
+_domain_locks_guard = threading.Lock()
+
 
 def _domain_of(url: str) -> str:
     return re.sub(r"^https?://", "", url).split("/")[0]
 
 
+def _lock_for(domain: str) -> threading.Lock:
+    with _domain_locks_guard:
+        return _domain_locks[domain]
+
+
 def respectful_get(url: str, timeout: int = 20) -> requests.Response:
-    """GET avec User-Agent identifiable et respect du Crawl-delay du domaine."""
+    """GET avec User-Agent identifiable et respect du Crawl-delay du domaine.
+
+    Le verrou est tenu pendant toute la requête (pas seulement l'attente) :
+    deux threads qui viseraient le même domaine restent ainsi strictement
+    séquentiels, comme l'exige le Crawl-delay - seuls des domaines
+    DIFFERENTS peuvent réellement se chevaucher dans le temps."""
     domain = _domain_of(url)
-    min_delay = CRAWL_DELAYS.get(domain, DEFAULT_MIN_DELAY)
-    last = _last_request_at.get(domain)
-    if last is not None:
-        elapsed = time.monotonic() - last
-        wait = min_delay - elapsed
-        if wait > 0:
-            time.sleep(wait)
-    resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=timeout)
-    _last_request_at[domain] = time.monotonic()
+    with _lock_for(domain):
+        min_delay = CRAWL_DELAYS.get(domain, DEFAULT_MIN_DELAY)
+        last = _last_request_at.get(domain)
+        if last is not None:
+            elapsed = time.monotonic() - last
+            wait = min_delay - elapsed
+            if wait > 0:
+                time.sleep(wait)
+        resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=timeout)
+        _last_request_at[domain] = time.monotonic()
     resp.raise_for_status()
     # Certains sites communaux ne déclarent pas de charset dans leur
     # Content-Type (ex. neupre.be) ; requests retombe alors sur ISO-8859-1
@@ -162,26 +190,27 @@ def fetch_rendered_html(url: str, click_selector: Optional[str] = None, wait_ms:
     from playwright.sync_api import sync_playwright
 
     domain = _domain_of(url)
-    min_delay = CRAWL_DELAYS.get(domain, DEFAULT_MIN_DELAY)
-    last = _last_request_at.get(domain)
-    if last is not None:
-        elapsed = time.monotonic() - last
-        wait = min_delay - elapsed
-        if wait > 0:
-            time.sleep(wait)
+    with _lock_for(domain):
+        min_delay = CRAWL_DELAYS.get(domain, DEFAULT_MIN_DELAY)
+        last = _last_request_at.get(domain)
+        if last is not None:
+            elapsed = time.monotonic() - last
+            wait = min_delay - elapsed
+            if wait > 0:
+                time.sleep(wait)
 
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        page = browser.new_page(user_agent=USER_AGENT)
-        page.goto(url, wait_until="networkidle", timeout=timeout_ms)
-        if click_selector:
-            page.click(click_selector, timeout=timeout_ms)
-            page.wait_for_load_state("networkidle", timeout=timeout_ms)
-        page.wait_for_timeout(wait_ms)  # laisse le temps aux derniers rendus asynchrones (cartes, widgets)
-        html = page.content()
-        browser.close()
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page(user_agent=USER_AGENT)
+            page.goto(url, wait_until="networkidle", timeout=timeout_ms)
+            if click_selector:
+                page.click(click_selector, timeout=timeout_ms)
+                page.wait_for_load_state("networkidle", timeout=timeout_ms)
+            page.wait_for_timeout(wait_ms)  # laisse le temps aux derniers rendus asynchrones (cartes, widgets)
+            html = page.content()
+            browser.close()
 
-    _last_request_at[domain] = time.monotonic()
+        _last_request_at[domain] = time.monotonic()
     return html
 
 
