@@ -12,6 +12,9 @@
 //   BREVO_API_KEY         - idem (voir criteres_alertes.py, même clé)
 //   BREVO_SENDER_EMAIL    - idem
 //   BREVO_SENDER_NAME     - optionnel, "Trouvéo" par défaut
+//   ADMIN_NOTIFY_EMAIL    - optionnel, adresse à prévenir à chaque nouvelle
+//                            inscription (même variable que brevo-signup.js) -
+//                            si absent, notification simplement ignorée
 //
 // Route : fichier functions/api/save-criteria.js -> disponible sur /api/save-criteria
 //
@@ -113,6 +116,15 @@ export async function onRequestPost(context) {
       await sendConfirmationEmail(env, email, enfants, commune.trim()).catch((err) => {
         console.error("Envoi de l'email de confirmation impossible", err);
       });
+      // Notification interne seulement pour une VRAIE première inscription
+      // (201) - pas à chaque republication du formulaire (200/204, ex. pour
+      // corriger un âge), sinon la notification perd tout son sens. Voir
+      // brevo-signup.js pour la même logique côté liste d'attente simple.
+      if (res.status === 201) {
+        context.waitUntil(notifyAdminOfCriteria(env, email, enfants, commune.trim()).catch((err) => {
+          console.error("Notification de nouvelle inscription (critères) impossible", err);
+        }));
+      }
       return jsonResponse(200, { ok: true });
     }
 
@@ -255,6 +267,33 @@ async function sendConfirmationEmail(env, email, enfants, commune) {
       to: [{ email }],
       subject: "Vos critères sont bien enregistrés",
       htmlContent: html,
+    }),
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!resp.ok) {
+    const details = await resp.text().catch(() => "");
+    throw new Error(`Brevo ${resp.status}: ${details}`);
+  }
+}
+
+async function notifyAdminOfCriteria(env, email, enfants, commune) {
+  const apiKey = env.BREVO_API_KEY;
+  const senderEmail = env.BREVO_SENDER_EMAIL;
+  const notifyEmail = env.ADMIN_NOTIFY_EMAIL;
+  if (!apiKey || !senderEmail || !notifyEmail) return; // notification optionnelle, pas de config = pas d'envoi
+
+  const senderName = env.BREVO_SENDER_NAME || "Trouvéo";
+  const ages = enfants.map((e) => `${e.age} ans`).join(", ");
+  const resp = await fetch("https://api.brevo.com/v3/smtp/email", {
+    method: "POST",
+    headers: { "api-key": apiKey, "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({
+      sender: { name: senderName, email: senderEmail },
+      to: [{ email: notifyEmail }],
+      subject: "Trouvéo — nouveaux critères remplis",
+      htmlContent:
+        `<p>Nouveaux critères remplis par <strong>${esc(email)}</strong></p>` +
+        `<p>Localité : ${esc(commune)}<br>Enfant(s) : ${esc(ages)}</p>`,
     }),
     signal: AbortSignal.timeout(8000),
   });
