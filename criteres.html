@@ -2,8 +2,10 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<!-- Meta Pixel Code -->
+<!-- Meta Pixel Code - charge uniquement apres consentement, voir consent.js -->
+<script src="consent.js"></script>
 <script>
+function loadMetaPixel(){
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -14,10 +16,9 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '1636164581456288');
 fbq('track', 'PageView');
+}
+window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
 </script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
-/></noscript>
 <!-- End Meta Pixel Code -->
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -186,7 +187,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   </a>
   <button class="nav-toggle" id="navToggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="navLinks">☰</button>
   <div class="nav-links" id="navLinks">
-    <a href="partenaires.html" class="nav-link">Être sur Trouvéo</a>
+    <a href="partenaires.html" class="nav-link">Pour les organisateurs</a>
     <a href="/activites" class="nav-cta">Voir les activités</a>
   </div>
 </nav>
@@ -248,7 +249,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
 <footer>
   <div class="wrap">
     <p>Trouvéo — service indépendant, non affilié aux communes référencées.</p>
-    <p><a href="/">← Retour à l'accueil</a></p>
+    <p><a href="confidentialite.html">Confidentialité</a> · <a href="mentions-legales.html">Mentions légales</a> · <a href="/">← Retour à l'accueil</a></p>
   </div>
 </footer>
 
