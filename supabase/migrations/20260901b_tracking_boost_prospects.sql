@@ -63,10 +63,11 @@ create index if not exists events_organizer_idx on public.events (organizer_id) 
 --    organisme - le Boost cible un seul stage précis, pas tout le
 --    catalogue d'un organisateur.
 create table if not exists public.activites_boost (
-    id           bigint generated always as identity primary key,
-    activite_id  bigint not null references public.activites(id) on delete cascade,
+    id            bigint generated always as identity primary key,
+    activite_id   bigint not null references public.activites(id) on delete cascade,
+    boost_debute_le date not null default current_date,  -- distinct de created_at : un renouvellement met à jour cette date, created_at ne bouge pas sur un upsert
     boost_jusquau date not null,
-    created_at   timestamptz not null default now(),
+    created_at    timestamptz not null default now(),
     unique (activite_id)  -- une seule ligne de boost active par activité ; un nouvel achat met à jour la même ligne (on_conflict)
 );
 
