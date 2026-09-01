@@ -157,6 +157,20 @@ jobs:
         # criteres_parents) - placé ici par cohérence avec les deux autres
         # jobs d'email plutôt que pour une vraie dépendance au scrape.
 
+      - name: Relancer les organisateurs sans stage à venir
+        if: inputs.check_email_stats != true && (inputs.skip_scrape == true || steps.scrape.outcome == 'success')
+        working-directory: scrapers
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          BREVO_SENDER_EMAIL: ${{ secrets.BREVO_SENDER_EMAIL }}
+          RELANCE_ORG_TEST_EMAIL: ${{ inputs.test_email }}
+        run: python relance_organisateurs.py ${{ inputs.dry_run && '--dry-run' || '' }}
+        # Placé après "Importer les soumissions" (pas avant) : a besoin des
+        # activités tout juste importées pour juger correctement si un
+        # organisateur a déjà soumis un programme récent avant de le relancer.
+
       - name: Consulter les statistiques email (diagnostic)
         if: inputs.check_email_stats == true
         working-directory: scrapers

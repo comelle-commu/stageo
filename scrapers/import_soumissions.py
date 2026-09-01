@@ -62,6 +62,25 @@ def _to_activite(row: dict) -> Activite:
     )
 
 
+def _save_contact_emails(rows: list[dict]) -> None:
+    """Alimente organisateurs_contact (voir migration 20260901) pour que
+    relance_organisateurs.py sache qui prévenir une fois ces activités
+    passées - un organisateur qui soumet directement nous donne son email
+    de contact, autant le garder plutôt que de le perdre après l'import."""
+    seen: dict[str, str] = {}
+    for r in rows:
+        seen[r["organisateur"]] = r["contact_email"]  # le plus récent gagne si doublon dans ce batch
+    payload = [{"source_key": k, "contact_email": v} for k, v in seen.items()]
+    url = f"{SUPABASE_URL}/rest/v1/organisateurs_contact?on_conflict=source_key"
+    resp = requests.post(
+        url,
+        headers=_headers("resolution=merge-duplicates,return=minimal"),
+        json=payload,
+        timeout=15,
+    )
+    resp.raise_for_status()
+
+
 def _mark_importee(ids: list[int]) -> None:
     if not ids:
         return
@@ -90,6 +109,7 @@ def main() -> int:
 
     activites = [_to_activite(r) for r in rows]
     upserted = upsert_activites(activites)
+    _save_contact_emails(rows)
     _mark_importee([r["id"] for r in rows])
 
     print(f"{len(upserted)} activité(s) importée(s) depuis soumissions_activites :")
