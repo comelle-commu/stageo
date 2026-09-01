@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <!-- Meta Pixel Code - charge uniquement apres consentement, voir consent.js -->
 <script src="consent.js"></script>
+<script src="tracking.js"></script>
 <script>
 function loadMetaPixel(){
 !function(f,b,e,v,n,t,s)
@@ -371,6 +372,16 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
         form.style.display = 'none';
         confirmEl.style.display = 'block';
         if (typeof fbq === 'function') { fbq('track', 'Lead'); }
+        // Jamais l'email dans le tracking analytics (voir events, table
+        // séparée de criteres_parents) - uniquement des critères agrégés.
+        if (window.trouveoTrack) {
+          window.trouveoTrack('ALERT_CREATED', {
+            commune: commune,
+            rayon_km: 15,
+            ages: enfants.map(function(e){ return e.age; }),
+            types: Array.from(new Set(enfants.reduce(function(acc, e){ return acc.concat(e.types_activites); }, [])))
+          });
+        }
       })
       .catch(function(err){
         errorEl.textContent = err.message || "L'enregistrement a échoué, réessayez dans un instant.";
