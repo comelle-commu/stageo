@@ -834,6 +834,45 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   // sinon un clic sur "Afficher plus" (même recherche, page suivante)
   // enverrait un doublon inutile. Nombre de résultats = celui APRÈS
   // filtrage mais avant pagination (visible.length, pas visibleLimit).
+  // schema.org/Event pour les activités actuellement affichées (SEO -
+  // voir docs plan d'exécution §19). Injecté après chaque rendu plutôt
+  // qu'au chargement de la page : Google exécute le JS avant de lire les
+  // données structurées, donc ça reste valide, et ça reflète toujours ce
+  // qui est réellement visible plutôt qu'un instantané figé. N'émet
+  // JAMAIS une activité dont la date n'a pas pu être extraite de façon
+  // fiable (voir firstDate/lastDate) - mieux vaut absente qu'inventée.
+  function injectEventSchema(pageItems){
+    const existing = document.getElementById('ldEventSchema');
+    if (existing) existing.remove();
+    const toIso = function(d){ return d ? d.toISOString().slice(0, 10) : null; };
+    const events = pageItems
+      .filter(function(r){ return !isPast(r); })
+      .map(function(r){
+        const start = toIso(firstDate(r.dates));
+        if (!start) return null;
+        const end = toIso(lastDate(r.dates)) || start;
+        return {
+          '@context': 'https://schema.org',
+          '@type': 'Event',
+          name: r.nom_activite,
+          startDate: start,
+          endDate: end,
+          eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+          eventStatus: 'https://schema.org/EventScheduled',
+          location: { '@type': 'Place', name: r.lieu || r.commune, address: r.commune },
+          organizer: { '@type': 'Organization', name: groupKey(r) },
+          url: r.lien_source || (location.origin + location.pathname)
+        };
+      })
+      .filter(Boolean);
+    if (!events.length) return;
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = 'ldEventSchema';
+    script.textContent = JSON.stringify(events);
+    document.head.appendChild(script);
+  }
+
   function scheduleSearchTracking(resultCount){
     if (!window.trouveoTrack) return;
     clearTimeout(searchTrackTimer);
@@ -1030,6 +1069,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
       html += '</div>';
       resultsEl.innerHTML = html;
       observeCardViews();
+      injectEventSchema(page);
     }
     scheduleSearchTracking(visible.length);
 
