@@ -95,11 +95,15 @@ pense à lui redemander le suivant".
 **Cas déclencheur : Société archéologique de Namur.** ASBL de médiation
 culturelle (archéologie/beaux-arts, mentionnée en intro de ce doc) qui a
 envoyé son programme de stages directement à Muriel par email plutôt que
-via `soumettre-activite.html`. Comme l'activité a été ajoutée en base sans
-passer par le formulaire, aucun email de contact n'existait dans
-`organisateurs_contact` (alimentée automatiquement seulement pour les
-soumissions via le formulaire, voir `import_soumissions.py`) - la ligne a
-donc été ajoutée à la main (Table editor Supabase) pour que la relance
-fonctionne aussi pour elle le jour où ses stages actuels seront tous
-passés. À refaire pareil pour tout futur organisme qui communique son
-programme par un canal autre que le formulaire.
+via `soumettre-activite.html`. Plutôt que d'ajouter l'activité directement
+en base et de renseigner `organisateurs_contact` à la main, la fiche a été
+saisie à la main dans `soumissions_activites` (même schéma que le
+formulaire) puis approuvée - ce qui a laissé le pipeline standard
+(`import_soumissions.py`) faire tout le reste tout seul : import dans
+`activites` **et** remplissage automatique de `organisateurs_contact` avec
+l'email de contact (`carla.cruz@lasan.be`, soumission #1, approuvée et
+importée le 01/09/2026 à 10h09). Aucune intervention manuelle sur
+`organisateurs_contact` n'a donc été nécessaire - à refaire pareil pour
+tout futur organisme qui communique son programme par un canal autre que
+le formulaire : saisir dans `soumissions_activites`, pas directement dans
+`activites`.
