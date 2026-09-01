@@ -2,8 +2,11 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<!-- Meta Pixel Code -->
+<!-- Meta Pixel Code - charge uniquement apres consentement, voir consent.js -->
+<script src="consent.js"></script>
+<script src="tracking.js"></script>
 <script>
+function loadMetaPixel(){
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -14,10 +17,9 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '1636164581456288');
 fbq('track', 'PageView');
+}
+window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
 </script>
-<noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
-/></noscript>
 <!-- End Meta Pixel Code -->
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -282,6 +284,11 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     display:inline-block;font-size:11px;font-weight:700;letter-spacing:.02em;
     color:#8A5A00;background:var(--peach);padding:3px 10px;border-radius:100px;margin-bottom:10px;
   }
+  .card.is-boosted{border-color:rgba(1,151,175,0.55);box-shadow:0 14px 30px -18px rgba(1,151,175,0.45);}
+  .boost-badge{
+    display:inline-block;font-size:11px;font-weight:700;letter-spacing:.02em;
+    color:#fff;background:var(--teal);padding:3px 10px;border-radius:100px;margin-bottom:10px;
+  }
   .card-logo{width:16px;height:16px;border-radius:4px;object-fit:cover;vertical-align:-3px;margin-right:5px;}
   .verified-badge{color:var(--teal-deep);font-weight:700;}
   .card-desc{font-size:13px;color:var(--ink-soft);line-height:1.5;margin:-2px 0 10px;}
@@ -314,8 +321,8 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
       <span class="cta-short">Activités</span>
     </a>
     <a href="partenaires.html" class="nav-link">
-      <span class="cta-full">Être sur Trouvéo</span>
-      <span class="cta-short">Partenaires</span>
+      <span class="cta-full">Pour les organisateurs</span>
+      <span class="cta-short">Organisateurs</span>
     </a>
     <a href="/#top-form" class="nav-cta">
       <span class="cta-full">Recevoir des alertes</span>
@@ -416,7 +423,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
 <footer>
   <div class="wrap">
     <p>Trouvéo — service indépendant, non affilié aux communes référencées.</p>
-    <p><a href="/">← Retour à l'accueil</a></p>
+    <p><a href="confidentialite.html">Confidentialité</a> · <a href="mentions-legales.html">Mentions légales</a> · <a href="/">← Retour à l'accueil</a></p>
   </div>
 </footer>
 
@@ -718,6 +725,8 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
   let activePeriod = 'ALL';
   let showPast = false;
   let visibleLimit = PAGE_SIZE;
+  let searchTrackTimer = null;
+  let lastTrackedSearchKey = null;
   // Recherche par proximité : recalculés à chaque frappe (updateProximityState),
   // lus par matchesFilters - un seul calcul par rendu, partagé entre
   // render() et renderChips() plutôt que chacune sa propre logique.
@@ -748,6 +757,12 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     return !!(p && p.mis_en_avant_jusquau && p.mis_en_avant_jusquau >= todayIso());
   }
   function todayIso(){ return new Date().toISOString().slice(0, 10); }
+  // Boost (voir partenaires.html) : même principe qu'isFeatured mais à la
+  // maille activité (boostMap, table activites_boost), pas organisme.
+  function isBoosted(r){
+    const jusquau = boostMap[r.id];
+    return !!(jusquau && jusquau >= todayIso());
+  }
 
   // Élargit toujours une recherche de lieu (commune ou code postal connu)
   // aux communes dans un rayon de RADIUS_KM autour, en plus des résultats
@@ -813,6 +828,113 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
     return true;
   }
 
+  // SEARCH_PERFORMED : un seul événement 900ms après la dernière frappe/
+  // clic de filtre (pas un par filtre coché en rafale), et seulement si
+  // la requête a réellement changé depuis le dernier événement envoyé -
+  // sinon un clic sur "Afficher plus" (même recherche, page suivante)
+  // enverrait un doublon inutile. Nombre de résultats = celui APRÈS
+  // filtrage mais avant pagination (visible.length, pas visibleLimit).
+  // schema.org/Event pour les activités actuellement affichées (SEO -
+  // voir docs plan d'exécution §19). Injecté après chaque rendu plutôt
+  // qu'au chargement de la page : Google exécute le JS avant de lire les
+  // données structurées, donc ça reste valide, et ça reflète toujours ce
+  // qui est réellement visible plutôt qu'un instantané figé. N'émet
+  // JAMAIS une activité dont la date n'a pas pu être extraite de façon
+  // fiable (voir firstDate/lastDate) - mieux vaut absente qu'inventée.
+  function injectEventSchema(pageItems){
+    const existing = document.getElementById('ldEventSchema');
+    if (existing) existing.remove();
+    const toIso = function(d){ return d ? d.toISOString().slice(0, 10) : null; };
+    const events = pageItems
+      .filter(function(r){ return !isPast(r); })
+      .map(function(r){
+        const start = toIso(firstDate(r.dates));
+        if (!start) return null;
+        const end = toIso(lastDate(r.dates)) || start;
+        return {
+          '@context': 'https://schema.org',
+          '@type': 'Event',
+          name: r.nom_activite,
+          startDate: start,
+          endDate: end,
+          eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+          eventStatus: 'https://schema.org/EventScheduled',
+          location: { '@type': 'Place', name: r.lieu || r.commune, address: r.commune },
+          organizer: { '@type': 'Organization', name: groupKey(r) },
+          url: r.lien_source || (location.origin + location.pathname)
+        };
+      })
+      .filter(Boolean);
+    if (!events.length) return;
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = 'ldEventSchema';
+    script.textContent = JSON.stringify(events);
+    document.head.appendChild(script);
+  }
+
+  function scheduleSearchTracking(resultCount){
+    if (!window.trouveoTrack) return;
+    clearTimeout(searchTrackTimer);
+    searchTrackTimer = setTimeout(function(){
+      const q = searchEl.value.trim();
+      const key = JSON.stringify([q, activeAge, activeType, activeProvince, activePeriod, showPast]);
+      if (key === lastTrackedSearchKey) return;
+      lastTrackedSearchKey = key;
+      window.trouveoTrack('SEARCH_PERFORMED', {
+        commune: proximityOrigin || null,
+        rayon_km: proximityOrigin ? RADIUS_KM : null,
+        age: activeAge !== 'ALL' ? activeAge : null,
+        type: activeType !== 'ALL' ? activeType : null,
+        periode: activePeriod !== 'ALL' ? activePeriod : null,
+        province: activeProvince !== 'ALL' ? activeProvince : null,
+        texte_libre: (!proximityOrigin && q) ? q.slice(0, 100) : null,
+        resultats: resultCount
+      });
+    }, 900);
+  }
+
+  // ACTIVITY_VIEWED : une seule fois par activité réellement visible à
+  // l'écran (pas juste présente dans le HTML) - IntersectionObserver,
+  // seuil 50%, on arrête d'observer une fois déclenché (jamais deux fois
+  // pour la même carte dans la même session).
+  let cardObserver = null;
+  function observeCardViews(){
+    if (!window.trouveoTrack || !('IntersectionObserver' in window)) return;
+    if (!cardObserver){
+      cardObserver = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if (!entry.isIntersecting) return;
+          cardObserver.unobserve(entry.target);
+          const el = entry.target;
+          window.trouveoTrack('ACTIVITY_VIEWED', {
+            commune: el.dataset.commune || null,
+            type: el.dataset.type || null,
+            boost_status: el.dataset.boost || 'none'
+          }, { activiteId: Number(el.dataset.aid) || null, organizerId: el.dataset.org || null });
+        });
+      }, { threshold: 0.5 });
+    }
+    resultsEl.querySelectorAll('.card[data-aid]').forEach(function(el){ cardObserver.observe(el); });
+  }
+
+  // OUTBOUND_REGISTRATION_CLICK : délégation sur resultsEl (les cartes
+  // sont reconstruites à chaque rendu, un seul listener suffit). Envoyé
+  // via sendBeacon (voir tracking.js) donc jamais bloquant, la navigation
+  // vers le lien externe continue normalement sans attendre.
+  resultsEl.addEventListener('click', function(e){
+    const link = e.target.closest('.card-link');
+    if (!link) return;
+    const card = link.closest('.card[data-aid]');
+    if (!card || !window.trouveoTrack) return;
+    window.trouveoTrack('OUTBOUND_REGISTRATION_CLICK', {
+      commune: card.dataset.commune || null,
+      type: card.dataset.type || null,
+      boost_status: card.dataset.boost || 'none',
+      cible: link.textContent.trim()
+    }, { activiteId: Number(card.dataset.aid) || null, organizerId: card.dataset.org || null });
+  });
+
   function render(){
     updateProximityState();
     const q = searchEl.value.trim().toLowerCase();
@@ -859,6 +981,25 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
       return 0;
     });
 
+    // Boost : fait remonter UNE SEULE activité (la première boostée
+    // rencontrée dans le tri déjà établi ci-dessus), juste après le bloc
+    // Partenaire (jamais devant - Partenaire reste l'engagement annuel,
+    // Boost un coup de pouce ponctuel sur une activité). Le Boost ne crée
+    // jamais de résultat : `visible` est déjà filtré, on ne fait que
+    // réordonner ce qui s'y trouve déjà. Position volontairement "juste
+    // après Partenaire" plutôt qu'une règle arbitraire "jamais en
+    // premier" : elle n'est en tête que s'il n'y a aucun Partenaire
+    // au-dessus, ce qui reste cohérent (rien à devancer).
+    let boostedActivityId = null;
+    const boostIdx = visible.findIndex(function(r){ return !isPast(r) && isBoosted(r) && !isFeatured(r); });
+    if (boostIdx !== -1){
+      const boostedItem = visible.splice(boostIdx, 1)[0];
+      let insertAt = 0;
+      while (insertAt < visible.length && isFeatured(visible[insertAt])) insertAt++;
+      visible.splice(insertAt, 0, boostedItem);
+      boostedActivityId = boostedItem.id;
+    }
+
     if (!visible.length){
       const hiddenPastCount = showPast ? 0 : matching.filter(isPast).length;
       if (hiddenPastCount > 0){
@@ -903,10 +1044,14 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
         const featured = !past && isFeatured(r);
         const complete = featured && !!(premium && premium.mise_en_avant_complete);
         const verified = !!(premium && premium.verifie);
-        html += '<article class="card' + (past ? ' is-past' : '') + (featured ? ' is-featured' : '') + '">';
+        const boosted = !past && r.id === boostedActivityId;
+        const boostStatus = complete ? 'partenaire' : (boosted ? 'boost' : 'none');
+        html += '<article class="card' + (past ? ' is-past' : '') + (featured ? ' is-featured' : '') + (boosted ? ' is-boosted' : '') + '"'
+          + ' data-aid="' + r.id + '" data-org="' + esc(source) + '" data-commune="' + esc(r.commune) + '" data-type="' + esc(r.type_activite || '') + '" data-boost="' + boostStatus + '">';
         html += '<div class="card-body">';
         if (past) html += '<div class="past-badge">Édition passée</div>';
         else if (complete) html += '<div class="featured-badge">★ Partenaire</div>';
+        else if (boosted) html += '<div class="boost-badge">Mis en avant</div>';
         html += '<div class="card-source">' + (verified && premium.logo_url ? '<img class="card-logo" src="' + esc(premium.logo_url) + '" alt="">' : '') + esc(source) + (verified ? ' <span class="verified-badge" title="Organisme vérifié">✓</span>' : '') + '</div>';
         html += '<div class="card-name">' + esc(r.nom_activite) + '</div>';
         if (complete && premium.description_longue) html += '<div class="card-desc">' + esc(premium.description_longue) + '</div>';
@@ -923,7 +1068,10 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
       });
       html += '</div>';
       resultsEl.innerHTML = html;
+      observeCardViews();
+      injectEventSchema(page);
     }
+    scheduleSearchTracking(visible.length);
 
     if (visible.length){
       const shown = Math.min(visibleLimit, visible.length);
@@ -1190,7 +1338,23 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
       .catch(function(){ /* premiumMap reste vide */ });
   }
 
-  Promise.all([fetchAllActivites(0, []), fetchPremium()])
+  // activites_boost : mise en avant ponctuelle d'UNE activité (voir
+  // partenaires.html "Booster une activité", migration
+  // 20260901b_tracking_boost_prospects.sql) - même logique best-effort
+  // que fetchPremium, jamais bloquant.
+  let boostMap = {};
+  function fetchBoosts(){
+    return fetch(SUPABASE_URL + '/rest/v1/activites_boost?select=activite_id,boost_jusquau', { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY } })
+      .then(function(res){ return res.ok ? res.json() : []; })
+      .then(function(rows){
+        const map = {};
+        rows.forEach(function(row){ map[row.activite_id] = row.boost_jusquau; });
+        boostMap = map;
+      })
+      .catch(function(){ /* boostMap reste vide */ });
+  }
+
+  Promise.all([fetchAllActivites(0, []), fetchPremium(), fetchBoosts()])
     .then(function(results){
       data = results[0];
       renderStats();

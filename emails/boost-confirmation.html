@@ -1,0 +1,55 @@
+<!--
+Boost — email de confirmation (voir docs plan d'exécution §16).
+NON BRANCHÉ à ce stade : gabarit prêt à copier dans Brevo (ou à envoyer
+à la main) le jour où l'automatisation est justifiée (voir seuil §3).
+
+Envoyé : juste après confirmation d'un achat Boost (aujourd'hui, manuel).
+Champs à remplacer : {{nom_activite}}, {{organisateur}}, {{date_debut}},
+{{date_fin}}, {{lien_activite}}
+-->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Grandstander:wght@700;800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body style="margin:0;background:#FFFDF8;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFFDF8;">
+<tr><td align="center" style="padding:36px 16px;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;font-family:'Work Sans',Arial,sans-serif;">
+
+  <tr><td style="padding-bottom:22px;">
+    <span style="font-family:'Grandstander',Arial,sans-serif;font-weight:800;font-size:22px;color:#015380;">Trouvéo</span>
+  </td></tr>
+
+  <tr><td style="padding-bottom:24px;">
+    <span style="font-family:'Grandstander',Arial,sans-serif;font-weight:700;font-size:21px;color:#015380;line-height:1.3;">
+      Votre Boost est activé
+    </span>
+  </td></tr>
+
+  <tr><td style="padding-bottom:26px;color:#5C7A8C;font-size:14.5px;line-height:1.6;">
+    « {{nom_activite}} » est mise en avant sur Trouvéo du {{date_debut}} au {{date_fin}} —
+    position prioritaire et badge « Mis en avant » dans les résultats déjà pertinents pour chaque famille.
+  </td></tr>
+
+  <tr><td align="center" style="padding:0 0 22px;">
+    <a href="{{lien_activite}}" style="display:inline-block;background:#0197AF;color:#ffffff;text-decoration:none;
+      font-family:'Work Sans',Arial,sans-serif;font-weight:700;font-size:14px;padding:14px 28px;border-radius:100px;">
+      Voir ma fiche →
+    </a>
+  </td></tr>
+
+  <tr><td style="border-top:1px solid rgba(1,83,128,0.12);padding-top:18px;">
+    <p style="color:#93A9B5;font-size:12px;line-height:1.6;margin:0;text-align:center;">
+      Vous recevrez un bilan chiffré (vues, clics vers l'inscription) à la fin de la période.
+      Une question ? <a href="mailto:hello@trouveo.be" style="color:#93A9B5;">hello@trouveo.be</a>
+    </p>
+  </td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>

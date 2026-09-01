@@ -36,7 +36,7 @@ export async function onRequestPost(context) {
     return jsonResponse(400, { error: "Requête invalide." });
   }
 
-  const { type, email, url, message } = body || {};
+  const { type, email, url, message, offre } = body || {};
 
   if (!VALID_TYPES.has(type)) {
     return jsonResponse(400, { error: "Type de demande invalide." });
@@ -68,6 +68,7 @@ export async function onRequestPost(context) {
           email: email || null,
           url: url ? url.trim() : null,
           message: message ? String(message).slice(0, 2000) : null,
+          offre: offre && ["boost", "partenaire"].includes(offre) ? offre : null,
         },
       ]),
     });
