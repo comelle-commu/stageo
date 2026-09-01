@@ -43,7 +43,9 @@ Trois morceaux techniques, chacun simple isolément :
    actuellement : commune exacte > type préféré > proximité de date).
 2. **Descriptif plus détaillé** : un champ texte optionnel en plus des
    champs existants, affiché sur la carte quand rempli.
-3. **Badge "Le choix de Trouvéo"** : badge visuel sur la carte, même
+3. **Badge "Partenaire"** (renommé depuis "Le choix de Trouvéo" le
+   31/08/2026 - risquait de sonner comme une recommandation éditoriale
+   plutôt qu'un badge payant assumé) : badge visuel sur la carte, même
    principe que le badge "Édition passée" déjà en place.
 
 Le statut "mis en avant" lui-même : prévoir une **date d'expiration**
