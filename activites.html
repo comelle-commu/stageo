@@ -858,9 +858,9 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
         const source = groupKey(r);
         const past = isPast(r);
         const premium = premiumFor(r);
-        // "Basique" (featured) : position prioritaire + encadré orange
-        // seulement. "Complet" (featured ET mise_en_avant_complete) : en
-        // plus, badge "Le choix de Trouvéo" + descriptif détaillé - voir
+        // "Priorité" (featured) : position prioritaire + encadré orange
+        // seulement. "Partenaire" (featured ET mise_en_avant_complete) : en
+        // plus, badge "Partenaire" + descriptif détaillé - voir
         // partenaires.html, section "Mise en avant" (deux formules).
         const featured = !past && isFeatured(r);
         const complete = featured && !!(premium && premium.mise_en_avant_complete);
@@ -868,7 +868,7 @@ src="https://www.facebook.com/tr?id=1636164581456288&ev=PageView&noscript=1"
         html += '<article class="card' + (past ? ' is-past' : '') + (featured ? ' is-featured' : '') + '">';
         html += '<div class="card-body">';
         if (past) html += '<div class="past-badge">Édition passée</div>';
-        else if (complete) html += '<div class="featured-badge">★ Le choix de Trouvéo</div>';
+        else if (complete) html += '<div class="featured-badge">★ Partenaire</div>';
         html += '<div class="card-source">' + (verified && premium.logo_url ? '<img class="card-logo" src="' + esc(premium.logo_url) + '" alt="">' : '') + esc(source) + (verified ? ' <span class="verified-badge" title="Organisme vérifié">✓</span>' : '') + '</div>';
         html += '<div class="card-name">' + esc(r.nom_activite) + '</div>';
         if (complete && premium.description_longue) html += '<div class="card-desc">' + esc(premium.description_longue) + '</div>';
