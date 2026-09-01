@@ -215,6 +215,13 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   }
   .tier-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0;}
   @media (max-width:600px){ .tier-grid{grid-template-columns:1fr;} }
+  .faq{margin-top:40px;}
+  .faq-item{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:4px 20px;margin-bottom:10px;}
+  .faq-item summary{padding:14px 0;font-weight:700;font-size:15px;color:var(--ink);cursor:pointer;list-style:none;}
+  .faq-item summary::-webkit-details-marker{display:none;}
+  .faq-item summary::after{content:'+';float:right;color:var(--ink-faint);font-weight:400;}
+  .faq-item[open] summary::after{content:'−';}
+  .faq-item p{padding:0 0 16px;margin:0;color:var(--ink-soft);font-size:14px;line-height:1.6;}
   .tier-card{background:var(--paper);border:1.5px solid var(--line);border-radius:16px;padding:16px;}
   .tier-card.is-complete{border-color:var(--orange-deep);box-shadow:0 12px 26px -18px rgba(226,162,14,0.5);}
   .tier-name{font-family:'Grandstander',sans-serif;font-weight:700;font-size:14.5px;color:var(--ink);margin-bottom:10px;}
@@ -398,10 +405,10 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   <div class="blob blob2"></div>
   <div class="wrap narrow">
     <span class="eyebrow">Pour les organismes</span>
-    <h1 class="headline">Soyez <span class="hi">sur Trouvéo</span>.</h1>
-    <p class="lede">Trouvéo prévient les parents de Wallonie et de Bruxelles dès qu'une place de stage ou de plaine correspond à leur enfant. Que vos activités y soient déjà ou pas encore, nous pouvons les rendre visibles ensemble.</p>
+    <h1 class="headline">Vous organisez des stages&nbsp;? <span class="hi">Faites-les découvrir</span> aux familles qui les cherchent.</h1>
+    <p class="lede">Être référencé sur Trouvéo est gratuit. Besoin de plus de visibilité&nbsp;? Vous pouvez booster une activité ou mettre toute votre saison en avant.</p>
     <div class="stat-strip">
-      <div class="stat-cell"><span class="stat-num">46</span><span class="stat-label">sources actives (communes, ASBL, organismes)</span></div>
+      <div class="stat-cell"><span class="stat-num">51</span><span class="stat-label">sources actives (communes, ASBL, organismes)</span></div>
       <div class="stat-cell"><span class="stat-num" id="statCount">1800+</span><span class="stat-label">activités actuellement recensées</span></div>
       <div class="stat-cell"><span class="stat-num stat-num-text">Chaque semaine</span><span class="stat-label">vos infos publiques sont vérifiées et remises à jour automatiquement</span></div>
     </div>
@@ -445,17 +452,18 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   <div class="wrap narrow">
     <div class="offer-head">
       <h2>Ce que nous vous proposons</h2>
-      <p class="lead">Apparaître sur Trouvéo est et restera toujours gratuit, que vos activités y soient déjà ou pas encore. Voici ce qui est déjà acquis, ce qui est disponible dès maintenant, et ce que nous préparons pour la suite.</p>
+      <p class="lead">Apparaître sur Trouvéo est et restera toujours gratuit, que vos activités y soient déjà ou pas encore. Trois façons d'aller plus loin, simples à comprendre.</p>
     </div>
 
-    <div class="offer-zone offer-zone-free">
-      <span class="zone-badge">Gratuit</span>
+    <div class="offer-zone offer-zone-free" id="gratuit">
+      <span class="zone-badge">1. Gratuit — 0€</span>
       <div class="zone-grid">
         <div class="zone-copy">
           <h3>Dès aujourd'hui, pour toujours</h3>
           <ul class="offer-list">
             <li><span class="ok">✓</span> Toutes vos activités reprises automatiquement, dès qu'elles sont publiées sur votre site</li>
             <li><span class="ok">✓</span> Mise à jour automatique chaque semaine, sans rien faire de votre côté</li>
+            <li><span class="ok">✓</span> Présence standard dans les résultats, sans engagement</li>
             <li><span class="ok">✓</span> Si elles n'y sont pas encore, nous les ajoutons avec vous</li>
           </ul>
         </div>
@@ -474,93 +482,100 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
       </div>
     </div>
 
-    <div class="offer-zone offer-zone-mid">
-      <span class="zone-badge">Mise en avant</span>
-      <div class="zone-copy">
-        <h3>Deux formules</h3>
-        <p class="zone-lead">Disponible sur demande, dès maintenant — sans jamais remplacer l'inscription de base, qui reste gratuite.</p>
-      </div>
-
-      <div class="tier-grid">
-        <div class="tier-card">
-          <div class="tier-name">Priorité</div>
-          <ul class="tier-list">
-            <li><span class="tick">✓</span> Position prioritaire dans les résultats</li>
-            <li><span class="tick">✓</span> Encadré orange qui attire l'œil</li>
-          </ul>
-          <div class="tier-price">10€ <span>/mois</span></div>
-          <div class="tier-example">
-            <span class="mock-label">Aperçu</span>
-            <div class="priority-mock">
-              <div class="mini-card is-boosted">
-                <div class="mini-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
-                <div class="mini-meta">GRACE-HOLLOGNE · 4–5 ans</div>
-              </div>
-              <div class="mini-card">
-                <div class="mini-name">Stage multisports — Sprimont</div>
-                <div class="mini-meta">SPRIMONT · 6–9 ans</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="tier-card is-complete">
-          <div class="tier-name">Partenaire</div>
-          <ul class="tier-list">
-            <li><span class="tick">✓</span> Tout ce qui est dans Priorité</li>
-            <li><span class="tick">✓</span> Badge « Partenaire »</li>
-            <li><span class="tick">✓</span> Descriptif plus riche</li>
-          </ul>
-          <div class="tier-price">20€ <span>/mois</span></div>
-          <div class="tier-example">
-            <span class="mock-label">Aperçu</span>
-            <div class="card is-partner" style="margin-top:0;margin-bottom:0;">
-              <div class="featured-badge">★ Partenaire</div>
-              <div class="card-source">GRACE-HOLLOGNE</div>
-              <div class="card-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
-              <div class="card-desc">Fouilles pédagogiques, ateliers de restauration et visite des collections - une semaine pour découvrir l'archéologie en s'amusant.</div>
-              <div class="card-meta">
-                <div class="row">📅 Du 6 juillet au 7 août 2026, de 9h à 16h</div>
-                <div class="row">📍 Ecole Sinibaldo Basile, Rue Paul Janson, 187</div>
-              </div>
-              <div class="card-foot"><span class="pill-ok">4–5 ans</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="offer-price">
-        <div class="offer-price-num" style="font-size:15px;">Facturé sur base annuelle</div>
-        <a class="offer-cta" href="#nous-contacter">En discuter →</a>
-      </div>
-      <p class="offer-note">Sans engagement au-delà d'un an. Nous validons votre fiche ensemble avant publication - rien ne change sans votre accord. Votre inscription de base reste et restera toujours gratuite, avec ou sans mise en avant.</p>
-    </div>
-
-    <div class="offer-zone offer-zone-later">
-      <span class="zone-badge">À venir</span>
+    <div class="offer-zone offer-zone-mid" id="boost">
+      <span class="zone-badge">2. Boost — 29€ / 4 semaines</span>
       <div class="zone-grid">
         <div class="zone-copy">
-          <h3>Ce que nous préparons pour la suite</h3>
-          <p class="zone-lead">Une piste en réflexion, qu'on n'a pas encore assez creusée pour vous en donner le détail. Dites-nous si ça vous intéresse, on en discute ensemble.</p>
+          <h3>Un stage à remplir plus vite ?</h3>
+          <p class="zone-lead">Boostez une activité précise, sans engagement.</p>
           <ul class="offer-list">
-            <li><span class="ok">↑</span> Encart publicitaire avec photo — décliné par région ou par catégorie d'activité, visible même en dehors des résultats de recherche</li>
+            <li><span class="ok">✓</span> Une activité, celle de votre choix</li>
+            <li><span class="ok">✓</span> Position prioritaire parmi les résultats déjà pertinents pour chaque famille</li>
+            <li><span class="ok">✓</span> Badge « Mis en avant »</li>
+            <li><span class="ok">✓</span> Suivi des vues et des clics vers l'inscription</li>
+          </ul>
+          <p class="zone-lead" style="margin-top:14px;margin-bottom:0;font-size:13.5px;">Le Boost ne fait jamais apparaître votre activité en dehors des critères d'un parent — il la fait seulement remonter parmi les résultats qui lui correspondent déjà.</p>
+        </div>
+        <div class="zone-mock">
+          <span class="mock-label">Aperçu</span>
+          <div class="priority-mock">
+            <div class="mini-card is-boosted">
+              <span class="mini-tag">Mis en avant</span>
+              <div class="mini-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
+              <div class="mini-meta">GRACE-HOLLOGNE · 4–5 ans</div>
+            </div>
+            <div class="mini-card">
+              <div class="mini-name">Stage multisports — Sprimont</div>
+              <div class="mini-meta">SPRIMONT · 6–9 ans</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="offer-price">
+        <div class="offer-price-num">29€ <span>/ 4 semaines, une activité</span></div>
+        <a class="offer-cta" href="#nous-contacter" data-offre="boost">Booster une activité →</a>
+      </div>
+      <p class="offer-note">Sans engagement. Écrivez-nous quelle activité booster, on l'active rapidement et on vous confirme par email.</p>
+    </div>
+
+    <div class="offer-zone offer-zone-mid" id="partenaire" style="background:var(--peach);">
+      <span class="zone-badge" style="background:var(--orange-deep);color:#fff;">3. Partenaire — 240€ / an</span>
+      <div class="zone-grid">
+        <div class="zone-copy">
+          <h3>Toute votre saison, mise en avant</h3>
+          <p class="zone-lead">Pour les organismes qui proposent plusieurs stages par an.</p>
+          <ul class="offer-list">
+            <li><span class="ok">✓</span> Toutes vos activités mises en avant, toute l'année</li>
+            <li><span class="ok">✓</span> Profil enrichi : logo, description détaillée</li>
+            <li><span class="ok">✓</span> Visibilité prioritaire dans les résultats pertinents</li>
+            <li><span class="ok">✓</span> Statistiques de vues et de clics</li>
+            <li><span class="ok">✓</span> Accompagnement prioritaire</li>
           </ul>
         </div>
         <div class="zone-mock">
-          <span class="mock-label">Encart publicitaire avec photo</span>
-          <div class="ad-mock-photo">
-            <img src="hero-photo.jpg" alt="">
-            <div class="ad-mock-inner">
-              <span class="ad-mock-tag">Sponsorisé</span>
-              <div class="ad-mock-body"><strong>Grâce-Hollogne</strong> — Dernières places pour le stage d'été au Centre Janson !</div>
-              <div class="ad-mock-targets">
-                <span>📍 Par région</span>
-                <span>🏷️ Par catégorie</span>
-              </div>
+          <span class="mock-label">Aperçu</span>
+          <div class="card is-partner" style="margin-top:0;margin-bottom:0;">
+            <div class="featured-badge">★ Partenaire</div>
+            <div class="card-source">GRACE-HOLLOGNE</div>
+            <div class="card-name">Plaines de vacances Grâce-Hollogne — Centre Janson</div>
+            <div class="card-desc">Fouilles pédagogiques, ateliers de restauration et visite des collections - une semaine pour découvrir l'archéologie en s'amusant.</div>
+            <div class="card-meta">
+              <div class="row">📅 Du 6 juillet au 7 août 2026, de 9h à 16h</div>
+              <div class="row">📍 Ecole Sinibaldo Basile, Rue Paul Janson, 187</div>
             </div>
+            <div class="card-foot"><span class="pill-ok">4–5 ans</span></div>
           </div>
         </div>
       </div>
+      <div class="offer-price">
+        <div class="offer-price-num">240€ <span>/ an, facturé en une fois</span></div>
+        <a class="offer-cta" href="#nous-contacter" data-offre="partenaire">Devenir partenaire →</a>
+      </div>
+      <p class="offer-note">Sans engagement au-delà d'un an. Nous validons votre fiche ensemble avant publication - rien ne change sans votre accord.</p>
+    </div>
+
+    <div class="faq">
+      <h2 style="text-align:center;margin-bottom:20px;">Questions fréquentes</h2>
+      <details class="faq-item">
+        <summary>C'est vraiment gratuit ?</summary>
+        <p>Oui, sans condition ni durée limitée. Boost et Partenaire sont des options, jamais un passage obligé.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Comment mes activités arrivent-elles sur Trouvéo ?</summary>
+        <p>Automatiquement, à partir de votre site ou de vos réseaux, mises à jour chaque semaine - ou envoyez-les-nous directement via <a href="soumettre-activite.html">le formulaire dédié</a>.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Puis-je tester avant de m'engager ?</summary>
+        <p>Oui, c'est exactement à ça que sert Boost : une activité, 29€, sans engagement, avant de décider si Partenaire vaut le coup pour vous.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Comment savoir si cela fonctionne ?</summary>
+        <p>Vous recevez vos statistiques réelles (vues, clics vers l'inscription) - vous jugez sur vos propres chiffres, pas sur notre parole.</p>
+      </details>
+      <details class="faq-item">
+        <summary>Puis-je arrêter après un Boost ?</summary>
+        <p>Oui, sans aucune démarche : le Boost s'arrête tout seul à la fin des 4 semaines, et votre fiche reste gratuite normalement.</p>
+      </details>
     </div>
   </div>
 </section>
@@ -589,7 +604,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
         <div class="tdot">3</div>
         <div class="tcontent">
           <h3>Envie de plus de visibilité ? C'est possible dès aujourd'hui</h3>
-          <p>La mise en avant, à partir de 10€/mois, est disponible sur demande en deux formules (voir plus haut). L'encart publicitaire avec photo reste une piste en réflexion.</p>
+          <p>Boostez une activité précise pour 29€ (4 semaines, sans engagement), ou passez à Partenaire pour 240€/an si vous avez plusieurs stages dans l'année (voir plus haut).</p>
         </div>
       </div>
     </div>
@@ -619,11 +634,12 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
         <div class="form-error" id="organismeError" role="alert"></div>
       </div>
       <div class="form-card">
-        <h3>Être recontacté·e</h3>
-        <p>Intéressé·e par la mise en avant ou par un encart publicitaire ? Laissez votre email, nous vous recontactons.</p>
+        <h3 id="premiumTitle">Booster une activité ou devenir partenaire</h3>
+        <p id="premiumIntro">Intéressé·e par Boost (29€) ou Partenaire (240€/an) ? Laissez votre email et l'activité concernée, nous vous recontactons rapidement pour l'activer.</p>
         <form class="contact-form" id="premiumForm" novalidate>
+          <input type="hidden" name="offre" id="premiumOffre" value="">
           <input type="email" name="email" placeholder="votre@email.be" required aria-label="Votre email">
-          <textarea name="message" placeholder="Un mot sur votre besoin (optionnel)" rows="2" aria-label="Message (optionnel)"></textarea>
+          <textarea name="message" placeholder="Quelle activité, et Boost ou Partenaire ?" rows="2" aria-label="Message"></textarea>
           <button type="submit">Être recontacté·e</button>
         </form>
         <div class="form-confirm" id="premiumConfirm" role="status">Merci ! Nous vous recontactons rapidement.</div>
@@ -686,6 +702,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
       const emailInput = form.querySelector('input[type=email]');
       const urlInput = form.querySelector('input[type=url]');
       const messageInput = form.querySelector('textarea');
+      const offreInput = form.querySelector('input[name=offre]');
       const email = emailInput ? emailInput.value.trim() : '';
       const url = urlInput ? urlInput.value.trim() : '';
 
@@ -715,7 +732,8 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
           type: opts.type,
           email: email || null,
           url: url || null,
-          message: messageInput ? messageInput.value.trim() : null
+          message: messageInput ? messageInput.value.trim() : null,
+          offre: offreInput ? (offreInput.value || null) : null
         })
       })
         .then(function(res){
@@ -745,6 +763,30 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
 
   handleContactForm({ formId: 'organismeForm', confirmId: 'organismeConfirm', errorId: 'organismeError', type: 'organisme' });
   handleContactForm({ formId: 'premiumForm', confirmId: 'premiumConfirm', errorId: 'premiumError', type: 'premium' });
+
+  // Les CTA "Booster une activité" / "Devenir partenaire" mènent au même
+  // formulaire "Être recontacté·e" (pas de checkout automatisé pour
+  // l'instant, voir docs plan d'exécution §3) - on préremplit juste le
+  // contexte (offre + titre + intro) pour que la personne n'ait pas à le
+  // repréciser dans le message.
+  (function(){
+    var offreEl = document.getElementById('premiumOffre');
+    var titleEl = document.getElementById('premiumTitle');
+    var introEl = document.getElementById('premiumIntro');
+    var labels = {
+      boost: { title: 'Booster une activité', intro: "Indiquez-nous quelle activité booster (29€ / 4 semaines) et votre email, on l'active rapidement." },
+      partenaire: { title: 'Devenir partenaire', intro: 'Laissez votre email, on vous recontacte pour activer Partenaire (240€/an) sur toutes vos activités.' }
+    };
+    document.querySelectorAll('[data-offre]').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var offre = btn.getAttribute('data-offre');
+        if (offreEl) offreEl.value = offre;
+        if (labels[offre] && titleEl) titleEl.textContent = labels[offre].title;
+        if (labels[offre] && introEl) introEl.textContent = labels[offre].intro;
+        if (window.trouveoTrack) window.trouveoTrack('BOOST_CTA_CLICKED', { source_page: 'partenaires', offre: offre });
+      });
+    });
+  })();
 </script>
 
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "eceefc64e8bd4505bf888cad33783426"}'></script><!-- End Cloudflare Web Analytics -->

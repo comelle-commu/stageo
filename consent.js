@@ -37,6 +37,13 @@
   };
 
   function showBanner(){
+    // consent.js est chargé dans <head>, avant que <body> existe : si le
+    // DOM n'est pas encore prêt, on retente au bon moment plutôt que de
+    // planter sur document.body.appendChild(null).
+    if (!document.body) {
+      document.addEventListener('DOMContentLoaded', showBanner, { once: true });
+      return;
+    }
     if (document.getElementById('consentBanner')) return;
     var el = document.createElement('div');
     el.id = 'consentBanner';
