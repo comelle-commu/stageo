@@ -77,3 +77,29 @@ telle quelle la mécanique de `scrapers/relance_criteres.py` :
 Rien à faire tant qu'il n'y a pas de partenaire payant réel. Répondre à
 l'ASBL namuroise en suivant le processus d'onboarding ci-dessus ; lui
 proposer la mise en avant seulement si/quand l'offre existe vraiment.
+
+## Mise à jour — relance automatique construite (01/09/2026)
+
+La section "Relance automatique du partenaire pour le programme suivant"
+ci-dessus n'est plus une idée : construite le 01/09/2026
+(`supabase/migrations/20260901_create_relance_organisateurs.sql`,
+`scrapers/relance_organisateurs.py`, step "Relancer les organisateurs sans
+stage à venir" dans `.github/workflows/scrape.yml`). Contrairement à ce que
+la section suggérait, la mécanique n'est **pas** limitée aux partenaires
+"mis en avant" (l'offre payante n'existe toujours pas) : elle s'applique à
+tout organisateur ayant un email de contact connu dans
+`organisateurs_contact`, gratuit ou pas - c'est cette table qui manquait
+pour fermer la boucle "un organisme envoie son programme une fois, on
+pense à lui redemander le suivant".
+
+**Cas déclencheur : Société archéologique de Namur.** ASBL de médiation
+culturelle (archéologie/beaux-arts, mentionnée en intro de ce doc) qui a
+envoyé son programme de stages directement à Muriel par email plutôt que
+via `soumettre-activite.html`. Comme l'activité a été ajoutée en base sans
+passer par le formulaire, aucun email de contact n'existait dans
+`organisateurs_contact` (alimentée automatiquement seulement pour les
+soumissions via le formulaire, voir `import_soumissions.py`) - la ligne a
+donc été ajoutée à la main (Table editor Supabase) pour que la relance
+fonctionne aussi pour elle le jour où ses stages actuels seront tous
+passés. À refaire pareil pour tout futur organisme qui communique son
+programme par un canal autre que le formulaire.
