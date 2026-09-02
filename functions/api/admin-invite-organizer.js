@@ -96,6 +96,10 @@ function generateToken() {
 
 async function sendInviteEmail(env, contactEmail, sourceKey, lien) {
   const senderName = env.BREVO_SENDER_NAME || "Trouvéo";
+  // Ton volontairement personnel (retour de Muriel : la première version
+  // "sonnait trop marketing") - même esprit que emails/premier-contact-
+  // organisateur.html (se présenter, dire ce que ça change pour EUX avant
+  // de parler de nous, mention Boost/Partenaire discrète et en dernier).
   const html = `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -114,26 +118,45 @@ async function sendInviteEmail(env, contactEmail, sourceKey, lien) {
 
   <tr><td style="padding-bottom:24px;">
     <span style="font-family:'Grandstander',Arial,sans-serif;font-weight:700;font-size:21px;color:#015380;line-height:1.3;">
-      Vos activités sont déjà sur Trouvéo
+      « ${esc(sourceKey)} » est déjà visible sur Trouvéo
     </span>
   </td></tr>
 
-  <tr><td style="padding-bottom:26px;color:#5C7A8C;font-size:14.5px;line-height:1.6;">
-    Trouvéo est une plateforme qui recense les stages et activités pour enfants en Belgique francophone - nous avons repéré vos activités (${esc(sourceKey)})
-    et les avons ajoutées à notre catalogue. Le lien ci-dessous vous donne accès à un espace pour les consulter, signaler une correction si besoin,
-    et éventuellement les mettre en avant.
+  <tr><td style="padding-bottom:18px;color:#5C7A8C;font-size:14.5px;line-height:1.6;">
+    Bonjour,
   </td></tr>
 
-  <tr><td align="center" style="padding:0 0 22px;">
+  <tr><td style="padding-bottom:18px;color:#5C7A8C;font-size:14.5px;line-height:1.6;">
+    Je m'appelle Muriel, je viens de lancer Trouvéo : un site qui réunit en un seul endroit les stages et activités de vacances pour enfants en Wallonie et à Bruxelles, pour aider les parents à trouver plus vite ce qui convient à leur enfant.
+  </td></tr>
+
+  <tr><td style="padding-bottom:18px;color:#5C7A8C;font-size:14.5px;line-height:1.6;">
+    En repérant les activités déjà publiées publiquement, j'ai référencé « ${esc(sourceKey)} » - gratuitement, sans démarche de votre part, et ça le restera.
+  </td></tr>
+
+  <tr><td style="padding-bottom:18px;color:#5C7A8C;font-size:14.5px;line-height:1.6;">
+    Je vous ai préparé un espace personnel où vous pouvez voir exactement ce qu'on affiche de vous, signaler une correction si quelque chose a changé, ou retirer votre fiche si vous préférez ne pas y figurer.
+  </td></tr>
+
+  <tr><td align="center" style="padding:6px 0 24px;">
     <a href="${lien}" style="display:inline-block;background:#0197AF;color:#ffffff;text-decoration:none;
       font-family:'Work Sans',Arial,sans-serif;font-weight:700;font-size:14px;padding:14px 28px;border-radius:100px;">
-      Accéder à mon espace →
+      Voir mes activités →
     </a>
+  </td></tr>
+
+  <tr><td style="padding:16px 18px;background:#E7F4EE;border-radius:14px;color:#015380;font-size:13.5px;line-height:1.6;">
+    Envie d'un peu plus de visibilité sur les dates qui vous tiennent à cœur ? C'est possible directement depuis cet espace, sans obligation ni engagement - à voir si ça vous intéresse un jour.
+  </td></tr>
+
+  <tr><td style="padding:22px 0 26px;color:#5C7A8C;font-size:14.5px;line-height:1.6;">
+    Belle journée,<br>
+    Muriel — fondatrice de Trouvéo
   </td></tr>
 
   <tr><td style="border-top:1px solid rgba(1,83,128,0.12);padding-top:18px;">
     <p style="color:#93A9B5;font-size:12px;line-height:1.6;margin:0;text-align:center;">
-      Ce lien est personnel, gardez-le pour vous. Une question ? Écrivez à hello@trouveo.be.
+      Ce lien est personnel, gardez-le pour vous. Une question ? Répondez simplement à cet email.
     </p>
   </td></tr>
 
@@ -149,7 +172,7 @@ async function sendInviteEmail(env, contactEmail, sourceKey, lien) {
     body: JSON.stringify({
       sender: { name: senderName, email: env.BREVO_SENDER_EMAIL },
       to: [{ email: contactEmail }],
-      subject: "Vos activités sont déjà sur Trouvéo",
+      subject: `« ${sourceKey} » est déjà visible sur Trouvéo`,
       htmlContent: html,
     }),
     signal: AbortSignal.timeout(8000),
