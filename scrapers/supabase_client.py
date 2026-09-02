@@ -222,3 +222,25 @@ def log_run_and_check_quality(total_activites: int) -> tuple[bool, str]:
             "- un site a probablement changé de structure, le scraper ne lit peut-être plus rien."
         )
     return healthy, message
+
+
+# --- Désinscription -------------------------------------------------------
+#
+# Source unique de vérité pour "cette adresse ne veut plus AUCUN email
+# Trouvéo", consultée par tous les scripts d'envoi transactionnel
+# (criteres_alertes.py, relance_criteres.py, relance_organisateurs.py) - le
+# digest hebdomadaire (brevo_digest.py) n'en a pas besoin, il passe par
+# l'API Campagnes Brevo qui gère nativement son propre désabonnement.
+#
+# Alimentée par functions/api/desinscription.js (lien "un clic" présent
+# dans chaque email transactionnel) - voir
+# supabase/migrations/20260902_create_email_opt_out.sql.
+
+
+def fetch_opt_out_emails() -> set[str]:
+    if not is_configured():
+        return set()
+    url = f"{SUPABASE_URL}/rest/v1/email_opt_out?select=email"
+    resp = requests.get(url, headers=_headers("count=none"), timeout=15)
+    resp.raise_for_status()
+    return {row["email"].strip().lower() for row in resp.json()}

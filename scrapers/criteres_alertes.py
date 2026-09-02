@@ -35,7 +35,7 @@ import unicodedata
 from datetime import date, datetime, timezone
 from math import asin, cos, radians, sin, sqrt
 from pathlib import Path
-from urllib.parse import urlencode
+from urllib.parse import quote, urlencode
 
 import requests
 
@@ -297,7 +297,7 @@ def build_detail_link(parent: dict) -> str:
     return f"{SITE_URL}/activites?{urlencode(params)}"
 
 
-def build_email_html(matches: list[dict], commune: str, detail_link: str) -> tuple[str, str]:
+def build_email_html(matches: list[dict], commune: str, detail_link: str, unsubscribe_link: str) -> tuple[str, str]:
     n = len(matches)
     subject = f"{n} stage{'s' if n != 1 else ''} correspond{'ent' if n != 1 else ''} à votre recherche"
 
@@ -365,6 +365,7 @@ def build_email_html(matches: list[dict], commune: str, detail_link: str) -> tup
   <tr><td style="border-top:1px solid rgba(1,83,128,0.12);padding-top:18px;">
     <p style="color:#93A9B5;font-size:12px;line-height:1.6;margin:0;text-align:center;">
       Vous recevez cet email car vous avez laissé vos critères de recherche sur Trouvéo.
+      <a href="{unsubscribe_link}" style="color:#93A9B5;">Se désinscrire</a>.
     </p>
   </td></tr>
 
@@ -409,9 +410,12 @@ def main() -> int:
     parents = fetch_criteres()
     activites = fetch_activites()
     already_sent = fetch_already_sent()
+    opted_out = supabase_client.fetch_opt_out_emails()
 
     today = datetime.now(timezone.utc).date()
     activites = [a for a in activites if is_upcoming(a, today)]
+
+    parents = [p for p in parents if p["email"].strip().lower() not in opted_out]
 
     if TEST_EMAIL:
         parents = [p for p in parents if p["email"].strip().lower() == TEST_EMAIL]
@@ -429,7 +433,8 @@ def main() -> int:
         if dry_run:
             continue
 
-        subject, html = build_email_html(matches, parent["commune"], build_detail_link(parent))
+        unsubscribe_link = f"{SITE_URL}/api/desinscription?email={quote(parent['email'])}"
+        subject, html = build_email_html(matches, parent["commune"], build_detail_link(parent), unsubscribe_link)
         try:
             send_transactional(parent["email"], subject, html)
         except requests.HTTPError as exc:

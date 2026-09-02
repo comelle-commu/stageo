@@ -104,7 +104,7 @@ def _esc(s: str) -> str:
     return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
-def build_email_html(criteres_link: str) -> tuple[str, str]:
+def build_email_html(criteres_link: str, unsubscribe_link: str) -> tuple[str, str]:
     subject = "Il manque juste vos critères pour activer vos alertes"
     html = f"""<!DOCTYPE html>
 <html lang="fr">
@@ -143,7 +143,8 @@ def build_email_html(criteres_link: str) -> tuple[str, str]:
 
   <tr><td style="border-top:1px solid rgba(1,83,128,0.12);padding-top:18px;margin-top:22px;">
     <p style="color:#93A9B5;font-size:12px;line-height:1.6;margin:0;text-align:center;">
-      Vous recevez cet email car vous vous êtes inscrit·e sur Trouvéo. Pas intéressé·e ? Ignorez simplement ce message.
+      Vous recevez cet email car vous vous êtes inscrit·e sur Trouvéo.
+      <a href="{unsubscribe_link}" style="color:#93A9B5;">Se désinscrire</a>.
     </p>
   </td></tr>
 
@@ -191,12 +192,13 @@ def main() -> int:
     contacts = fetch_brevo_contacts()
     criteres_emails = fetch_criteres_emails()
     already_reminded = fetch_already_reminded()
+    opted_out = supabase_client.fetch_opt_out_emails()
     cutoff = datetime.now(timezone.utc) - timedelta(days=DELAY_DAYS)
 
     candidates = []
     for c in contacts:
         email = (c.get("email") or "").strip().lower()
-        if not email or c.get("emailBlacklisted"):
+        if not email or c.get("emailBlacklisted") or email in opted_out:
             continue  # désabonné·e - ne jamais relancer malgré la promesse "désinscription en un clic"
         if email in criteres_emails or email in already_reminded:
             continue
@@ -223,7 +225,8 @@ def main() -> int:
     sent = 0
     for email in candidates:
         criteres_link = f"{SITE_URL}/criteres.html?email={quote(email)}"
-        subject, html = build_email_html(criteres_link)
+        unsubscribe_link = f"{SITE_URL}/api/desinscription?email={quote(email)}"
+        subject, html = build_email_html(criteres_link, unsubscribe_link)
         print(f"{'[dry-run] ' if dry_run else ''}Relance pour {email}")
         if dry_run:
             continue

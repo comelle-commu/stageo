@@ -42,6 +42,8 @@ import os
 import sys
 from datetime import date, datetime, timezone
 
+from urllib.parse import quote
+
 import requests
 
 import supabase_client
@@ -112,7 +114,7 @@ def log_relance(source_key: str, dernier_ajout_connu: datetime) -> None:
     resp.raise_for_status()
 
 
-def build_email_html(source_key: str) -> tuple[str, str]:
+def build_email_html(source_key: str, unsubscribe_link: str) -> tuple[str, str]:
     subject = "Vos stages sont terminés - et la suite ?"
     submit_link = f"{SITE_URL}/soumettre-activite.html"
     partenaires_link = f"{SITE_URL}/partenaires.html"
@@ -155,6 +157,7 @@ def build_email_html(source_key: str) -> tuple[str, str]:
       Au passage : si vous voulez plus de visibilité, une mise en avant est possible
       (<a href="{partenaires_link}" style="color:#93A9B5;">en savoir plus</a>). Aucune obligation,
       l'inscription de base reste et restera toujours gratuite.
+      <a href="{unsubscribe_link}" style="color:#93A9B5;">Se désinscrire</a> de ces relances.
     </p>
   </td></tr>
 
@@ -199,10 +202,13 @@ def main() -> int:
 
     activites_par_org = fetch_activites_par_organisateur(list(contacts.keys()))
     already = fetch_already_relanced()
+    opted_out = supabase_client.fetch_opt_out_emails()
     today = date.today()
 
     candidates: list[tuple[str, str, datetime]] = []  # (source_key, email, dernier_ajout_connu)
     for source_key, email in contacts.items():
+        if email.strip().lower() in opted_out:
+            continue  # désabonné·e
         rows = activites_par_org.get(source_key, [])
         if not rows:
             continue  # jamais importé (ou pas encore) - rien à relancer
@@ -224,7 +230,8 @@ def main() -> int:
 
     sent = 0
     for source_key, email, dernier_ajout in candidates:
-        subject, html = build_email_html(source_key)
+        unsubscribe_link = f"{SITE_URL}/api/desinscription?email={quote(email)}"
+        subject, html = build_email_html(source_key, unsubscribe_link)
         print(f"{'[dry-run] ' if dry_run else ''}Relance pour {source_key} ({email})")
         if dry_run:
             continue
