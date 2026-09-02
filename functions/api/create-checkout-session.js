@@ -58,13 +58,32 @@ export async function onRequestPost(context) {
     return jsonResponse(400, { error: "Requête invalide." });
   }
 
-  const { offre, email, activite_id: activiteIdRaw, organisme: organismeRaw } = body || {};
+  const { offre, email, activite_id: activiteIdRaw, organisme: organismeRaw, token } = body || {};
 
   if (!OFFRES[offre]) {
     return jsonResponse(400, { error: "Offre invalide." });
   }
   if (typeof email !== "string" || !EMAIL_RE.test(email)) {
     return jsonResponse(400, { error: "Adresse email invalide." });
+  }
+
+  // Un jeton "espace organisateur" valide (voir organisateur.html,
+  // functions/api/organisateur-espace.js) prouve déjà l'identité - preuve
+  // plus forte qu'une simple correspondance de domaine d'email, donc
+  // vérifiée en premier.
+  let tokenSourceKey = null;
+  if (typeof token === "string" && token) {
+    try {
+      const res = await fetch(
+        `${supabaseUrl}/rest/v1/organisateurs_contact?select=source_key&access_token=eq.${encodeURIComponent(token)}`,
+        { headers: { apikey: secretKey, Authorization: `Bearer ${secretKey}` } }
+      );
+      const rows = await res.json();
+      tokenSourceKey = Array.isArray(rows) && rows[0] ? rows[0].source_key : null;
+    } catch (err) {
+      console.error("Vérification du jeton organisateur impossible", err);
+      // Non bloquant : retombe sur la vérification par domaine ci-dessous.
+    }
   }
 
   let productName;
@@ -83,7 +102,7 @@ export async function onRequestPost(context) {
     let activite;
     try {
       const res = await fetch(
-        `${supabaseUrl}/rest/v1/activites?select=id,nom_activite,contact_email,lien_source&id=eq.${activiteId}`,
+        `${supabaseUrl}/rest/v1/activites?select=id,nom_activite,contact_email,lien_source,organisateur,commune&id=eq.${activiteId}`,
         { headers: { apikey: secretKey, Authorization: `Bearer ${secretKey}` } }
       );
       const rows = await res.json();
@@ -97,7 +116,10 @@ export async function onRequestPost(context) {
     }
     productName = `Boost Trouvéo — ${activite.nom_activite}`;
     metadata.activite_id = String(activiteId);
-    metadata.verifie = isAffiliated(email, [activite.contact_email, activite.lien_source]) ? "oui" : "non";
+    const ownedByToken =
+      tokenSourceKey && (activite.organisateur === tokenSourceKey || activite.commune === tokenSourceKey);
+    metadata.verifie =
+      ownedByToken || isAffiliated(email, [activite.contact_email, activite.lien_source]) ? "oui" : "non";
   } else {
     const organisme = typeof organismeRaw === "string" ? organismeRaw.trim() : "";
     if (!organisme || organisme.length > 200) {
@@ -121,7 +143,7 @@ export async function onRequestPost(context) {
       // Non bloquant : à défaut de vérifier, on marque juste "non vérifié"
       // plutôt que de refuser le paiement pour une panne transitoire.
     }
-    metadata.verifie = isAffiliated(email, refs) ? "oui" : "non";
+    metadata.verifie = tokenSourceKey === organisme || isAffiliated(email, refs) ? "oui" : "non";
   }
 
   const { montant_cents } = OFFRES[offre];

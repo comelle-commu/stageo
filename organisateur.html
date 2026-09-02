@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trouvéo — Votre espace organisateur</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Grandstander:wght@600;700;800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FFFDF8; --mint:#E7F4EE; --paper:#FFFFFF; --peach:#FDF1E1; --blush:#FCEAE7;
+    --ink:#015380; --ink-soft:#5C7A8C; --ink-faint:#93A9B5;
+    --teal:#0197AF; --teal-deep:#017089; --orange:#FDBA18; --pink:#D6336C;
+    --line: rgba(1,83,128,0.12); --line-soft: rgba(1,83,128,0.07);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:'Work Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Grandstander',sans-serif;font-weight:700;margin:0;}
+  a{color:var(--teal-deep);}
+  .wrap{max-width:720px;margin:0 auto;padding:0 24px;}
+  nav.wrap{max-width:1080px;display:flex;align-items:center;padding:24px;}
+  .logo-img{height:58px;width:auto;display:block;}
+  @media (max-width:520px){ .logo-img{height:34px;} }
+  header.intro{padding:20px 0 10px;}
+  .eyebrow{display:inline-block;font-size:12.5px;font-weight:700;color:var(--teal-deep);background:var(--mint);padding:5px 12px;border-radius:100px;margin-bottom:14px;}
+  h1{font-size:clamp(24px,4.5vw,30px);margin-bottom:8px;}
+  .sub{color:var(--ink-soft);font-size:14.5px;line-height:1.6;margin-bottom:32px;}
+  #loading, #errorState{padding:40px 0;text-align:center;color:var(--ink-soft);}
+  #errorState{display:none;}
+  .partenaire-band{
+    background:var(--paper);border-radius:18px;padding:20px 22px;margin-bottom:28px;
+    border:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  }
+  .partenaire-band .label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--ink-faint);margin-bottom:4px;}
+  .partenaire-band .status{font-size:15px;font-weight:700;color:var(--ink);}
+  .btn{display:inline-block;font-weight:700;font-size:13.5px;text-decoration:none;padding:10px 20px;border-radius:100px;border:none;cursor:pointer;font-family:'Work Sans',sans-serif;}
+  .btn-primary{background:var(--teal);color:#fff;}
+  .btn-primary:hover{background:var(--teal-deep);}
+  .btn-secondary{background:var(--paper);color:var(--ink);border:1px solid var(--line);}
+  .btn:disabled{opacity:.6;cursor:default;}
+  .card{
+    background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px 20px;margin-bottom:14px;
+  }
+  .card-name{font-family:'Grandstander',sans-serif;font-weight:700;font-size:15.5px;color:var(--ink);margin-bottom:6px;}
+  .card-meta{color:var(--ink-soft);font-size:13.5px;line-height:1.6;margin-bottom:12px;}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;margin-left:8px;vertical-align:middle;}
+  .badge-boost{background:var(--peach);color:#8A5A00;}
+  .card-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+  .correction-box{display:none;margin-top:12px;}
+  .correction-box textarea{
+    width:100%;border:1.5px solid var(--line);background:var(--cream);border-radius:12px;
+    padding:10px 12px;font-size:13.5px;font-family:'Work Sans',sans-serif;color:var(--ink);outline:none;resize:vertical;
+    margin-bottom:8px;
+  }
+  .correction-box textarea:focus{border-color:var(--teal);}
+  .msg{margin-top:8px;font-size:13px;font-weight:600;display:none;}
+  .msg-ok{color:var(--teal-deep);}
+  .msg-err{color:var(--pink);}
+  footer{padding:30px 0 60px;text-align:center;font-size:13px;color:var(--ink-faint);}
+  footer a{text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<nav class="wrap">
+  <a class="logo" href="/"><img src="trouveo-logo.png" alt="Trouvéo" class="logo-img"></a>
+</nav>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="eyebrow">Espace organisateur</span>
+    <h1>Vos activités sur Trouvéo</h1>
+    <p class="sub">Consultez ce que nous avons repéré chez vous, signalez une correction si besoin, ou mettez une activité en avant.</p>
+  </header>
+
+  <div id="loading">Chargement…</div>
+  <div id="errorState"></div>
+  <div id="content" style="display:none;">
+    <div class="partenaire-band" id="partenaireBand"></div>
+    <div id="activitesList"></div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p>Trouvéo — service indépendant, non affilié aux communes référencées.</p>
+    <p><a href="faq.html">FAQ</a> · <a href="confidentialite.html">Confidentialité</a> · <a href="/">← Retour à l'accueil</a></p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var params = new URLSearchParams(window.location.search);
+  var token = params.get('token');
+  var loadingEl = document.getElementById('loading');
+  var errorEl = document.getElementById('errorState');
+  var contentEl = document.getElementById('content');
+  var partenaireBandEl = document.getElementById('partenaireBand');
+  var listEl = document.getElementById('activitesList');
+
+  function esc(s){ return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  function showError(msg){
+    loadingEl.style.display = 'none';
+    errorEl.style.display = 'block';
+    errorEl.textContent = msg;
+  }
+
+  if (!token){
+    showError("Lien invalide - vérifiez que vous avez bien copié le lien complet reçu par email, ou écrivez à hello@trouveo.be.");
+    return;
+  }
+
+  fetch('/api/organisateur-espace?token=' + encodeURIComponent(token))
+    .then(function(res){
+      return res.json().catch(function(){ return {}; }).then(function(data){ return { ok: res.ok, data: data }; });
+    })
+    .then(function(result){
+      if (!result.ok) throw new Error((result.data && result.data.error) || "Impossible de charger votre espace.");
+      render(result.data);
+    })
+    .catch(function(err){
+      showError(err.message || "Impossible de charger votre espace, réessayez dans un instant.");
+    });
+
+  function payerCheckout(payload, btn){
+    var original = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Redirection…';
+    fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(function(res){
+        return res.json().catch(function(){ return {}; }).then(function(data){ return { ok: res.ok, data: data }; });
+      })
+      .then(function(result){
+        if (!result.ok || !result.data.url) throw new Error((result.data && result.data.error) || "Le paiement n'a pas pu être initié.");
+        window.location.href = result.data.url;
+      })
+      .catch(function(err){
+        btn.disabled = false;
+        btn.textContent = original;
+        alert(err.message || "Le paiement n'a pas pu être initié, réessayez dans un instant.");
+      });
+  }
+
+  function render(data){
+    loadingEl.style.display = 'none';
+    contentEl.style.display = 'block';
+
+    // Bandeau Partenaire
+    var today = new Date().toISOString().slice(0, 10);
+    var isPartenaire = data.partenaire && data.partenaire.complet && data.partenaire.jusquau >= today;
+    if (isPartenaire){
+      partenaireBandEl.innerHTML =
+        '<div><div class="label">Partenaire</div><div class="status">Actif jusqu\'au ' + esc(data.partenaire.jusquau) + '</div></div>';
+    } else {
+      partenaireBandEl.innerHTML =
+        '<div><div class="label">Partenaire</div><div class="status">Pas encore activé</div></div>' +
+        '<button class="btn btn-primary" id="partenaireBtn">Devenir Partenaire — 240€/an</button>';
+      document.getElementById('partenaireBtn').addEventListener('click', function(){
+        payerCheckout({ offre: 'partenaire', email: data.contact_email, organisme: data.source_key, token: token }, this);
+      });
+    }
+
+    if (!data.activites.length){
+      listEl.innerHTML = '<p class="sub">Aucune activité repérée pour l\'instant.</p>';
+      return;
+    }
+
+    listEl.innerHTML = data.activites.map(function(a){
+      var boosted = a.boost_jusquau && a.boost_jusquau >= today;
+      var age = (a.age_min != null && a.age_max != null) ? (a.age_min + '–' + a.age_max + ' ans') : '';
+      return '<div class="card" data-aid="' + a.id + '">' +
+        '<div class="card-name">' + esc(a.nom_activite) + (boosted ? '<span class="badge badge-boost">Boosté jusqu\'au ' + esc(a.boost_jusquau) + '</span>' : '') + '</div>' +
+        '<div class="card-meta">' + esc(a.dates || 'Dates non précisées') + (a.lieu ? ' · ' + esc(a.lieu) : '') + (age ? ' · ' + esc(age) : '') + (a.prix ? ' · ' + esc(a.prix) : '') + '</div>' +
+        '<div class="card-actions">' +
+          (boosted ? '' : '<button class="btn btn-primary boost-btn">Booster — 29€/4 semaines</button>') +
+          '<button class="btn btn-secondary correction-toggle">Signaler une correction</button>' +
+        '</div>' +
+        '<div class="correction-box">' +
+          '<textarea rows="3" placeholder="Ex. la date a changé, c\'est maintenant du 12 au 16 août..."></textarea>' +
+          '<button class="btn btn-primary correction-submit">Envoyer</button>' +
+          '<div class="msg msg-ok">Merci, on la vérifie et on met à jour rapidement.</div>' +
+          '<div class="msg msg-err"></div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    listEl.querySelectorAll('.boost-btn').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var card = btn.closest('.card');
+        var activiteId = Number(card.getAttribute('data-aid'));
+        payerCheckout({ offre: 'boost', email: data.contact_email, activite_id: activiteId, token: token }, btn);
+      });
+    });
+
+    listEl.querySelectorAll('.correction-toggle').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var box = btn.closest('.card').querySelector('.correction-box');
+        box.style.display = box.style.display === 'block' ? 'none' : 'block';
+      });
+    });
+
+    listEl.querySelectorAll('.correction-submit').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var card = btn.closest('.card');
+        var box = card.querySelector('.correction-box');
+        var textarea = box.querySelector('textarea');
+        var msgOk = box.querySelector('.msg-ok');
+        var msgErr = box.querySelector('.msg-err');
+        msgOk.style.display = 'none';
+        msgErr.style.display = 'none';
+        var message = textarea.value.trim();
+        if (!message){
+          msgErr.textContent = 'Merci de décrire la correction souhaitée.';
+          msgErr.style.display = 'block';
+          return;
+        }
+        var original = btn.textContent;
+        btn.disabled = true;
+        btn.textContent = 'Envoi…';
+        fetch('/api/organisateur-signaler-correction', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: token, activite_id: Number(card.getAttribute('data-aid')), message: message })
+        })
+          .then(function(res){
+            return res.json().catch(function(){ return {}; }).then(function(data){ return { ok: res.ok, data: data }; });
+          })
+          .then(function(result){
+            if (!result.ok) throw new Error((result.data && result.data.error) || "L'envoi a échoué.");
+            textarea.value = '';
+            msgOk.style.display = 'block';
+          })
+          .catch(function(err){
+            msgErr.textContent = err.message || "L'envoi a échoué, réessayez dans un instant.";
+            msgErr.style.display = 'block';
+          })
+          .finally(function(){
+            btn.disabled = false;
+            btn.textContent = original;
+          });
+      });
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
