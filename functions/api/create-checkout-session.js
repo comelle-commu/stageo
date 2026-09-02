@@ -98,11 +98,13 @@ export async function onRequestPost(context) {
     // récapitulatif Stripe) plutôt que de faire confiance à un ID envoyé
     // par le navigateur - activites_boost a une contrainte de clé
     // étrangère de toute façon, mais mieux vaut un message clair ici
-    // qu'une erreur Stripe générique après coup.
+    // qu'une erreur Stripe générique après coup. `activites` n'a PAS de
+    // colonne contact_email (elle vit uniquement sur organisateurs_contact,
+    // voir import_soumissions.py) - vérifiée séparément ci-dessous.
     let activite;
     try {
       const res = await fetch(
-        `${supabaseUrl}/rest/v1/activites?select=id,nom_activite,contact_email,lien_source,organisateur,commune&id=eq.${activiteId}`,
+        `${supabaseUrl}/rest/v1/activites?select=id,nom_activite,lien_source,organisateur,commune&id=eq.${activiteId}`,
         { headers: { apikey: secretKey, Authorization: `Bearer ${secretKey}` } }
       );
       const rows = await res.json();
@@ -116,10 +118,11 @@ export async function onRequestPost(context) {
     }
     productName = `Boost Trouvéo — ${activite.nom_activite}`;
     metadata.activite_id = String(activiteId);
-    const ownedByToken =
-      tokenSourceKey && (activite.organisateur === tokenSourceKey || activite.commune === tokenSourceKey);
+    const sourceKey = activite.organisateur || activite.commune;
+    const ownedByToken = tokenSourceKey && tokenSourceKey === sourceKey;
+    const knownContactEmail = sourceKey ? await fetchContactEmail(supabaseUrl, secretKey, sourceKey) : null;
     metadata.verifie =
-      ownedByToken || isAffiliated(email, [activite.contact_email, activite.lien_source]) ? "oui" : "non";
+      ownedByToken || isAffiliated(email, [knownContactEmail, activite.lien_source]) ? "oui" : "non";
   } else {
     const organisme = typeof organismeRaw === "string" ? organismeRaw.trim() : "";
     if (!organisme || organisme.length > 200) {
@@ -127,23 +130,25 @@ export async function onRequestPost(context) {
     }
     productName = `Partenaire Trouvéo — ${organisme}`;
     metadata.organisme = organisme;
-    // Toutes les activités connues de cet organisme (même logique que
-    // groupKey() côté client : organisateur, sinon commune) - un seul
-    // contact_email ou lien_source qui correspond suffit à vérifier.
-    let refs = [];
+    // Une activité de cet organisme suffit pour récupérer son domaine
+    // source (lien_source) ; le contact_email connu vient directement
+    // d'organisateurs_contact (source_key = organisme), pas de `activites`.
+    let lienSource = null;
     try {
       const res = await fetch(
-        `${supabaseUrl}/rest/v1/activites?select=contact_email,lien_source&or=(organisateur.eq.${encodeURIComponent(organisme)},commune.eq.${encodeURIComponent(organisme)})&limit=200`,
+        `${supabaseUrl}/rest/v1/activites?select=lien_source&or=(organisateur.eq.${encodeURIComponent(organisme)},commune.eq.${encodeURIComponent(organisme)})&lien_source=not.is.null&limit=1`,
         { headers: { apikey: secretKey, Authorization: `Bearer ${secretKey}` } }
       );
       const rows = await res.json();
-      refs = Array.isArray(rows) ? rows.flatMap((r) => [r.contact_email, r.lien_source]) : [];
+      lienSource = Array.isArray(rows) && rows[0] ? rows[0].lien_source : null;
     } catch (err) {
       console.error("Vérification de l'organisme impossible", err);
       // Non bloquant : à défaut de vérifier, on marque juste "non vérifié"
       // plutôt que de refuser le paiement pour une panne transitoire.
     }
-    metadata.verifie = tokenSourceKey === organisme || isAffiliated(email, refs) ? "oui" : "non";
+    const knownContactEmail = await fetchContactEmail(supabaseUrl, secretKey, organisme);
+    metadata.verifie =
+      tokenSourceKey === organisme || isAffiliated(email, [knownContactEmail, lienSource]) ? "oui" : "non";
   }
 
   const { montant_cents } = OFFRES[offre];
@@ -186,6 +191,20 @@ export async function onRequestPost(context) {
 
 export async function onRequest() {
   return jsonResponse(405, { error: "Méthode non autorisée." });
+}
+
+async function fetchContactEmail(supabaseUrl, secretKey, sourceKey) {
+  try {
+    const res = await fetch(
+      `${supabaseUrl}/rest/v1/organisateurs_contact?select=contact_email&source_key=eq.${encodeURIComponent(sourceKey)}`,
+      { headers: { apikey: secretKey, Authorization: `Bearer ${secretKey}` } }
+    );
+    const rows = await res.json();
+    return Array.isArray(rows) && rows[0] ? rows[0].contact_email : null;
+  } catch (err) {
+    console.error("Lecture d'organisateurs_contact impossible", err);
+    return null;
+  }
 }
 
 // true si `email` correspond exactement à l'une des références connues
