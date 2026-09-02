@@ -293,6 +293,12 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   section.final h2{font-size:clamp(24px,3vw,32px);margin-bottom:12px;}
   section.final p{color:var(--ink-soft);font-size:16px;margin-bottom:26px;max-width:54ch;margin-left:auto;margin-right:auto;}
 
+  /* ---- Villes (SEO/navigation) ---- */
+  section.cities{padding:0 0 50px;text-align:center;}
+  section.cities h2{font-size:16px;margin-bottom:14px;color:var(--ink-soft);}
+  .city-link{display:inline-block;font-size:13.5px;font-weight:600;color:var(--teal-deep);background:var(--paper);border:1px solid var(--line);padding:8px 16px;border-radius:100px;text-decoration:none;margin:0 8px 8px 0;}
+  .city-link:hover{border-color:var(--teal);}
+
   footer{padding:26px 0 40px;border-top:1px solid var(--line);}
   .back-to-top{
     display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:9px 18px;
@@ -419,6 +425,20 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   <h2>Envie d'être prévenu·e dès l'ouverture des inscriptions ?</h2>
   <p>La liste ci-dessus grandit chaque semaine. Laissez votre email et vos critères, et nous vous aidons à ne pas rater la bonne place, sans devoir revenir vérifier ici.</p>
   <a href="/#top-form" class="nav-cta">Recevoir des alertes</a>
+</section>
+
+<section class="cities wrap">
+  <h2>Stages par ville</h2>
+  <a href="/stages/liege" class="city-link">Liège</a>
+  <a href="/stages/uccle" class="city-link">Uccle</a>
+  <a href="/stages/woluwe-saint-pierre" class="city-link">Woluwe-Saint-Pierre</a>
+  <a href="/stages/woluwe-saint-lambert" class="city-link">Woluwe-Saint-Lambert</a>
+  <a href="/stages/etterbeek" class="city-link">Etterbeek</a>
+  <a href="/stages/wavre" class="city-link">Wavre</a>
+  <a href="/stages/mons" class="city-link">Mons</a>
+  <a href="/stages/charleroi" class="city-link">Charleroi</a>
+  <a href="/stages/nivelles" class="city-link">Nivelles</a>
+  <a href="/stages/herstal" class="city-link">Herstal</a>
 </section>
 
 <footer>
