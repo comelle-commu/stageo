@@ -169,12 +169,29 @@ function classifyDispo(text) {
   return { cls: "p-neutral", label: "Non communiqué" };
 }
 
+// Même correctif que activites.html (voir sa version pour le contexte) :
+// age_min/age_max sont parfois décimaux (ex. iclub.py, "8 an(s) et 5
+// mois" -> 8.416666...) - affiché brut, illisible.
+function formatAgeNum(n) {
+  const y = Math.floor(n + 1e-9);
+  const m = Math.round((n - y) * 12);
+  if (m <= 0) return y + " an" + (y !== 1 ? "s" : "");
+  if (m >= 12) return (y + 1) + " an" + (y + 1 !== 1 ? "s" : "");
+  return y + " an" + (y !== 1 ? "s" : "") + " " + m + " mois";
+}
+
 function ageLabel(row) {
   const a = row.age_min, b = row.age_max;
   if (a == null && b == null) return null;
-  if (a != null && b != null) return a + "–" + b + " ans";
-  if (a != null) return "à partir de " + a + " ans";
-  return "jusqu’à " + b + " ans";
+  const bothWhole = (a == null || Number.isInteger(a)) && (b == null || Number.isInteger(b));
+  if (bothWhole) {
+    if (a != null && b != null) return a + "–" + b + " ans";
+    if (a != null) return "à partir de " + a + " ans";
+    return "jusqu’à " + b + " ans";
+  }
+  if (a != null && b != null) return formatAgeNum(a) + " – " + formatAgeNum(b);
+  if (a != null) return "à partir de " + formatAgeNum(a);
+  return "jusqu’à " + formatAgeNum(b);
 }
 
 function esc(s) {
