@@ -131,7 +131,7 @@ async function sendInviteEmail(env, contactEmail, sourceKey, lien) {
   </td></tr>
 
   <tr><td style="padding-bottom:18px;color:#5C7A8C;font-size:14.5px;line-height:1.6;">
-    Je me suis permise de recenser « ${esc(sourceKey)} » car elle me semblait intéressante pour la communauté de parents que Trouvéo essaie d'aider - gratuitement, et ça le restera.
+    Je me suis permis de recenser « ${esc(sourceKey)} » car elle me semblait intéressante pour la communauté de parents que Trouvéo essaie d'aider - gratuitement, et ça le restera.
   </td></tr>
 
   <tr><td style="padding-bottom:18px;color:#5C7A8C;font-size:14.5px;line-height:1.6;">
