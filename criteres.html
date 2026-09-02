@@ -93,23 +93,12 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     background:var(--teal);color:#fff;text-decoration:none;white-space:nowrap;
     box-shadow:0 10px 24px -8px rgba(1,151,175,0.5);
   }
-  .nav-toggle{
-    display:none;flex:none;border:none;background:none;color:var(--ink);
-    font-size:26px;line-height:1;padding:6px 4px;cursor:pointer;
-  }
   @media (max-width:480px){
-    nav.wrap{padding:16px 20px;}
-    .logo-img{height:24px;}
-    .nav-toggle{display:block;}
-    .nav-links{
-      display:none;position:absolute;top:100%;left:0;right:0;margin-top:8px;
-      flex-direction:column;align-items:stretch;gap:0;
-      background:var(--paper);border:1px solid var(--line);border-radius:16px;
-      box-shadow:0 16px 34px -20px rgba(1,83,128,0.4);padding:8px 18px 16px;z-index:20;
-    }
-    .nav-links.open{display:flex;}
-    .nav-link{padding:13px 2px;border-bottom:1px solid var(--line-soft);}
-    .nav-cta{align-self:flex-start;margin-top:14px;font-size:13px;padding:10px 16px;}
+    nav.wrap{padding:14px 16px;gap:6px;}
+    .logo-img{height:20px;}
+    .nav-links{gap:6px;}
+    .nav-link{font-size:11px;}
+    .nav-cta{font-size:11px;padding:7px 10px;}
   }
 
   header.intro{padding:24px 0 30px;text-align:center;}
@@ -194,25 +183,12 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   <a class="logo" href="/">
     <img src="trouveo-logo.png" alt="Trouvéo" class="logo-img">
   </a>
-  <button class="nav-toggle" id="navToggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="navLinks">☰</button>
   <div class="nav-links" id="navLinks">
     <a href="partenaires.html" class="nav-link">Pour les organisateurs</a>
     <a href="/activites" class="nav-cta">Voir les activités</a>
   </div>
 </nav>
 </div>
-<script>
-(function(){
-  var toggle = document.getElementById('navToggle');
-  var links = document.getElementById('navLinks');
-  if (!toggle || !links) return;
-  toggle.addEventListener('click', function(){
-    var open = links.classList.toggle('open');
-    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    toggle.textContent = open ? '✕' : '☰';
-  });
-})();
-</script>
 
 <div class="wrap">
   <header class="intro">

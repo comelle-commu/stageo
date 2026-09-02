@@ -113,25 +113,14 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   }
   .nav-cta:hover{transform:translateY(-1px);background:var(--teal-deep);}
   .cta-short{display:none;}
-  .nav-toggle{
-    display:none;flex:none;border:none;background:none;color:var(--ink);
-    font-size:26px;line-height:1;padding:6px 4px;cursor:pointer;
-  }
   @media (max-width:480px){
-    nav.wrap{padding:16px 20px;}
-    .logo-img{height:24px;}
-    .nav-toggle{display:block;}
-    .nav-links{
-      display:none;position:absolute;top:100%;left:0;right:0;margin-top:8px;
-      flex-direction:column;align-items:stretch;gap:0;
-      background:var(--paper);border:1px solid var(--line);border-radius:16px;
-      box-shadow:0 16px 34px -20px rgba(1,83,128,0.4);padding:8px 18px 16px;z-index:20;
-    }
-    .nav-links.open{display:flex;}
-    .nav-link{padding:13px 2px;border-bottom:1px solid var(--line-soft);}
-    .nav-cta{align-self:flex-start;margin-top:14px;}
-    .cta-full{display:inline;}
-    .cta-short{display:none;}
+    nav.wrap{padding:14px 20px;}
+    .logo-img{height:22px;}
+    .nav-links{gap:8px;}
+    .nav-link{font-size:12px;}
+    .nav-cta{padding:8px 12px;font-size:12px;}
+    .cta-full{display:none;}
+    .cta-short{display:inline;}
   }
 
   /* ---- Intro ---- */
@@ -322,7 +311,6 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   <a class="logo" href="/">
     <img src="trouveo-logo.png" alt="Trouvéo" class="logo-img">
   </a>
-  <button class="nav-toggle" id="navToggle" type="button" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="navLinks">☰</button>
   <div class="nav-links" id="navLinks">
     <a href="/activites" class="nav-link active" aria-current="page">
       <span class="cta-full">Voir toutes les activités</span>
@@ -339,18 +327,6 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   </div>
 </nav>
 </div>
-<script>
-(function(){
-  var toggle = document.getElementById('navToggle');
-  var links = document.getElementById('navLinks');
-  if (!toggle || !links) return;
-  toggle.addEventListener('click', function(){
-    var open = links.classList.toggle('open');
-    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-    toggle.textContent = open ? '✕' : '☰';
-  });
-})();
-</script>
 
 <header class="intro wrap">
   <div class="blob blob1"></div>
