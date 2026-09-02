@@ -365,6 +365,38 @@ grandes villes déjà couvertes indirectement (Liège, Charleroi, Mons...) ont
 souvent leur propre régie ou ASBL de gestion avec un site distinct du site
 communal principal - à rechercher nommément plutôt que de deviner une URL.
 
+### Quatre pistes vérifiées le 02/09/2026, aucune exploitable pour l'instant
+
+Sur demande, quatre candidates supplémentaires ont été recherchées
+(piscine d'Ans, piscine de Seraing, piscine de Herve, AXEO) - toutes
+existent réellement, mais aucune n'a de contenu "stages vacances" publié et
+extractible à cette date. Pas de scraper écrit pour éviter du code mort
+sur du contenu qui n'existe pas encore ; à revérifier avant une prochaine
+période de vacances (les stages se publient souvent 3-4 semaines avant,
+voir Forest/Uccle plus haut) :
+
+- **Piscine d'Ans (Liège Natation)** - uniquement des cours hebdomadaires
+  à l'année (`liegenatation.be/Web/category/piscine/ans/`), aucun stage de
+  vacances mentionné.
+- **AXEO (Ans/Xhendremael, piscine biologique privée)** - des stages d'été
+  sont mentionnés dans des avis clients, mais rien de publié sur le site
+  au 02/09/2026 (seul un planning de cours hebdomadaires 2026-2027 en PDF,
+  pas de page "stages" dédiée) - `myaxeo.be`.
+- **Piscine Olympique de Seraing** - la Ville organise depuis plusieurs
+  années des "stages sportifs" incluant la natation (60€ Seraing / 80€
+  hors commune, historique 2022-2024 confirmé), mais publiés sous une URL
+  différente à chaque saison (`/stages-sportifs-ete-2024/` etc.) - rien
+  trouvé de vivant pour 2026-2027 sur la page pool elle-même
+  (`seraing.be/vivre-en-ville/sports/piscine-olympique/`) ni en recherche.
+  Seraing a déjà un scraper (`seraing.py`, plaines de vacances) - ce
+  serait une source distincte à ajouter dès publication.
+- **ForSports (piscines Herve/Saint-Georges)** - a bien une page stages
+  vivante (`forsports.be/automne-2026`), mais ses stages sont multi-
+  activités génériques (pas de natation) et n'ont pas Herve comme site -
+  la piscine de Herve elle-même n'a que des cours hebdomadaires
+  (`forsports.be/natation-herve`). Pas une source "stages piscine"
+  pertinente en l'état.
+
 ## Forest / Uccle : pages communales mises à jour uniquement à l'approche de la période
 
 Contrairement aux organismes privés (ADEPS, Cap Sciences, Dimension Sport...)
