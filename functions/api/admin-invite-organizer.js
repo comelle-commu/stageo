@@ -127,7 +127,7 @@ async function sendInviteEmail(env, contactEmail, sourceKey, lien) {
   </td></tr>
 
   <tr><td style="padding-bottom:18px;color:#5C7A8C;font-size:14.5px;line-height:1.6;">
-    Je m'appelle Muriel, je viens de lancer Trouvéo : un site qui réunit en un seul endroit les stages et activités de vacances pour enfants en Wallonie et à Bruxelles, pour aider les parents à trouver plus vite ce qui convient à leur enfant.
+    Je m'appelle Muriel Delépont, je viens de lancer Trouvéo : un site qui réunit en un seul endroit les stages et activités de vacances pour enfants en Wallonie et à Bruxelles, pour aider les parents à trouver plus vite ce qui convient à leur enfant.
   </td></tr>
 
   <tr><td style="padding-bottom:18px;color:#5C7A8C;font-size:14.5px;line-height:1.6;">
@@ -135,7 +135,7 @@ async function sendInviteEmail(env, contactEmail, sourceKey, lien) {
   </td></tr>
 
   <tr><td style="padding-bottom:18px;color:#5C7A8C;font-size:14.5px;line-height:1.6;">
-    Je vous ai préparé un espace personnel où vous pouvez voir exactement ce qu'on affiche de vous, signaler une correction si quelque chose a changé, ou retirer votre fiche si vous préférez ne pas y figurer.
+    Je vous ai préparé un espace personnel où vous pouvez voir exactement ce que nous affichons de vous, signaler une correction si quelque chose a changé, ou retirer votre fiche si vous préférez ne pas y figurer.
   </td></tr>
 
   <tr><td align="center" style="padding:6px 0 24px;">
