@@ -78,6 +78,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   }
   p{margin:0;}
   .wrap{max-width:1140px;margin:0 auto;padding:0 28px;}
+  .nav-sticky{position:sticky;top:0;z-index:100;background:var(--cream);border-bottom:1px solid var(--line);}
   .narrow{max-width:760px;margin:0 auto;}
   a{color:inherit;}
   @media (prefers-reduced-motion: reduce){
@@ -217,12 +218,9 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   .tier-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0;}
   @media (max-width:600px){ .tier-grid{grid-template-columns:1fr;} }
   .faq{margin-top:40px;}
-  .faq-item{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:4px 20px;margin-bottom:10px;}
-  .faq-item summary{padding:14px 0;font-weight:700;font-size:15px;color:var(--ink);cursor:pointer;list-style:none;}
-  .faq-item summary::-webkit-details-marker{display:none;}
-  .faq-item summary::after{content:'+';float:right;color:var(--ink-faint);font-weight:400;}
-  .faq-item[open] summary::after{content:'−';}
-  .faq-item p{padding:0 0 16px;margin:0;color:var(--ink-soft);font-size:14px;line-height:1.6;}
+  .faq-item{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:10px;}
+  .faq-item h3{font-weight:700;font-size:15px;color:var(--ink);margin-bottom:8px;font-family:'Work Sans',sans-serif;}
+  .faq-item p{margin:0;color:var(--ink-soft);font-size:14px;line-height:1.6;}
   .badge-block{margin-top:48px;padding-top:40px;border-top:1px solid var(--line);}
   .badge-preview{display:flex;justify-content:center;margin-bottom:18px;}
   .badge-pill{
@@ -363,6 +361,12 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   .cta-fine{margin-top:18px;font-size:13px;color:rgba(255,253,248,0.65);}
 
   footer{padding:26px 0 40px;border-top:1px solid var(--line);background:var(--cream);}
+  .back-to-top{
+    display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:9px 18px;
+    border-radius:100px;background:var(--paper);border:1px solid var(--line);
+    color:var(--ink-soft);font-size:13px;font-weight:600;text-decoration:none;
+  }
+  .back-to-top:hover{color:var(--ink);border-color:var(--teal);}
   footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
   footer p{font-size:13px;color:var(--ink-soft);}
   footer a{text-decoration:underline;}
@@ -380,6 +384,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
 </head>
 <body>
 
+<div class="nav-sticky">
 <nav class="wrap">
   <a class="logo" href="/">
     <img src="trouveo-logo.png" alt="Trouvéo" class="logo-img">
@@ -400,6 +405,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     </a>
   </div>
 </nav>
+</div>
 <script>
 (function(){
   var toggle = document.getElementById('navToggle');
@@ -528,7 +534,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
         <div class="offer-price-num">29€ <span>/ 4 semaines, une activité</span></div>
         <a class="offer-cta" href="#booster-partenaire" data-offre="boost">Booster une activité →</a>
       </div>
-      <p class="offer-note">Sans engagement. Écrivez-nous quelle activité booster, on l'active rapidement et on vous confirme par email.</p>
+      <p class="offer-note">Sans engagement. Écrivez-nous quelle activité booster, nous l'activons rapidement et nous vous confirmons par email.</p>
     </div>
 
     <div class="offer-zone offer-zone-mid" id="partenaire" style="background:var(--peach);">
@@ -569,26 +575,26 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
 
     <div class="faq">
       <h2 style="text-align:center;margin-bottom:20px;">Questions fréquentes</h2>
-      <details class="faq-item">
-        <summary>C'est vraiment gratuit ?</summary>
+      <div class="faq-item">
+        <h3>C'est vraiment gratuit ?</h3>
         <p>Oui, sans condition ni durée limitée. Boost et Partenaire sont des options, jamais un passage obligé.</p>
-      </details>
-      <details class="faq-item">
-        <summary>Comment mes activités arrivent-elles sur Trouvéo ?</summary>
+      </div>
+      <div class="faq-item">
+        <h3>Comment mes activités arrivent-elles sur Trouvéo ?</h3>
         <p>Automatiquement, à partir de votre site ou de vos réseaux, mises à jour chaque semaine - ou envoyez-les-nous directement via <a href="soumettre-activite.html">le formulaire dédié</a>.</p>
-      </details>
-      <details class="faq-item">
-        <summary>Puis-je tester avant de m'engager ?</summary>
+      </div>
+      <div class="faq-item">
+        <h3>Puis-je tester avant de m'engager ?</h3>
         <p>Oui, c'est exactement à ça que sert Boost : une activité, 29€, sans engagement, avant de décider si Partenaire vaut le coup pour vous.</p>
-      </details>
-      <details class="faq-item">
-        <summary>Comment savoir si cela fonctionne ?</summary>
+      </div>
+      <div class="faq-item">
+        <h3>Comment savoir si cela fonctionne ?</h3>
         <p>Vous recevez vos statistiques réelles (vues, clics vers l'inscription) - vous jugez sur vos propres chiffres, pas sur notre parole.</p>
-      </details>
-      <details class="faq-item">
-        <summary>Puis-je arrêter après un Boost ?</summary>
+      </div>
+      <div class="faq-item">
+        <h3>Puis-je arrêter après un Boost ?</h3>
         <p>Oui, sans aucune démarche : le Boost s'arrête tout seul à la fin des 4 semaines, et votre fiche reste gratuite normalement.</p>
-      </details>
+      </div>
     </div>
 
     <div class="badge-block">
@@ -691,6 +697,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   <div class="wrap">
     <p>Trouvéo — service indépendant, non affilié aux communes référencées.</p>
     <p><a href="confidentialite.html">Confidentialité</a> · <a href="mentions-legales.html">Mentions légales</a> · <a href="/">← Retour à l'accueil</a></p>
+    <p><a href="#" class="back-to-top">↑ Remonter en haut</a></p>
   </div>
 </footer>
 
@@ -820,8 +827,8 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     var titleEl = document.getElementById('premiumTitle');
     var introEl = document.getElementById('premiumIntro');
     var labels = {
-      boost: { title: 'Booster une activité', intro: "Indiquez-nous quelle activité booster (29€ / 4 semaines) et votre email, on l'active rapidement." },
-      partenaire: { title: 'Devenir partenaire', intro: 'Laissez votre email, on vous recontacte pour activer Partenaire (240€/an) sur toutes vos activités.' }
+      boost: { title: 'Booster une activité', intro: "Indiquez-nous quelle activité booster (29€ / 4 semaines) et votre email, nous l'activons rapidement." },
+      partenaire: { title: 'Devenir partenaire', intro: 'Laissez votre email, nous vous recontactons pour activer Partenaire (240€/an) sur toutes vos activités.' }
     };
     document.querySelectorAll('[data-offre]').forEach(function(btn){
       btn.addEventListener('click', function(){

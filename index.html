@@ -86,6 +86,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   }
   p{margin:0;}
   .wrap{max-width:1140px;margin:0 auto;padding:0 28px;}
+  .nav-sticky{position:sticky;top:0;z-index:100;background:var(--cream);border-bottom:1px solid var(--line);}
   a{color:inherit;}
   @media (prefers-reduced-motion: reduce){
     *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;}
@@ -375,6 +376,12 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   section.final .error{margin:10px auto 0;}
 
   footer{padding:30px 0 40px;background:var(--cream);border-top:1px solid var(--line);}
+  .back-to-top{
+    display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:9px 18px;
+    border-radius:100px;background:var(--paper);border:1px solid var(--line);
+    color:var(--ink-soft);font-size:13px;font-weight:600;text-decoration:none;
+  }
+  .back-to-top:hover{color:var(--ink);border-color:var(--teal);}
   footer .wrap{
     display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;
   }
@@ -393,6 +400,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
 </head>
 <body>
 
+<div class="nav-sticky">
 <nav class="wrap">
   <div class="logo">
     <img src="trouveo-logo.png" alt="Trouvéo" class="logo-img">
@@ -425,6 +433,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   })();
   </script>
 </nav>
+</div>
 
 <header class="hero" id="top-form">
   <div class="blob blob1"></div>
@@ -575,6 +584,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     <p>Trouvéo — service indépendant, non affilié aux communes référencées. Contact : hello@trouveo.be</p>
     <p><a href="confidentialite.html">Confidentialité</a> · <a href="mentions-legales.html">Mentions légales</a></p>
     <p>© 2026 Trouvéo</p>
+    <p><a href="#" class="back-to-top">↑ Remonter en haut</a></p>
   </div>
 </footer>
 

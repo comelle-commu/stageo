@@ -89,6 +89,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   }
   p{margin:0;}
   .wrap{max-width:1080px;margin:0 auto;padding:0 28px;}
+  .nav-sticky{position:sticky;top:0;z-index:100;background:var(--cream);border-bottom:1px solid var(--line);}
   a{color:inherit;}
   button{font-family:inherit;}
   @media (prefers-reduced-motion: reduce){
@@ -299,6 +300,12 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   section.final p{color:var(--ink-soft);font-size:16px;margin-bottom:26px;max-width:54ch;margin-left:auto;margin-right:auto;}
 
   footer{padding:26px 0 40px;border-top:1px solid var(--line);}
+  .back-to-top{
+    display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:9px 18px;
+    border-radius:100px;background:var(--paper);border:1px solid var(--line);
+    color:var(--ink-soft);font-size:13px;font-weight:600;text-decoration:none;
+  }
+  .back-to-top:hover{color:var(--ink);border-color:var(--teal);}
   footer .wrap{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
   footer p{font-size:13px;color:var(--ink-soft);}
 
@@ -310,6 +317,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
 </head>
 <body>
 
+<div class="nav-sticky">
 <nav class="wrap">
   <a class="logo" href="/">
     <img src="trouveo-logo.png" alt="Trouvéo" class="logo-img">
@@ -330,6 +338,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     </a>
   </div>
 </nav>
+</div>
 <script>
 (function(){
   var toggle = document.getElementById('navToggle');
@@ -424,6 +433,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   <div class="wrap">
     <p>Trouvéo — service indépendant, non affilié aux communes référencées.</p>
     <p><a href="confidentialite.html">Confidentialité</a> · <a href="mentions-legales.html">Mentions légales</a> · <a href="/">← Retour à l'accueil</a></p>
+    <p><a href="#" class="back-to-top">↑ Remonter en haut</a></p>
   </div>
 </footer>
 
