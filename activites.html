@@ -441,6 +441,16 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   <a href="/stages/herstal" class="city-link">Herstal</a>
 </section>
 
+<section class="cities wrap">
+  <h2>Stages par province</h2>
+  <a href="/province/liege" class="city-link">Liège</a>
+  <a href="/province/hainaut" class="city-link">Hainaut</a>
+  <a href="/province/namur" class="city-link">Namur</a>
+  <a href="/province/brabant-wallon" class="city-link">Brabant wallon</a>
+  <a href="/province/luxembourg" class="city-link">Luxembourg</a>
+  <a href="/province/bruxelles" class="city-link">Bruxelles</a>
+</section>
+
 <footer>
   <div class="wrap">
     <p>Trouvéo — service indépendant, non affilié aux communes référencées.</p>
@@ -492,29 +502,34 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     'Saint-Georges-sur-Meuse': 'Liège', 'Seraing': 'Liège', 'Spa': 'Liège',
     'Sprimont': 'Liège', 'Stavelot': 'Liège', 'Tiège': 'Liège', 'Trooz': 'Liège',
     'Verviers': 'Liège', 'Waremme': 'Liège', 'Welkenraedt': 'Liège',
+    'Hannut': 'Liège', 'Ferrieres': 'Liège',
     // Hainaut
     'Ath': 'Hainaut', 'Beaumont': 'Hainaut', 'Beloeil': 'Hainaut',
     'Charleroi': 'Hainaut', 'Enghien': 'Hainaut', 'Estaimpuis': 'Hainaut',
     'Forchies': 'Hainaut', 'Gosselies': 'Hainaut', 'Jurbise': 'Hainaut',
     'Loverval': 'Hainaut', 'Mons': 'Hainaut', 'Mouscron': 'Hainaut',
     'Quevaucamps': 'Hainaut', 'Saint-Ghislain': 'Hainaut', 'Tournai': 'Hainaut',
+    'La Louviere': 'Hainaut', 'Silly': 'Hainaut',
     // Namur
     'Champion': 'Namur', 'Dinant': 'Namur', 'Eghezée': 'Namur', 'Erpent': 'Namur',
     'Fernelmont': 'Namur', 'Floreffe': 'Namur', 'Florennes': 'Namur',
     'Gedinne': 'Namur', 'Gembloux': 'Namur', 'Jambes': 'Namur', 'Lonzée': 'Namur',
-    'Mettet': 'Namur', 'Namur': 'Namur', 'Ohey': 'Namur',
+    'Mettet': 'Namur', 'Namur': 'Namur', 'Ohey': 'Namur', 'Ciney': 'Namur',
     // Brabant wallon
     "Braine-l'Alleud": 'Brabant wallon', 'Louvain-la-Neuve': 'Brabant wallon',
     'Nivelles': 'Brabant wallon', 'Ottignies-Louvain-la-Neuve': 'Brabant wallon',
     'Waterloo': 'Brabant wallon', 'Wavre': 'Brabant wallon',
+    'Bierges': 'Brabant wallon', 'Grez-Doiceau': 'Brabant wallon',
     // Luxembourg
     'Arlon': 'Luxembourg', 'Bastogne': 'Luxembourg', 'Etalle': 'Luxembourg',
     'Habay-la-Neuve': 'Luxembourg', 'Libramont': 'Luxembourg',
-    'Marche-en-Famenne': 'Luxembourg', 'Rouvroy': 'Luxembourg',
+    'Marche-en-Famenne': 'Luxembourg', 'Rouvroy': 'Luxembourg', 'Aubange': 'Luxembourg',
     // Bruxelles
     'Etterbeek': 'Bruxelles', 'Forest': 'Bruxelles', 'Ixelles': 'Bruxelles',
     'Laeken': 'Bruxelles', 'Schaerbeek': 'Bruxelles', 'Uccle': 'Bruxelles',
     'Wol.-St-Lambert': 'Bruxelles', 'Wol.-St-Pierre': 'Bruxelles',
+    'Auderghem': 'Bruxelles', 'Jette': 'Bruxelles',
+    '1000': 'Bruxelles', '1020': 'Bruxelles', '1120': 'Bruxelles', '1130': 'Bruxelles',
   };
   function provinceOf(commune){
     const base = (commune || '').replace(/\s+Extrascolaire$/i, '').replace(/\s+Parascolaire$/i, '').trim();
@@ -1319,6 +1334,9 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
       const bracket = AGE_BRACKETS.find(function(b){ return ageNum >= b.min && ageNum < b.max; });
       if (bracket) activeAge = bracket.key;
     }
+    // Lien "voir plus" depuis une page province (voir functions/province/[province].js)
+    const province = params.get('province');
+    if (province && PROVINCE_ORDER.indexOf(province) !== -1) activeProvince = province;
   })();
 
   // PostgREST plafonne une requête sans pagination à 1000 lignes par défaut

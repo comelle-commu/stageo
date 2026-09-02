@@ -1,74 +1,134 @@
-// Pages "ville" pour le référencement (SEO programmatique) : une page par
-// commune plutôt que tout miser sur /activites. Rendu entièrement côté
-// serveur (pas de fetch client comme activites.html) pour que Google et
-// les autres moteurs voient le vrai contenu dès la première réponse.
+// Pages "province" pour le référencement (SEO programmatique), en
+// complément des pages ville (voir functions/stages/[commune].js) : les
+// pages ville ne couvrent que 10 communes précises, alors qu'on a des
+// activités dans une centaine de communes différentes. Les pages province
+// couvrent tout le catalogue d'un coup (6 pages -> ~95% des activités
+// avec une commune connue), même les petites communes qui n'auront
+// jamais leur propre page dédiée.
 //
-// Route : fichier functions/stages/[commune].js -> disponible sur
-// /stages/:commune (routage dynamique Cloudflare Pages Functions).
+// Rendu entièrement côté serveur, même principe que les pages ville :
+// contenu réel dans le HTML dès la première réponse, pas de fetch
+// client. Clé Supabase publique (même lecture publique que activites.html
+// et les pages ville) - aucune variable d'environnement nécessaire.
 //
-// Clé Supabase utilisée : la clé publique (publishable), la même que
-// celle déjà exposée côté client dans activites.html - la table
-// `activites` est en lecture publique (RLS), donc aucune variable
-// d'environnement Cloudflare n'est nécessaire pour cette fonction.
+// PROVINCE_OF est une copie de la table du même nom dans activites.html
+// (même source : Wikipedia "Liste des communes de la Région wallonne" +
+// les 19 communes de Bruxelles-Capitale) - à maintenir en synchro si l'une
+// des deux évolue, pas d'import partagé possible entre une page statique
+// et une Function.
 //
-// Départ volontairement limité à quelques communes pilotes (voir
-// PILOT_COMMUNES ci-dessous) plutôt qu'une page pour les ~110 communes
-// présentes en base : mieux vaut tester avec un contenu solide sur peu de
-// pages que publier d'un coup des pages fines/vides qui nuiraient au
-// référencement plutôt que de l'aider. Une commune non listée renvoie un
-// vrai 404 (jamais une page vide indexable).
-//
-// Les valeurs brutes stockées en base sont parfois incohérentes (accents,
-// abréviations - ex. "Liège" et "Liege" coexistent, "Wol.-St-Pierre" pour
-// Woluwe-Saint-Pierre) : dbValues couvre les variantes connues pour
-// chaque commune pilote, display est le nom présenté aux visiteurs.
+// Route : fichier functions/province/[province].js -> disponible sur
+// /province/:province.
 
 const SUPABASE_URL = "https://oitmxxrurvutazuqsjbl.supabase.co";
 const SUPABASE_KEY = "sb_publishable_BO_qv6_PsRrAP6VoVXYq7w_YoT2CfLG";
 
-const PILOT_COMMUNES = {
-  "liege": { display: "Liège", region: "Wallonie", dbValues: ["Liège", "Liege"], provinceSlug: "liege", provinceName: "Liège" },
-  "uccle": { display: "Uccle", region: "Bruxelles", dbValues: ["Uccle"], provinceSlug: "bruxelles", provinceName: "Bruxelles" },
-  "woluwe-saint-pierre": { display: "Woluwe-Saint-Pierre", region: "Bruxelles", dbValues: ["Wol.-St-Pierre"], provinceSlug: "bruxelles", provinceName: "Bruxelles" },
-  "woluwe-saint-lambert": { display: "Woluwe-Saint-Lambert", region: "Bruxelles", dbValues: ["Wol.-St-Lambert"], provinceSlug: "bruxelles", provinceName: "Bruxelles" },
-  "etterbeek": { display: "Etterbeek", region: "Bruxelles", dbValues: ["Etterbeek"], provinceSlug: "bruxelles", provinceName: "Bruxelles" },
-  "wavre": { display: "Wavre", region: "Wallonie", dbValues: ["Wavre"], provinceSlug: "brabant-wallon", provinceName: "Brabant wallon" },
-  "mons": { display: "Mons", region: "Wallonie", dbValues: ["Mons"], provinceSlug: "hainaut", provinceName: "Hainaut" },
-  "charleroi": { display: "Charleroi", region: "Wallonie", dbValues: ["Charleroi"], provinceSlug: "hainaut", provinceName: "Hainaut" },
-  "nivelles": { display: "Nivelles", region: "Wallonie", dbValues: ["Nivelles"], provinceSlug: "brabant-wallon", provinceName: "Brabant wallon" },
-  "herstal": { display: "Herstal", region: "Wallonie", dbValues: ["Herstal"], provinceSlug: "liege", provinceName: "Liège" },
+const PROVINCES = {
+  "liege": { display: "Liège", label: "la province de Liège", withDe: "de la province de Liège" },
+  "hainaut": { display: "Hainaut", label: "le Hainaut", withDe: "du Hainaut" },
+  "namur": { display: "Namur", label: "la province de Namur", withDe: "de la province de Namur" },
+  "brabant-wallon": { display: "Brabant wallon", label: "le Brabant wallon", withDe: "du Brabant wallon" },
+  "luxembourg": { display: "Luxembourg", label: "la province de Luxembourg", withDe: "de la province de Luxembourg" },
+  "bruxelles": { display: "Bruxelles", label: "la Région de Bruxelles-Capitale", withDe: "de la Région de Bruxelles-Capitale" },
+};
+
+// Villes ayant leur propre page dédiée (voir functions/stages/[commune].js),
+// groupées par province - pour le maillage interne province <-> ville.
+const CITY_PAGES_BY_PROVINCE = {
+  "Liège": [["liege", "Liège"], ["herstal", "Herstal"]],
+  "Hainaut": [["mons", "Mons"], ["charleroi", "Charleroi"]],
+  "Brabant wallon": [["wavre", "Wavre"], ["nivelles", "Nivelles"]],
+  "Bruxelles": [["uccle", "Uccle"], ["woluwe-saint-pierre", "Woluwe-Saint-Pierre"], ["woluwe-saint-lambert", "Woluwe-Saint-Lambert"], ["etterbeek", "Etterbeek"]],
+  "Namur": [],
+  "Luxembourg": [],
+};
+
+// Copie de PROVINCE_OF (activites.html) - voir le commentaire en tête de
+// fichier.
+const PROVINCE_OF = {
+  'Ans': 'Liège', 'Anthisnes': 'Liège', 'Aubel': 'Liège', 'Awans': 'Liège',
+  'Braives': 'Liège', 'Chaudfontaine': 'Liège', 'Comblain-au-Pont': 'Liège',
+  'Engis': 'Liège', 'Esneux': 'Liège', 'Faimes': 'Liège',
+  'Fexhe-le-Haut-Clocher': 'Liège', 'Geer': 'Liège', 'Grace-Hollogne': 'Liège',
+  'Henri-Chapelle': 'Liège', 'Herbesthal': 'Liège', 'Heron': 'Liège',
+  'Herstal': 'Liège', 'Herve': 'Liège', 'Heusy': 'Liège', 'Huy': 'Liège',
+  'Jalhay': 'Liège', 'La Calamine': 'Liège', 'Liege': 'Liège', 'Liège': 'Liège',
+  'Marchin': 'Liège', 'Nandrin': 'Liège', 'Neupre': 'Liège', 'Olne': 'Liège',
+  'Saint-Georges-sur-Meuse': 'Liège', 'Seraing': 'Liège', 'Spa': 'Liège',
+  'Sprimont': 'Liège', 'Stavelot': 'Liège', 'Tiège': 'Liège', 'Trooz': 'Liège',
+  'Verviers': 'Liège', 'Waremme': 'Liège', 'Welkenraedt': 'Liège',
+  'Hannut': 'Liège', 'Ferrieres': 'Liège',
+  'Ath': 'Hainaut', 'Beaumont': 'Hainaut', 'Beloeil': 'Hainaut',
+  'Charleroi': 'Hainaut', 'Enghien': 'Hainaut', 'Estaimpuis': 'Hainaut',
+  'Forchies': 'Hainaut', 'Gosselies': 'Hainaut', 'Jurbise': 'Hainaut',
+  'Loverval': 'Hainaut', 'Mons': 'Hainaut', 'Mouscron': 'Hainaut',
+  'Quevaucamps': 'Hainaut', 'Saint-Ghislain': 'Hainaut', 'Tournai': 'Hainaut',
+  'La Louviere': 'Hainaut', 'Silly': 'Hainaut',
+  'Champion': 'Namur', 'Dinant': 'Namur', 'Eghezée': 'Namur', 'Erpent': 'Namur',
+  'Fernelmont': 'Namur', 'Floreffe': 'Namur', 'Florennes': 'Namur',
+  'Gedinne': 'Namur', 'Gembloux': 'Namur', 'Jambes': 'Namur', 'Lonzée': 'Namur',
+  'Mettet': 'Namur', 'Namur': 'Namur', 'Ohey': 'Namur', 'Ciney': 'Namur',
+  "Braine-l'Alleud": 'Brabant wallon', 'Louvain-la-Neuve': 'Brabant wallon',
+  'Nivelles': 'Brabant wallon', 'Ottignies-Louvain-la-Neuve': 'Brabant wallon',
+  'Waterloo': 'Brabant wallon', 'Wavre': 'Brabant wallon',
+  'Bierges': 'Brabant wallon', 'Grez-Doiceau': 'Brabant wallon',
+  'Arlon': 'Luxembourg', 'Bastogne': 'Luxembourg', 'Etalle': 'Luxembourg',
+  'Habay-la-Neuve': 'Luxembourg', 'Libramont': 'Luxembourg',
+  'Marche-en-Famenne': 'Luxembourg', 'Rouvroy': 'Luxembourg', 'Aubange': 'Luxembourg',
+  'Etterbeek': 'Bruxelles', 'Forest': 'Bruxelles', 'Ixelles': 'Bruxelles',
+  'Laeken': 'Bruxelles', 'Schaerbeek': 'Bruxelles', 'Uccle': 'Bruxelles',
+  'Wol.-St-Lambert': 'Bruxelles', 'Wol.-St-Pierre': 'Bruxelles',
+  'Auderghem': 'Bruxelles', 'Jette': 'Bruxelles',
+  '1000': 'Bruxelles', '1020': 'Bruxelles', '1120': 'Bruxelles', '1130': 'Bruxelles',
 };
 
 const MOIS = { janvier: 0, février: 1, fevrier: 1, mars: 2, avril: 3, mai: 4, juin: 5, juillet: 6, août: 7, aout: 7, septembre: 8, octobre: 9, novembre: 10, décembre: 11, decembre: 11 };
 
+const MAX_CARDS = 150;
+
 export async function onRequestGet(context) {
-  const slug = String(context.params.commune || "").toLowerCase();
-  const commune = PILOT_COMMUNES[slug];
-  if (!commune) {
+  const slug = String(context.params.province || "").toLowerCase();
+  const province = PROVINCES[slug];
+  if (!province) {
     return new Response(render404(), { status: 404, headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
 
-  const filter = commune.dbValues.map((v) => encodeURIComponent(v)).join(",");
-  const url = `${SUPABASE_URL}/rest/v1/activites?select=*&commune=in.(${filter})&order=nom_activite.asc&limit=300`;
-
   let rows = [];
   try {
-    const res = await fetch(url, { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
-    if (res.ok) rows = await res.json();
+    rows = await fetchAllActivites();
   } catch (err) {
     console.error("Appel Supabase impossible", err);
   }
 
-  if (!rows.length) {
+  const matched = rows.filter((r) => provinceOf(r.commune) === province.display);
+  if (!matched.length) {
     return new Response(render404(), { status: 404, headers: { "Content-Type": "text/html; charset=utf-8" } });
   }
 
-  const upcoming = rows.filter((r) => !isPast(r));
-  const past = rows.filter((r) => isPast(r));
+  const upcoming = matched.filter((r) => !isPast(r));
+  const past = matched.filter((r) => isPast(r));
   const ordered = upcoming.concat(past);
+  const shown = ordered.slice(0, MAX_CARDS);
 
-  const html = renderPage(slug, commune, ordered, upcoming.length);
+  const html = renderPage(slug, province, matched.length, upcoming.length, shown);
   return new Response(html, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+}
+
+async function fetchAllActivites() {
+  const PAGE = 1000;
+  const pages = await Promise.all(
+    [0, 1, 2].map((i) =>
+      fetch(`${SUPABASE_URL}/rest/v1/activites?select=*&offset=${i * PAGE}&limit=${PAGE}`, {
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` },
+      }).then((r) => (r.ok ? r.json() : []))
+    )
+  );
+  return pages.flat();
+}
+
+function provinceOf(commune) {
+  const base = (commune || "").replace(/\s+Extrascolaire$/i, "").replace(/\s+Parascolaire$/i, "").trim();
+  return PROVINCE_OF[base] || null;
 }
 
 function lastDate(text) {
@@ -143,42 +203,46 @@ function renderCard(r) {
   return html;
 }
 
-function renderNeighbours(currentSlug) {
-  const others = Object.entries(PILOT_COMMUNES).filter(([slug]) => slug !== currentSlug);
-  return others.map(([slug, c]) => `<a href="/stages/${slug}" class="neighbour-link">${esc(c.display)}</a>`).join("");
+function renderCityLinks(display) {
+  const cities = CITY_PAGES_BY_PROVINCE[display] || [];
+  if (!cities.length) return "";
+  const links = cities.map(([slug, name]) => `<a href="/stages/${slug}" class="neighbour-link">${esc(name)}</a>`).join("");
+  return `<section class="neighbours"><h2>Villes avec leur propre page</h2>${links}</section>`;
 }
 
-function renderItemListSchema(slug, commune, rows) {
+function renderOtherProvinces(currentSlug) {
+  return Object.entries(PROVINCES)
+    .filter(([slug]) => slug !== currentSlug)
+    .map(([slug, p]) => `<a href="/province/${slug}" class="neighbour-link">${esc(p.display)}</a>`)
+    .join("");
+}
+
+function renderItemListSchema(slug, province, rows) {
   const items = rows.slice(0, 100).map((r, i) => ({
     "@type": "ListItem",
     position: i + 1,
     name: r.nom_activite,
-    url: r.lien_source || `https://trouveo.be/stages/${slug}`,
+    url: r.lien_source || `https://trouveo.be/province/${slug}`,
   }));
-  const schema = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    name: `Stages et activités pour enfants à ${commune.display}`,
-    itemListElement: items,
-  };
+  const schema = { "@context": "https://schema.org", "@type": "ItemList", name: `Stages et activités pour enfants en ${province.display}`, itemListElement: items };
   const breadcrumb = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "Accueil", item: "https://trouveo.be/" },
       { "@type": "ListItem", position: 2, name: "Toutes les activités", item: "https://trouveo.be/activites" },
-      { "@type": "ListItem", position: 3, name: commune.display, item: `https://trouveo.be/stages/${slug}` },
+      { "@type": "ListItem", position: 3, name: province.display, item: `https://trouveo.be/province/${slug}` },
     ],
   };
   return `<script type="application/ld+json">${JSON.stringify(schema)}</script>\n<script type="application/ld+json">${JSON.stringify(breadcrumb)}</script>`;
 }
 
-function renderPage(slug, commune, rows, upcomingCount) {
-  const total = rows.length;
-  const title = `Stages et activités pour enfants à ${commune.display} | Trouvéo`;
-  const description = `${total} stage${total > 1 ? "s" : ""} et activité${total > 1 ? "s" : ""} de vacances pour enfants recensé${total > 1 ? "s" : ""} à ${commune.display} (${commune.region}), mis à jour en continu par Trouvéo. Alerte gratuite dès qu'une place correspond à votre enfant.`;
-  const canonical = `https://trouveo.be/stages/${slug}`;
-  const cards = rows.map(renderCard).join("");
+function renderPage(slug, province, total, upcomingCount, shownRows) {
+  const title = `Stages et activités pour enfants en ${province.display} | Trouvéo`;
+  const description = `${total} stage${total > 1 ? "s" : ""} et activité${total > 1 ? "s" : ""} de vacances pour enfants recensé${total > 1 ? "s" : ""} dans ${province.label}, toutes communes confondues, mis à jour en continu par Trouvéo. Alerte gratuite dès qu'une place correspond à votre enfant.`;
+  const canonical = `https://trouveo.be/province/${slug}`;
+  const cards = shownRows.map(renderCard).join("");
+  const truncated = total > shownRows.length;
 
   return `<!DOCTYPE html>
 <html lang="fr">
@@ -201,7 +265,7 @@ function renderPage(slug, commune, rows, upcomingCount) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Grandstander:wght@600;700;800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-${renderItemListSchema(slug, commune, rows)}
+${renderItemListSchema(slug, province, shownRows)}
 <style>
   :root{
     --cream:#FFFDF8; --paper:#FFFFFF; --mint:#E7F4EE; --surface-tint:#F2F7F6;
@@ -237,6 +301,8 @@ ${renderItemListSchema(slug, commune, rows)}
   .eyebrow{display:inline-block;font-size:12.5px;font-weight:700;color:var(--teal-deep);background:var(--mint);padding:5px 12px;border-radius:100px;margin-bottom:14px;}
   h1{font-size:clamp(26px,4vw,38px);margin-bottom:14px;}
   .lead{font-size:16px;color:var(--ink-soft);line-height:1.65;max-width:70ch;margin:0 0 8px;}
+  .truncate-note{background:var(--mint);border-radius:14px;padding:14px 18px;font-size:14px;color:var(--ink-soft);margin:24px 0;}
+  .truncate-note a{color:var(--teal-deep);font-weight:700;}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin:30px 0 50px;}
   .card{background:var(--paper);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 28px -18px rgba(1,83,128,0.3);overflow:hidden;display:flex;flex-direction:column;}
   .card.is-past{opacity:.7;}
@@ -257,7 +323,7 @@ ${renderItemListSchema(slug, commune, rows)}
   section.final h2{font-size:clamp(22px,3vw,28px);margin-bottom:12px;}
   section.final p{color:var(--ink-soft);font-size:15.5px;margin-bottom:22px;max-width:52ch;margin-left:auto;margin-right:auto;}
   section.final .nav-cta{display:inline-block;}
-  .neighbours{padding:0 0 60px;}
+  .neighbours{padding:0 0 40px;}
   .neighbours h2{font-size:16px;margin-bottom:14px;}
   .neighbour-link{display:inline-block;font-size:13.5px;font-weight:600;color:var(--teal-deep);background:var(--paper);border:1px solid var(--line);padding:8px 16px;border-radius:100px;text-decoration:none;margin:0 8px 8px 0;}
   .neighbour-link:hover{border-color:var(--teal);}
@@ -303,11 +369,13 @@ ${renderItemListSchema(slug, commune, rows)}
 
 <div class="wrap">
   <header class="intro">
-    <span class="eyebrow">${esc(commune.display)} · ${esc(commune.region)}</span>
-    <h1>Stages et activités de vacances pour enfants à ${esc(commune.display)}</h1>
-    <p class="lead">${total} activité${total > 1 ? "s" : ""} repérée${total > 1 ? "s" : ""} à ${esc(commune.display)} et alentours, dont ${upcomingCount} à venir. Trouvéo suit en continu les communes, ASBL et organismes de Wallonie et de Bruxelles pour ne rien vous faire manquer.</p>
+    <span class="eyebrow">${esc(province.display)}</span>
+    <h1>Stages et activités de vacances pour enfants en ${esc(province.display)}</h1>
+    <p class="lead">${total} activité${total > 1 ? "s" : ""} repérée${total > 1 ? "s" : ""} dans ${esc(province.label)}, toutes communes confondues, dont ${upcomingCount} à venir. Trouvéo suit en continu les communes, ASBL et organismes de Wallonie et de Bruxelles pour ne rien vous faire manquer.</p>
     <p class="lead">Pas le temps de vérifier vous-même ? <a href="/criteres.html" style="color:var(--teal-deep);font-weight:700;">Créez une alerte gratuite</a> et recevez un email dès qu'un stage correspond à votre enfant.</p>
   </header>
+
+  ${truncated ? `<div class="truncate-note">Cette page affiche les ${shownRows.length} activités les plus proches. <a href="/activites?province=${encodeURIComponent(province.display)}">Voir les ${total} activités ${esc(province.withDe)} avec les filtres complets →</a></div>` : ""}
 
   <div class="grid">${cards}</div>
 
@@ -317,10 +385,11 @@ ${renderItemListSchema(slug, commune, rows)}
     <a href="/activites" class="nav-cta">Voir toutes les activités →</a>
   </section>
 
+  ${renderCityLinks(province.display)}
+
   <section class="neighbours">
-    <h2>Stages dans d'autres villes</h2>
-    ${renderNeighbours(slug)}
-    <a href="/province/${commune.provinceSlug}" class="neighbour-link" style="background:var(--mint);border-color:transparent;">Toutes les activités de ${esc(commune.provinceName)} →</a>
+    <h2>Autres provinces</h2>
+    ${renderOtherProvinces(slug)}
   </section>
 </div>
 
@@ -349,7 +418,7 @@ function render404() {
 <body style="margin:0;background:#FFFDF8;color:#015380;font-family:sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:24px;">
   <div>
     <h1 style="font-size:28px;">Cette page s'est perdue en chemin</h1>
-    <p style="color:#5C7A8C;margin:14px 0 24px;">Aucune activité recensée pour cette ville pour le moment.</p>
+    <p style="color:#5C7A8C;margin:14px 0 24px;">Aucune activité recensée pour cette province pour le moment.</p>
     <a href="/activites" style="display:inline-block;background:#0197AF;color:#fff;font-weight:700;padding:12px 24px;border-radius:100px;text-decoration:none;">Voir toutes les activités</a>
   </div>
 </body>
