@@ -157,6 +157,8 @@ un socle mutualisé pour cette famille de sites (voir
 | Le CFS asbl (organisme privé, Awans/Huy/Verlaine + Brabant wallon/Bruxelles hors périmètre) | Plateforme MyiClub (variante API JSON `AjaxGetCFS.asp`, distincte de la page HTML `register.asp` des autres clubs iClub) | API JSON publique sans auth, filtrée sur les 3 lieux confirmés en province de Liège | `cfs.py` |
 | StageVacances (répertoire national multi-organismes, Ligue des familles) | Nuxt SPA + API Cockpit CMS publique (`api.stagevacances.be/camps`) | ~2300 fiches toutes régions/années, filtrées par code postal "4xxx" -> commune (table construite à la main), période future uniquement, garde-fou anti-bannière (`_MAX_PERIOD_DAYS`) - détecte automatiquement tout nouvel organisme publiant sur la plateforme | `stagevacances.py` |
 | Le Fagotin (organisme privé, parc nature Stoumont) | WordPress/Gutenberg | HTML statique, blocs `h5` "Titre \| âge" groupés par semaine, lien de réservation individuel par stage (bookwhen.com) | `fagotin.py` |
+| Le Point d'Eau (piscine privée, La Louvière) | Site sur-mesure | HTML statique, `<li>` par stage sous `.divAquademy ul` - piège : certaines cartes contiennent un `<p hidden>` imbriqué (activité pas encore annoncée officiellement, contenu volontairement masqué côté public) qui casse la structure HTML ; retiré explicitement avant extraction (même principe que `check_legal()` : ne lire que le texte visible). Stages "à définir" (thème non choisi) exclus | `pointdeau.py` |
+| Parc Sportif des 3 Tilleuls (organisme privé, piscine Calypso, Watermael-Boitsfort) | Plateforme MyiClub (même famille que Royal Léopold Club/Royal Racing Club/Sport Fun Activ') | Simple ajout à `iclub.py` (`CLUBS`, `ClubID=28` sur `www.iclub.be`) - structure de carte identique aux autres clubs iClub, aucun nouveau parseur nécessaire | `iclub.py` |
 
 ### Sites 100% JavaScript : `common.fetch_rendered_html()`
 
@@ -323,6 +325,45 @@ dossier, qui a un vrai tableau propre) :
   bloc de texte capturé entre deux "Semaine du" embarquait parfois le
   titre de la section suivante ("STAGE DE DETENTE") faute de séparateur -
   filtré explicitement.
+
+## Ratissage piscines (communales et privées) - 02/09/2026
+
+Première passe, volontairement limitée à deux sources bien vérifiées plutôt
+qu'un ratissage exhaustif de toutes les piscines de Wallonie/Bruxelles (même
+logique que pour les communes : mieux vaut deux sources solides que dix
+approximatives) :
+
+- **Le Point d'Eau** (La Louvière, piscine privée) - nouveau scraper dédié,
+  6 stages "natation +" extraits (voir `pointdeau.py` ci-dessus).
+- **Parc Sportif des 3 Tilleuls** (Watermael-Boitsfort, piscine Calypso +
+  Mini-Bassin) - déjà sur la plateforme MyiClub qu'`iclub.py` sait lire :
+  simple ajout à `CLUBS` (`ClubID=28`, `www.iclub.be`), 8 stages extraits
+  sans nouveau code de parsing. Watermael-Boitsfort ajoutée à `PROVINCE_OF`
+  (activites.html + `functions/province/[province].js`) qui ne la
+  connaissait pas encore.
+
+**Candidates identifiées mais pas encore construites** (à reprendre avant de
+repartir de zéro sur une future session piscines) :
+- **Herstal Sports** (piscine communale, `herstal-sports.be`) - légalement
+  clair (robots.txt : `Disallow:` vide, aucune restriction), mais la page
+  "Stages sportifs" est vide au 02/09/2026 (aucun contenu publié pour
+  l'instant) - même situation que Forest/Uccle, à réextraire dès
+  publication, pas de scraper à écrire tant qu'il n'y a rien à lire. Herstal
+  a déjà un scraper communal (`herstal.py`, CCJV via le site iMio) - la
+  piscine est une source distincte, pas un doublon.
+- **Tip-Top ASBL** (`tip-top-asbl.be`) - stages de natation confirmés sur la
+  page d'accueil (page dédiée `/pages/stages-de-vacances-informations`),
+  mais site inaccessible en `curl`/`requests` classique lors du test
+  (connexion réinitialisée - possible protection anti-bot ou TLS
+  particulier) alors qu'accessible via un fetch alternatif. À
+  re-investiguer (vérifier `robots.txt`, essayer un User-Agent de
+  navigateur complet, ou `fetch_rendered_html()`) avant d'écrire un
+  parseur.
+
+D'autres pistes générales à explorer plus tard : les piscines communales des
+grandes villes déjà couvertes indirectement (Liège, Charleroi, Mons...) ont
+souvent leur propre régie ou ASBL de gestion avec un site distinct du site
+communal principal - à rechercher nommément plutôt que de deviner une URL.
 
 ## Forest / Uccle : pages communales mises à jour uniquement à l'approche de la période
 

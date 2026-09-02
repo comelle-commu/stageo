@@ -57,6 +57,11 @@ CLUBS = [
             "Esneux": "Esneux",
         },
     },
+    # Piscine privée (ratissage piscines, 02/09/2026) - stages natation sur
+    # deux bassins (Mini-Bassin + piscine Calypso), Av. Léopold Wiener 60,
+    # Watermael-Boitsfort. robots.txt absent (404) sur www.iclub.be comme
+    # sur les autres clubs de ce dossier - même statut légal déjà établi.
+    {"nom": "Parc Sportif des 3 Tilleuls", "commune": "Watermael-Boitsfort", "subdomain": "www", "club_id": 28},
 ]
 
 DATE_RANGE_RE = re.compile(r"(\d{2}/\d{2}/\d{4})\s*-\s*(\d{2}/\d{2}/\d{4})")

@@ -63,6 +63,7 @@ import nivelles
 import oupeye
 import ottignieslln
 import pari
+import pointdeau
 import reform
 import seraing
 import sprimont
@@ -132,6 +133,7 @@ SCRAPERS = [
     ("Hotton", hotton),
     ("La Roche-en-Ardenne", la_roche_en_ardenne),
     ("Vaux-sur-Sûre", vaux_sur_sure),
+    ("Le Point d'Eau (La Louvière)", pointdeau),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque

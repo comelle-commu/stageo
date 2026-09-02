@@ -78,7 +78,7 @@ const PROVINCE_OF = {
   'Etterbeek': 'Bruxelles', 'Forest': 'Bruxelles', 'Ixelles': 'Bruxelles',
   'Laeken': 'Bruxelles', 'Schaerbeek': 'Bruxelles', 'Uccle': 'Bruxelles',
   'Wol.-St-Lambert': 'Bruxelles', 'Wol.-St-Pierre': 'Bruxelles',
-  'Auderghem': 'Bruxelles', 'Jette': 'Bruxelles',
+  'Auderghem': 'Bruxelles', 'Jette': 'Bruxelles', 'Watermael-Boitsfort': 'Bruxelles',
   '1000': 'Bruxelles', '1020': 'Bruxelles', '1120': 'Bruxelles', '1130': 'Bruxelles',
 };
 
