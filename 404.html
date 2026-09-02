@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trouvéo — Page introuvable</title>
+<meta name="robots" content="noindex,follow">
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Grandstander:wght@600;700;800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FFFDF8; --mint:#E7F4EE; --paper:#FFFFFF;
+    --ink:#015380; --ink-soft:#5C7A8C; --ink-faint:#93A9B5;
+    --teal:#0197AF; --teal-deep:#017089; --orange:#FDBA18;
+    --line: rgba(1,83,128,0.12);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--cream);color:var(--ink);font-family:'Work Sans',sans-serif;-webkit-font-smoothing:antialiased;}
+  h1{font-family:'Grandstander',sans-serif;font-weight:700;margin:0;}
+  a{color:var(--teal-deep);}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+  nav.wrap{display:flex;align-items:center;padding:24px;}
+  .logo-img{height:58px;width:auto;display:block;}
+  @media (max-width:520px){ .logo-img{height:34px;} }
+  main{min-height:60vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px 24px;}
+  .content{max-width:460px;}
+  .eyebrow{display:inline-block;font-size:12.5px;font-weight:700;color:var(--teal-deep);background:var(--mint);padding:5px 12px;border-radius:100px;margin-bottom:16px;}
+  h1{font-size:clamp(28px,5vw,38px);margin-bottom:14px;}
+  p{font-size:15.5px;line-height:1.65;color:var(--ink-soft);margin:0 0 28px;}
+  .actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  .btn{display:inline-block;font-weight:700;font-size:14px;text-decoration:none;padding:12px 24px;border-radius:100px;}
+  .btn-primary{background:var(--teal);color:#fff;}
+  .btn-secondary{background:var(--paper);color:var(--ink);border:1px solid var(--line);}
+  footer{padding:30px 0 60px;text-align:center;font-size:13px;color:var(--ink-faint);}
+  footer a{text-decoration:underline;}
+</style>
+</head>
+<body>
+
+<nav class="wrap">
+  <a class="logo" href="/"><img src="trouveo-logo.png" alt="Trouvéo" class="logo-img"></a>
+</nav>
+
+<main>
+  <div class="content">
+    <span class="eyebrow">Erreur 404</span>
+    <h1>Cette page s'est perdue en chemin</h1>
+    <p>Le lien que vous avez suivi ne mène nulle part, ou la page a été déplacée. Pas de panique, les stages et activités sont toujours là.</p>
+    <div class="actions">
+      <a href="/" class="btn btn-primary">Retour à l'accueil</a>
+      <a href="/activites" class="btn btn-secondary">Voir les activités</a>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Trouvéo — service indépendant, non affilié aux communes référencées.</p>
+    <p><a href="confidentialite.html">Confidentialité</a> · <a href="mentions-legales.html">Mentions légales</a> · <a href="faq.html">FAQ</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
