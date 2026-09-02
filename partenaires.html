@@ -340,6 +340,18 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     display:none;margin-top:12px;font-size:13.5px;font-weight:600;color:var(--pink);
     background:var(--blush);padding:10px 14px;border-radius:12px;
   }
+  .premium-search-wrap{position:relative;}
+  .premium-suggestions{
+    position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;
+    background:var(--paper);border:1px solid var(--line);border-radius:12px;
+    box-shadow:0 14px 34px -18px rgba(1,83,128,0.35);max-height:220px;overflow-y:auto;
+  }
+  .premium-suggestion-item{
+    display:block;width:100%;text-align:left;border:none;background:none;cursor:pointer;
+    padding:10px 14px;font-size:13.5px;font-family:'Work Sans',sans-serif;color:var(--ink);
+  }
+  .premium-suggestion-item:hover, .premium-suggestion-item:focus{background:var(--mint);}
+  .premium-suggestion-item .sug-sub{display:block;font-size:12px;color:var(--ink-soft);}
 
   /* ---- CTA finale ---- */
   .band-cta{background:var(--teal-deep);text-align:center;}
@@ -662,14 +674,18 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
       </div>
       <div class="form-card" id="booster-partenaire">
         <h3 id="premiumTitle">Booster une activité ou devenir partenaire</h3>
-        <p id="premiumIntro">Intéressé·e par Boost (29€) ou Partenaire (240€/an) ? Laissez votre email et l'activité concernée, nous vous recontactons rapidement pour l'activer.</p>
+        <p id="premiumIntro">Intéressé·e par Boost (29€) ou Partenaire (240€/an) ? Choisissez d'abord une offre ci-dessus, puis payez en ligne - c'est activé immédiatement.</p>
         <form class="contact-form" id="premiumForm" novalidate>
           <input type="hidden" name="offre" id="premiumOffre" value="">
-          <input type="email" name="email" placeholder="votre@email.be" required aria-label="Votre email">
-          <textarea name="message" placeholder="Quelle activité, et Boost ou Partenaire ?" rows="2" aria-label="Message"></textarea>
-          <button type="submit">Être recontacté·e</button>
+          <input type="hidden" name="activite_id" id="premiumActiviteId" value="">
+          <label class="premium-search-wrap">
+            <input type="text" id="premiumSearchInput" placeholder="Choisissez d'abord Boost ou Partenaire ci-dessus" autocomplete="off" disabled aria-label="Votre activité (Boost) ou votre organisme (Partenaire)">
+            <div class="premium-suggestions" id="premiumSuggestions" hidden></div>
+          </label>
+          <input type="email" name="email" id="premiumEmail" placeholder="votre@email.be" required aria-label="Votre email">
+          <button type="submit" id="premiumSubmitBtn" disabled>Choisissez une offre ci-dessus</button>
         </form>
-        <div class="form-confirm" id="premiumConfirm" role="status">Merci ! Nous vous recontactons rapidement.</div>
+        <div class="form-confirm" id="premiumConfirm" role="status">Redirection vers le paiement…</div>
         <div class="form-error" id="premiumError" role="alert"></div>
       </div>
     </div>
@@ -807,30 +823,214 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   })();
 
   handleContactForm({ formId: 'organismeForm', confirmId: 'organismeConfirm', errorId: 'organismeError', type: 'organisme' });
-  handleContactForm({ formId: 'premiumForm', confirmId: 'premiumConfirm', errorId: 'premiumError', type: 'premium' });
 
-  // Les CTA "Booster une activité" / "Devenir partenaire" mènent au même
-  // formulaire "Être recontacté·e" (pas de checkout automatisé pour
-  // l'instant, voir docs plan d'exécution §3) - on préremplit juste le
-  // contexte (offre + titre + intro) pour que la personne n'ait pas à le
-  // repréciser dans le message.
+  // Les CTA "Booster une activité" / "Devenir partenaire" mènent à ce même
+  // formulaire, qui paie directement en ligne (Stripe Checkout) au lieu de
+  // "être recontacté·e" - on préremplit le contexte (offre + titre + intro
+  // + libellé du bouton) pour que la personne n'ait pas à le repréciser.
+  //
+  // La recherche (activité pour Boost, organisme pour Partenaire) réutilise
+  // les mêmes données publiques que le compteur d'activités ci-dessus
+  // (clé anon) - filtrage client, pas de nouvel endpoint : le catalogue
+  // (~2000 lignes) reste largement gérable en mémoire pour ce cas d'usage
+  // ponctuel (pas la recherche principale de /activites, bien plus lourde).
   (function(){
+    var SUPABASE_URL = "https://oitmxxrurvutazuqsjbl.supabase.co";
+    var SUPABASE_KEY = "sb_publishable_BO_qv6_PsRrAP6VoVXYq7w_YoT2CfLG";
+    var form = document.getElementById('premiumForm');
     var offreEl = document.getElementById('premiumOffre');
+    var activiteIdEl = document.getElementById('premiumActiviteId');
     var titleEl = document.getElementById('premiumTitle');
     var introEl = document.getElementById('premiumIntro');
+    var searchEl = document.getElementById('premiumSearchInput');
+    var suggestionsEl = document.getElementById('premiumSuggestions');
+    var emailEl = document.getElementById('premiumEmail');
+    var submitBtn = document.getElementById('premiumSubmitBtn');
+    var confirmEl = document.getElementById('premiumConfirm');
+    var errorEl = document.getElementById('premiumError');
+    var emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
     var labels = {
-      boost: { title: 'Booster une activité', intro: "Indiquez-nous quelle activité booster (29€ / 4 semaines) et votre email, nous l'activons rapidement." },
-      partenaire: { title: 'Devenir partenaire', intro: 'Laissez votre email, nous vous recontactons pour activer Partenaire (240€/an) sur toutes vos activités.' }
+      boost: {
+        title: 'Booster une activité',
+        intro: "Trouvez votre activité ci-dessous, indiquez votre email, et payez 29€ (4 semaines) - c'est activé immédiatement après paiement.",
+        placeholder: 'Nom de votre activité…',
+        button: 'Payer 29€ maintenant'
+      },
+      partenaire: {
+        title: 'Devenir partenaire',
+        intro: "Indiquez le nom de votre organisme, votre email, et payez 240€/an - c'est activé immédiatement après paiement.",
+        placeholder: 'Nom de votre organisme…',
+        button: 'Payer 240€ maintenant'
+      }
     };
+
+    var activites = null; // chargées une seule fois, à la première utilisation
+    function loadActivites(){
+      if (activites) return Promise.resolve(activites);
+      return fetch(SUPABASE_URL + '/rest/v1/activites?select=id,nom_activite,organisateur,commune', {
+        headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+      }).then(function(res){ return res.json(); }).then(function(rows){
+        activites = Array.isArray(rows) ? rows : [];
+        return activites;
+      }).catch(function(){ activites = []; return activites; });
+    }
+
+    function organismeNames(){
+      var seen = {};
+      var names = [];
+      activites.forEach(function(a){
+        var name = (a.organisateur || a.commune || '').trim();
+        if (name && !seen[name]){ seen[name] = true; names.push(name); }
+      });
+      return names;
+    }
+
+    function renderSuggestions(items){
+      if (!items.length){ suggestionsEl.hidden = true; suggestionsEl.innerHTML = ''; return; }
+      suggestionsEl.innerHTML = items.map(function(item){
+        return '<button type="button" class="premium-suggestion-item" data-id="' + (item.id != null ? item.id : '') + '" data-name="' + esc(item.name) + '">' +
+          esc(item.name) + (item.sub ? '<span class="sug-sub">' + esc(item.sub) + '</span>' : '') + '</button>';
+      }).join('');
+      suggestionsEl.hidden = false;
+    }
+
+    function esc(s){ return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+    searchEl.addEventListener('input', function(){
+      activiteIdEl.value = ''; // toute frappe invalide la sélection précédente
+      var q = searchEl.value.trim().toLowerCase();
+      if (!q || !activites){ renderSuggestions([]); return; }
+      var offre = offreEl.value;
+      if (offre === 'boost'){
+        var matches = activites.filter(function(a){
+          return (a.nom_activite || '').toLowerCase().indexOf(q) !== -1;
+        }).slice(0, 8).map(function(a){
+          return { id: a.id, name: a.nom_activite, sub: a.organisateur || a.commune || '' };
+        });
+        renderSuggestions(matches);
+      } else if (offre === 'partenaire'){
+        var names = organismeNames().filter(function(n){
+          return n.toLowerCase().indexOf(q) !== -1;
+        }).slice(0, 8).map(function(n){ return { id: null, name: n, sub: '' }; });
+        renderSuggestions(names);
+      }
+    });
+
+    suggestionsEl.addEventListener('click', function(e){
+      var btn = e.target.closest('.premium-suggestion-item');
+      if (!btn) return;
+      searchEl.value = btn.getAttribute('data-name');
+      activiteIdEl.value = btn.getAttribute('data-id') || '';
+      renderSuggestions([]);
+    });
+
+    // Cache les suggestions au clic ailleurs sur la page (pas seulement à
+    // la perte de focus du champ, sinon cliquer une suggestion la referme
+    // avant que le clic n'atteigne le bouton).
+    document.addEventListener('click', function(e){
+      if (!e.target.closest('.premium-search-wrap')) renderSuggestions([]);
+    });
+
     document.querySelectorAll('[data-offre]').forEach(function(btn){
       btn.addEventListener('click', function(){
         var offre = btn.getAttribute('data-offre');
-        if (offreEl) offreEl.value = offre;
-        if (labels[offre] && titleEl) titleEl.textContent = labels[offre].title;
-        if (labels[offre] && introEl) introEl.textContent = labels[offre].intro;
+        var label = labels[offre];
+        if (!label) return;
+        offreEl.value = offre;
+        activiteIdEl.value = '';
+        titleEl.textContent = label.title;
+        introEl.textContent = label.intro;
+        searchEl.placeholder = label.placeholder;
+        searchEl.disabled = false;
+        searchEl.value = '';
+        submitBtn.disabled = false;
+        submitBtn.textContent = label.button;
+        renderSuggestions([]);
+        loadActivites();
         if (window.trouveoTrack) window.trouveoTrack('BOOST_CTA_CLICKED', { source_page: 'partenaires', offre: offre });
       });
     });
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      errorEl.style.display = 'none';
+
+      var offre = offreEl.value;
+      var email = emailEl.value.trim();
+      if (offre !== 'boost' && offre !== 'partenaire'){
+        errorEl.textContent = "Merci de choisir d'abord Boost ou Partenaire ci-dessus.";
+        errorEl.style.display = 'block';
+        return;
+      }
+      if (!emailRe.test(email)){
+        errorEl.textContent = "Cette adresse email ne semble pas valide.";
+        errorEl.style.display = 'block';
+        emailEl.focus();
+        return;
+      }
+      var payload = { offre: offre, email: email };
+      if (offre === 'boost'){
+        if (!activiteIdEl.value){
+          errorEl.textContent = 'Merci de sélectionner votre activité dans la liste proposée.';
+          errorEl.style.display = 'block';
+          searchEl.focus();
+          return;
+        }
+        payload.activite_id = Number(activiteIdEl.value);
+      } else {
+        var organisme = searchEl.value.trim();
+        if (!organisme){
+          errorEl.textContent = "Merci d'indiquer le nom de votre organisme.";
+          errorEl.style.display = 'block';
+          searchEl.focus();
+          return;
+        }
+        payload.organisme = organisme;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Redirection…';
+
+      fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+        .then(function(res){
+          return res.json().catch(function(){ return {}; }).then(function(data){ return { ok: res.ok, data: data }; });
+        })
+        .then(function(result){
+          if (!result.ok || !result.data.url) throw new Error((result.data && result.data.error) || "Le paiement n'a pas pu être initié.");
+          confirmEl.style.display = 'block';
+          window.location.href = result.data.url;
+        })
+        .catch(function(err){
+          errorEl.textContent = err.message || "Le paiement n'a pas pu être initié, réessayez dans un instant.";
+          errorEl.style.display = 'block';
+          submitBtn.disabled = false;
+          submitBtn.textContent = labels[offre].button;
+        });
+    });
+  })();
+
+  // Retour depuis Stripe Checkout (succès ou annulation) - bannière
+  // discrète en haut de la section offres, pas de re-fetch nécessaire
+  // (l'activation elle-même vient du webhook côté serveur, indépendamment
+  // de ce que voit le navigateur ici).
+  (function(){
+    var params = new URLSearchParams(window.location.search);
+    var paiement = params.get('paiement');
+    if (!paiement) return;
+    var el = document.createElement('div');
+    el.className = paiement === 'succes' ? 'form-confirm' : 'form-error';
+    el.style.display = 'block';
+    el.style.margin = '0 0 20px';
+    el.textContent = paiement === 'succes'
+      ? "Paiement reçu, merci ! C'est déjà actif sur le site (quelques minutes de délai possible)."
+      : 'Paiement annulé - rien ne vous a été facturé.';
+    var anchor = document.getElementById('gratuit');
+    if (anchor) anchor.parentNode.insertBefore(el, anchor);
   })();
 </script>
 
