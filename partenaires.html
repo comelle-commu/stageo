@@ -1014,23 +1014,34 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     });
   })();
 
-  // Retour depuis Stripe Checkout (succès ou annulation) - bannière
-  // discrète en haut de la section offres, pas de re-fetch nécessaire
-  // (l'activation elle-même vient du webhook côté serveur, indépendamment
-  // de ce que voit le navigateur ici).
+  // Retour depuis Stripe Checkout (succès ou annulation) - réutilise les
+  // zones de confirmation/erreur DÉJÀ dans le formulaire (là où
+  // l'attention de la personne se trouve juste après avoir payé), plutôt
+  // qu'une bannière ailleurs sur la page qui passe facilement inaperçue.
+  // Pas de re-fetch nécessaire : l'activation vient du webhook côté
+  // serveur, indépendamment de ce que voit le navigateur ici - message
+  // volontairement prudent ("sera actif" plutôt que "est actif"), une
+  // vérification manuelle pouvant retarder l'activation dans de rares cas
+  // (voir metadata.verifie dans stripe-webhook.js).
   (function(){
     var params = new URLSearchParams(window.location.search);
     var paiement = params.get('paiement');
     if (!paiement) return;
-    var el = document.createElement('div');
-    el.className = paiement === 'succes' ? 'form-confirm' : 'form-error';
-    el.style.display = 'block';
-    el.style.margin = '0 0 20px';
-    el.textContent = paiement === 'succes'
-      ? "Paiement reçu, merci ! C'est déjà actif sur le site (quelques minutes de délai possible)."
-      : 'Paiement annulé - rien ne vous a été facturé.';
-    var anchor = document.getElementById('gratuit');
-    if (anchor) anchor.parentNode.insertBefore(el, anchor);
+    var form = document.getElementById('premiumForm');
+    var confirmEl = document.getElementById('premiumConfirm');
+    var errorEl = document.getElementById('premiumError');
+    if (paiement === 'succes'){
+      if (form) form.style.display = 'none';
+      if (confirmEl){
+        confirmEl.textContent = 'Paiement reçu, merci ! Votre mise en avant sera active très prochainement (quelques minutes en général).';
+        confirmEl.style.display = 'block';
+      }
+    } else if (errorEl) {
+      errorEl.textContent = 'Paiement annulé - rien ne vous a été facturé.';
+      errorEl.style.display = 'block';
+    }
+    var card = document.getElementById('booster-partenaire');
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
   })();
 </script>
 

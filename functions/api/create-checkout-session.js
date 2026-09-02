@@ -18,6 +18,19 @@
 //
 // Route : fichier functions/api/create-checkout-session.js -> disponible
 // sur /api/create-checkout-session
+//
+// Vérification d'affiliation (voir metadata.verifie, lu par
+// stripe-webhook.js) : rien n'empêchait jusqu'ici n'importe qui de payer
+// pour booster/mettre en avant une activité qui n'est pas la sienne - pas
+// de vraie fraude possible (ça ne fait de mal à personne d'autre), mais
+// un badge "Partenaire"/Boost obtenu par une personne non affiliée
+// viderait le badge de son sens. Plutôt que d'construire un système de
+// comptes, on vérifie que l'email du paiement correspond à quelque chose
+// qu'on connaît déjà pour cette activité/cet organisme (contact_email
+// soumis via soumettre-activite.html, ou domaine du site source
+// `lien_source`) - si rien ne correspond, le paiement est accepté quand
+// même (pas de vente perdue) mais l'activation n'est pas automatique,
+// voir stripe-webhook.js.
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SITE_URL = "https://trouveo.be";
@@ -70,7 +83,7 @@ export async function onRequestPost(context) {
     let activite;
     try {
       const res = await fetch(
-        `${supabaseUrl}/rest/v1/activites?select=id,nom_activite&id=eq.${activiteId}`,
+        `${supabaseUrl}/rest/v1/activites?select=id,nom_activite,contact_email,lien_source&id=eq.${activiteId}`,
         { headers: { apikey: secretKey, Authorization: `Bearer ${secretKey}` } }
       );
       const rows = await res.json();
@@ -84,6 +97,7 @@ export async function onRequestPost(context) {
     }
     productName = `Boost Trouvéo — ${activite.nom_activite}`;
     metadata.activite_id = String(activiteId);
+    metadata.verifie = isAffiliated(email, [activite.contact_email, activite.lien_source]) ? "oui" : "non";
   } else {
     const organisme = typeof organismeRaw === "string" ? organismeRaw.trim() : "";
     if (!organisme || organisme.length > 200) {
@@ -91,6 +105,23 @@ export async function onRequestPost(context) {
     }
     productName = `Partenaire Trouvéo — ${organisme}`;
     metadata.organisme = organisme;
+    // Toutes les activités connues de cet organisme (même logique que
+    // groupKey() côté client : organisateur, sinon commune) - un seul
+    // contact_email ou lien_source qui correspond suffit à vérifier.
+    let refs = [];
+    try {
+      const res = await fetch(
+        `${supabaseUrl}/rest/v1/activites?select=contact_email,lien_source&or=(organisateur.eq.${encodeURIComponent(organisme)},commune.eq.${encodeURIComponent(organisme)})&limit=200`,
+        { headers: { apikey: secretKey, Authorization: `Bearer ${secretKey}` } }
+      );
+      const rows = await res.json();
+      refs = Array.isArray(rows) ? rows.flatMap((r) => [r.contact_email, r.lien_source]) : [];
+    } catch (err) {
+      console.error("Vérification de l'organisme impossible", err);
+      // Non bloquant : à défaut de vérifier, on marque juste "non vérifié"
+      // plutôt que de refuser le paiement pour une panne transitoire.
+    }
+    metadata.verifie = isAffiliated(email, refs) ? "oui" : "non";
   }
 
   const { montant_cents } = OFFRES[offre];
@@ -133,6 +164,36 @@ export async function onRequestPost(context) {
 
 export async function onRequest() {
   return jsonResponse(405, { error: "Méthode non autorisée." });
+}
+
+// true si `email` correspond exactement à l'une des références connues
+// (contact_email d'une soumission), OU si son domaine correspond au
+// domaine d'un lien_source connu (ex. email @sportfunactiv.be pour une
+// activité dont le lien source est sportfunactiv.be/...) - une
+// correspondance sur une seule des références suffit.
+function isAffiliated(email, references) {
+  const emailLower = email.trim().toLowerCase();
+  const emailDomain = domainOf(emailLower);
+  for (const ref of references) {
+    if (!ref) continue;
+    if (ref.includes("@")) {
+      if (ref.trim().toLowerCase() === emailLower) return true;
+    } else if (emailDomain) {
+      const refDomain = domainOf(ref);
+      if (refDomain && refDomain === emailDomain) return true;
+    }
+  }
+  return false;
+}
+
+function domainOf(value) {
+  if (!value) return null;
+  if (value.includes("@")) return value.split("@")[1].toLowerCase();
+  try {
+    return new URL(value).hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return null;
+  }
 }
 
 function toFormUrlEncoded(params) {

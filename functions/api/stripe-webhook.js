@@ -71,27 +71,38 @@ export async function onRequestPost(context) {
 
   const metadata = session.metadata || {};
   const offre = metadata.offre;
-  const email = metadata.email || (session.customer_details && session.customer_details.email) || null;
+  // "oui"/"non" décidé par create-checkout-session.js (email du payeur vs
+  // contact_email/lien_source connus pour cette activité ou cet organisme)
+  // - active tout de suite seulement si ça correspond à quelque chose de
+  // connu, sinon le paiement est accepté mais l'activation attend une
+  // vérification humaine (voir notifyAdminOfPayment ci-dessous). Absent
+  // = traité comme "non" (défaut le plus prudent, ex. vieux paiement
+  // créé avant l'ajout de ce champ).
+  const verified = metadata.verifie === "oui";
 
-  try {
-    if (offre === "boost") {
-      await activateBoost(supabaseUrl, secretKey, metadata.activite_id);
-    } else if (offre === "partenaire") {
-      await activatePartenaire(supabaseUrl, secretKey, metadata.organisme);
-    } else {
-      console.error("Webhook Stripe sans offre reconnue dans metadata", metadata);
-      return new Response("ok", { status: 200 }); // accusé quand même - rejouer ne changerait rien sans metadata valide
+  if (offre !== "boost" && offre !== "partenaire") {
+    console.error("Webhook Stripe sans offre reconnue dans metadata", metadata);
+    return new Response("ok", { status: 200 }); // accusé quand même - rejouer ne changerait rien sans metadata valide
+  }
+
+  if (verified) {
+    try {
+      if (offre === "boost") {
+        await activateBoost(supabaseUrl, secretKey, metadata.activite_id);
+      } else {
+        await activatePartenaire(supabaseUrl, secretKey, metadata.organisme);
+      }
+    } catch (err) {
+      console.error("Activation après paiement impossible", err);
+      // 500 : Stripe réessaiera - un paiement encaissé et vérifié DOIT
+      // finir par activer quelque chose, une erreur Supabase transitoire
+      // ne doit pas laisser un client payant sans rien.
+      return new Response("Activation impossible, nouvelle tentative attendue.", { status: 500 });
     }
-  } catch (err) {
-    console.error("Activation après paiement impossible", err);
-    // 500 : Stripe réessaiera - un paiement encaissé DOIT finir par
-    // activer quelque chose, une erreur Supabase transitoire ne doit pas
-    // laisser un client payant sans rien.
-    return new Response("Activation impossible, nouvelle tentative attendue.", { status: 500 });
   }
 
   context.waitUntil(
-    notifyAdminOfPayment(env, offre, metadata, session).catch((err) => {
+    notifyAdminOfPayment(env, offre, metadata, session, verified).catch((err) => {
       console.error("Notification de paiement impossible", err);
     })
   );
@@ -162,7 +173,7 @@ async function activatePartenaire(supabaseUrl, secretKey, organismeRaw) {
   }
 }
 
-async function notifyAdminOfPayment(env, offre, metadata, session) {
+async function notifyAdminOfPayment(env, offre, metadata, session, verified) {
   const apiKey = env.BREVO_API_KEY;
   const senderEmail = env.BREVO_SENDER_EMAIL;
   const notifyEmail = env.ADMIN_NOTIFY_EMAIL;
@@ -171,17 +182,22 @@ async function notifyAdminOfPayment(env, offre, metadata, session) {
   const senderName = env.BREVO_SENDER_NAME || "Trouvéo";
   const montant = ((session.amount_total || 0) / 100).toFixed(2);
   const cible = offre === "boost" ? `Activité #${metadata.activite_id}` : `Organisme "${metadata.organisme}"`;
+  const statusHtml = verified
+    ? `<p>Paiement confirmé et <strong>activé automatiquement</strong> (l'email du paiement correspondait à un contact ou un site déjà connu pour cette activité/cet organisme).</p>` +
+      `<p>Rien à faire de ton côté - c'est déjà actif sur le site.</p>`
+    : `<p style="color:#b02a37;"><strong>Paiement confirmé mais PAS activé automatiquement</strong> - l'email du paiement (${esc(metadata.email || "inconnu")}) ne correspond à aucun contact ni site déjà connu pour ${esc(cible)}. Peut être légitime (nouvel organisme, ou email personnel plutôt que professionnel) ou pas.</p>` +
+      `<p>Si c'est légitime : Supabase → Table editor → ${offre === "boost" ? "activites_boost" : "organismes_premium"} → ajoute une ligne (${offre === "boost" ? `activite_id=${esc(metadata.activite_id)}` : `source_key="${esc(metadata.organisme)}"`}, jusqu'au = aujourd'hui + ${offre === "boost" ? "28 jours" : "1 an"}${offre === "partenaire" ? ", mise_en_avant_complete=true" : ""}).</p>` +
+      `<p>Si ça semble abusif : Stripe Dashboard → Paiements → rembourser.</p>`;
   const resp = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: { "api-key": apiKey, "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({
       sender: { name: senderName, email: senderEmail },
       to: [{ email: notifyEmail }],
-      subject: `Trouvéo — paiement ${offre === "boost" ? "Boost" : "Partenaire"} reçu (${montant}€)`,
+      subject: `Trouvéo — paiement ${offre === "boost" ? "Boost" : "Partenaire"} reçu (${montant}€)${verified ? "" : " — À VÉRIFIER"}`,
       htmlContent:
-        `<p>Paiement confirmé et activé automatiquement.</p>` +
         `<p><strong>${esc(cible)}</strong><br>${montant}€ · ${esc(metadata.email || "email inconnu")}</p>` +
-        `<p>Rien à faire de ton côté - c'est déjà actif sur le site.</p>`,
+        statusHtml,
     }),
     signal: AbortSignal.timeout(8000),
   });
