@@ -37,6 +37,11 @@
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const VALID_TYPES = new Set(["Sport", "Art & créativité", "Sciences & nature", "Langues", "Multi-activités"]);
 const MAX_ENFANTS = 5;
+// Mêmes paliers que le <select id="radiusSelect"> d'activites.html - un
+// rayon en dehors de cette liste ne peut venir que d'un appel direct à
+// l'API (jamais du formulaire), donc rejeté plutôt que silencieusement
+// ramené à une valeur par défaut.
+const VALID_RAYONS = new Set([5, 10, 15, 25, 50]);
 
 export async function onRequestPost(context) {
   const { request, env } = context;
@@ -55,10 +60,16 @@ export async function onRequestPost(context) {
     return jsonResponse(400, { error: "Requête invalide." });
   }
 
-  const { email, enfants, commune } = body || {};
+  const { email, enfants, commune, rayon_km: rayonKm } = body || {};
 
   if (typeof email !== "string" || !EMAIL_RE.test(email)) {
     return jsonResponse(400, { error: "Adresse email invalide." });
+  }
+  // Optionnel pour ne pas casser un appel plus ancien qui n'enverrait pas
+  // encore ce champ - 15 km reste le comportement historique par défaut.
+  const rayon = rayonKm === undefined ? 15 : rayonKm;
+  if (!VALID_RAYONS.has(rayon)) {
+    return jsonResponse(400, { error: "Rayon de recherche invalide." });
   }
   if (!Array.isArray(enfants) || enfants.length === 0 || enfants.length > MAX_ENFANTS) {
     return jsonResponse(400, { error: `Merci d'indiquer entre 1 et ${MAX_ENFANTS} enfant(s).` });
@@ -98,7 +109,7 @@ export async function onRequestPost(context) {
             types_activites: Array.isArray(e.types_activites) ? e.types_activites : [],
           })),
           commune: commune.trim(),
-          rayon_km: 15,
+          rayon_km: rayon,
           updated_at: new Date().toISOString(),
         },
       ]),
@@ -113,7 +124,7 @@ export async function onRequestPost(context) {
     if (res.status === 200 || res.status === 201 || res.status === 204) {
       // Best-effort : une erreur d'envoi ne doit pas transformer un
       // enregistrement réussi en échec côté utilisateur.
-      await sendConfirmationEmail(env, email, enfants, commune.trim()).catch((err) => {
+      await sendConfirmationEmail(env, email, enfants, commune.trim(), rayon).catch((err) => {
         console.error("Envoi de l'email de confirmation impossible", err);
       });
       // Notification interne seulement pour une VRAIE première inscription
@@ -176,7 +187,7 @@ function buildDetailLink(enfants, commune) {
   return `https://trouveo.be/activites?${params.toString()}`;
 }
 
-async function sendConfirmationEmail(env, email, enfants, commune) {
+async function sendConfirmationEmail(env, email, enfants, commune, rayon) {
   const apiKey = env.BREVO_API_KEY;
   const senderEmail = env.BREVO_SENDER_EMAIL;
   if (!apiKey || !senderEmail) {
@@ -229,7 +240,7 @@ async function sendConfirmationEmail(env, email, enfants, commune) {
   <tr><td style="padding:14px 16px;background:#FFFFFF;border:1px solid rgba(1,83,128,0.12);border-radius:14px;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
       <tr><td style="padding:0 0 8px;color:#93A9B5;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;">Localité</td></tr>
-      <tr><td style="padding:0 0 14px;color:#015380;font-size:14.5px;">${esc(commune)} (rayon de 15 km)</td></tr>
+      <tr><td style="padding:0 0 14px;color:#015380;font-size:14.5px;">${esc(commune)} (rayon de ${rayon} km)</td></tr>
       <tr><td style="padding:0 0 8px;color:#93A9B5;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;">Enfant${enfants.length > 1 ? "s" : ""}</td></tr>
       ${rows}
     </table>

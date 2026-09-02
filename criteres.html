@@ -134,7 +134,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     outline:none;transition:border-color .15s ease;
   }
   input:focus, select:focus{border-color:var(--teal);}
-  select#nbEnfants{max-width:120px;}
+  select#nbEnfants, select#rayon{max-width:120px;}
 
   .enfant-card{
     margin-top:12px;background:var(--surface-tint);border-radius:16px;padding:16px 18px;
@@ -247,7 +247,18 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     <div class="field">
       <label class="field-label" for="commune">Votre localité</label>
       <input type="text" id="commune" name="commune" placeholder="Ex : Liège, Namur, Wavre… ou 4000, 5000…" required>
-      <p class="field-help">Nous chercherons les activités dans un rayon de 15 km autour de cette localité.</p>
+    </div>
+
+    <div class="field">
+      <label class="field-label" for="rayon">Rayon de recherche</label>
+      <select id="rayon" name="rayon">
+        <option value="5">5 km</option>
+        <option value="10">10 km</option>
+        <option value="15" selected>15 km</option>
+        <option value="25">25 km</option>
+        <option value="50">50 km</option>
+      </select>
+      <p class="field-help">Nous chercherons les activités dans ce rayon autour de votre localité.</p>
     </div>
 
     <button type="submit" class="submit" id="submitBtn">Enregistrer mes critères</button>
@@ -343,6 +354,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
 
     const email = emailEl.value.trim();
     const commune = document.getElementById('commune').value.trim();
+    const rayonKm = Number(document.getElementById('rayon').value) || 15;
     const enfants = Array.from(enfantsRowsEl.querySelectorAll('.enfant-card')).map(function(card, i){
       return {
         age: Number(card.querySelector('input[data-enfant-age]').value),
@@ -375,7 +387,8 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
       body: JSON.stringify({
         email: email,
         enfants: enfants,
-        commune: commune
+        commune: commune,
+        rayon_km: rayonKm
       })
     })
       .then(function(res){
@@ -391,7 +404,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
         if (window.trouveoTrack) {
           window.trouveoTrack('ALERT_CREATED', {
             commune: commune,
-            rayon_km: 15,
+            rayon_km: rayonKm,
             ages: enfants.map(function(e){ return e.age; }),
             types: Array.from(new Set(enfants.reduce(function(acc, e){ return acc.concat(e.types_activites); }, [])))
           });

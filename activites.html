@@ -43,6 +43,9 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Grandstander:wght@600;700;800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Leaflet (vue carte) - OpenStreetMap, pas de clé API contrairement à Google Maps -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <style>
   :root{
     --cream: #FFFDF8;
@@ -174,6 +177,12 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     font-size:14.5px;color:var(--ink);font-family:inherit;cursor:pointer;
     -webkit-appearance:none;appearance:none;text-overflow:ellipsis;
   }
+  .radius-select-box{flex:none;min-width:0;width:auto;padding:11px 14px;}
+  .radius-select-box select{
+    border:none;background:transparent;outline:none;
+    font-size:14.5px;color:var(--ink);font-family:inherit;cursor:pointer;
+    -webkit-appearance:none;appearance:none;
+  }
   .toggle-past{
     flex:none;border:1px solid var(--line);background:var(--paper);color:var(--ink-soft);
     font-size:13px;font-weight:600;padding:0 16px;border-radius:100px;cursor:pointer;white-space:nowrap;
@@ -230,6 +239,12 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     color:var(--teal-deep);font-weight:700;font-size:14px;padding:12px 28px;border-radius:100px;
     cursor:pointer;box-shadow:0 6px 18px -12px rgba(1,83,128,0.25);
   }
+  #mapView{
+    height:480px;border-radius:22px;overflow:hidden;margin:8px 0 40px;
+    border:1px solid var(--line-soft);box-shadow:0 16px 40px -28px rgba(1,83,128,0.35);
+  }
+  #mapView .leaflet-popup-content{font-family:'Work Sans',sans-serif;font-size:13.5px;}
+  #mapView .leaflet-popup-content b{font-family:'Grandstander',sans-serif;color:var(--ink);}
   .load-more:hover{border-color:var(--teal);}
   .empty-state{text-align:center;padding:60px 20px;color:var(--ink-soft);font-size:14.5px;line-height:1.7;}
   .proximity-note{
@@ -375,10 +390,20 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
       <label class="search-box commune-select-box">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="9.5" r="2.4" stroke="currentColor" stroke-width="2"/></svg>
         <select id="communeSelect" aria-label="Choisir une commune, toutes provinces">
-          <option value="" selected>Toutes les communes (+ 15 km)…</option>
+          <option value="" selected>Toutes les communes…</option>
+        </select>
+      </label>
+      <label class="search-box radius-select-box">
+        <select id="radiusSelect" aria-label="Rayon de recherche autour de la localité">
+          <option value="5">+ 5 km</option>
+          <option value="10">+ 10 km</option>
+          <option value="15" selected>+ 15 km</option>
+          <option value="25">+ 25 km</option>
+          <option value="50">+ 50 km</option>
         </select>
       </label>
       <button class="toggle-past" id="togglePast" type="button" title="Affiche aussi les éditions déjà terminées, pour se faire une idée du type de programme proposé par chaque source">Voir aussi les dates passées</button>
+      <button class="toggle-past" id="toggleMap" type="button">Voir sur la carte</button>
     </div>
   </div>
 
@@ -419,6 +444,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   <p class="status-line" id="statusLine">Chargement des activités…</p>
   <div id="results"></div>
   <button class="load-more" id="loadMore" type="button" style="display:none;"></button>
+  <div id="mapView" style="display:none;"></div>
 </div>
 
 <section class="final wrap">
@@ -477,7 +503,10 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   const resultsEl = document.getElementById('results');
   const searchEl = document.getElementById('search');
   const communeSelectEl = document.getElementById('communeSelect');
+  const radiusSelectEl = document.getElementById('radiusSelect');
   const togglePastBtn = document.getElementById('togglePast');
+  const toggleMapBtn = document.getElementById('toggleMap');
+  const mapViewEl = document.getElementById('mapView');
   const statusLine = document.getElementById('statusLine');
   const loadMoreBtn = document.getElementById('loadMore');
 
@@ -586,9 +615,10 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   // officielles (sur 280, voir COMMUNES_BY_PROVINCE ci-dessous) absentes de
   // la table source par leur nom de fusion - ajoutees a la main avec les
   // coordonnees de leur code postal respectif (7780/7880/6120) pour que le
-  // menu deroulant "Toutes les communes" beneficie du meme rayon de 15 km
-  // que les autres.
-  const RADIUS_KM = 15;
+  // menu deroulant "Toutes les communes" beneficie du meme rayon
+  // que les autres - ajustable via #radiusSelect (5/10/15/25/50 km,
+  // 15 par defaut), pas figé comme avant.
+  let RADIUS_KM = Number(radiusSelectEl.value) || 15;
 
   function normalizeName(s){
     return (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
@@ -762,6 +792,14 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   let activePeriod = 'ALL';
   let showPast = false;
   let visibleLimit = PAGE_SIZE;
+  // Vue carte : les marqueurs sont regroupés par commune (pas de
+  // géocodage par activité) via COMMUNE_COORDS, déjà utilisé pour la
+  // recherche par proximité - initialisée seulement au premier basculement
+  // vers la carte (Leaflet inutile pour qui reste en vue liste).
+  let mapMode = false;
+  let leafletMap = null;
+  let mapMarkers = [];
+  let lastVisibleForMap = [];
   let searchTrackTimer = null;
   let lastTrackedSearchKey = null;
   // Recherche par proximité : recalculés à chaque frappe (updateProximityState),
@@ -972,6 +1010,79 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     }, { activiteId: Number(card.dataset.aid) || null, organizerId: card.dataset.org || null });
   });
 
+  // Vue carte : un marqueur par commune présente dans les résultats
+  // filtrés (pas par activité individuelle - aucune adresse géocodée au
+  // niveau de l'activité), avec le nombre d'activités dans le popup et un
+  // clic qui revient en liste filtrée sur cette commune.
+  function ensureMap(){
+    if (leafletMap) return;
+    leafletMap = L.map(mapViewEl, { scrollWheelZoom: false }).setView([50.55, 4.85], 8);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a>'
+    }).addTo(leafletMap);
+  }
+
+  function updateMap(list){
+    lastVisibleForMap = list;
+    if (!mapMode || !leafletMap) return;
+    mapMarkers.forEach(function(m){ leafletMap.removeLayer(m); });
+    mapMarkers = [];
+    const communes = {}; // cle normalisee -> { label, count }
+    list.forEach(function(r){
+      if (!r.commune) return;
+      const key = normalizeName(r.commune);
+      if (!communes[key]) communes[key] = { label: r.commune, count: 0 };
+      communes[key].count++;
+    });
+    const bounds = [];
+    Object.keys(communes).forEach(function(key){
+      const coords = COMMUNE_COORDS[key];
+      if (!coords) return; // quelques localites scrapees n'ont pas d'entree connue - pas de marqueur plutot qu'un mauvais
+      const info = communes[key];
+      const marker = L.marker([coords[0], coords[1]]).addTo(leafletMap);
+      marker.bindPopup('<b>' + esc(info.label) + '</b><br>' + info.count + ' activité' + (info.count !== 1 ? 's' : '') +
+        '<br><a href="#" data-commune="' + esc(info.label) + '">Voir la liste →</a>');
+      marker.on('popupopen', function(ev){
+        const link = ev.popup.getElement().querySelector('a[data-commune]');
+        if (!link) return;
+        link.addEventListener('click', function(e){
+          e.preventDefault();
+          searchEl.value = info.label;
+          setMapMode(false);
+          visibleLimit = PAGE_SIZE;
+          renderChips();
+          render();
+          searchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+      });
+      mapMarkers.push(marker);
+      bounds.push([coords[0], coords[1]]);
+    });
+    if (bounds.length) leafletMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 11 });
+  }
+
+  function setMapMode(on){
+    mapMode = on;
+    toggleMapBtn.classList.toggle('active', on);
+    toggleMapBtn.textContent = on ? 'Voir en liste' : 'Voir sur la carte';
+    resultsEl.style.display = on ? 'none' : '';
+    mapViewEl.style.display = on ? 'block' : 'none';
+    if (on) ensureMap();
+    render();
+    if (on){
+      // invalidateSize : le conteneur était display:none jusque-là, Leaflet
+      // a besoin de recalculer ses dimensions une fois visible, sinon la
+      // carte reste coupée/mal centrée au premier affichage - le render()
+      // ci-dessus vient d'appeler updateMap() mais AVANT ce recalcul,
+      // d'où ce second appel une fois la taille correcte connue.
+      setTimeout(function(){
+        leafletMap.invalidateSize();
+        updateMap(lastVisibleForMap);
+      }, 0);
+    }
+  }
+
   function render(){
     updateProximityState();
     const q = searchEl.value.trim().toLowerCase();
@@ -1109,6 +1220,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
       injectEventSchema(page);
     }
     scheduleSearchTracking(visible.length);
+    updateMap(visible);
 
     if (visible.length){
       const shown = Math.min(visibleLimit, visible.length);
@@ -1118,7 +1230,10 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
       statusLine.textContent = '';
     }
 
-    if (visible.length > visibleLimit){
+    // La carte gère son propre conteneur - le bouton "charger plus" n'a
+    // pas de sens tant qu'elle est affichée (elle montre déjà toutes les
+    // communes filtrées, pas une page paginée).
+    if (!mapMode && visible.length > visibleLimit){
       loadMoreBtn.style.display = 'block';
       loadMoreBtn.textContent = 'Afficher ' + Math.min(PAGE_SIZE, visible.length - visibleLimit) + ' de plus (' + (visible.length - visibleLimit) + ' restantes)';
     } else {
@@ -1303,6 +1418,12 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     renderChips();
     render();
   });
+  radiusSelectEl.addEventListener('change', function(){
+    RADIUS_KM = Number(radiusSelectEl.value) || 15;
+    visibleLimit = PAGE_SIZE;
+    renderChips();
+    render();
+  });
   togglePastBtn.addEventListener('click', function(){
     showPast = !showPast;
     visibleLimit = PAGE_SIZE;
@@ -1310,6 +1431,9 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     togglePastBtn.textContent = showPast ? 'Masquer les dates passées' : 'Voir aussi les dates passées';
     renderChips();
     render();
+  });
+  toggleMapBtn.addEventListener('click', function(){
+    setMapMode(!mapMode);
   });
   loadMoreBtn.addEventListener('click', function(){
     visibleLimit += PAGE_SIZE;
