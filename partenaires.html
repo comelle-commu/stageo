@@ -100,15 +100,20 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     transition:transform .15s ease, box-shadow .15s ease;
   }
   .nav-cta:hover{transform:translateY(-1px);box-shadow:0 12px 28px -8px rgba(1,151,175,0.55);background:var(--teal-deep);}
-  .cta-short{display:none;}
+  .nav-toggle{display:none;background:none;border:none;cursor:pointer;font-size:26px;line-height:1;color:var(--ink);padding:4px 6px;}
   @media (max-width:520px){
-    nav.wrap{padding-top:14px;padding-bottom:14px;gap:6px;}
-    .logo-img{height:34px;}
-    .nav-links{gap:8px;}
-    .nav-link{font-size:11.5px;}
-    .nav-cta{padding:8px 12px;font-size:11.5px;}
-    .cta-full{display:none;}
-    .cta-short{display:inline;}
+    nav.wrap{padding-top:16px;padding-bottom:16px;}
+    .logo-img{height:44px;}
+    .nav-toggle{display:block;}
+    .nav-links{
+      display:none;position:absolute;top:100%;left:0;right:0;
+      flex-direction:column;align-items:stretch;gap:0;
+      background:var(--cream);border-bottom:1px solid var(--line);
+      padding:6px 24px 20px;box-shadow:0 12px 20px -12px rgba(1,83,128,0.15);
+    }
+    .nav-links.open{display:flex;}
+    .nav-link{font-size:16px;padding:13px 0;border-bottom:1px solid var(--line);}
+    .nav-cta{margin-top:14px;text-align:center;font-size:15px;padding:13px 20px;}
   }
   .nav-cta:focus-visible, a:focus-visible, button:focus-visible{outline:3px solid var(--blue);outline-offset:2px;}
 
@@ -378,22 +383,33 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   <a class="logo" href="/">
     <img src="trouveo-logo.png" alt="Trouvéo" class="logo-img">
   </a>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">☰</button>
   <div class="nav-links" id="navLinks">
-    <a href="/activites" class="nav-link">
-      <span class="cta-full">Voir toutes les activités</span>
-      <span class="cta-short">Activités</span>
-    </a>
-    <a href="partenaires.html" class="nav-link active" aria-current="page">
-      <span class="cta-full">Pour les organisateurs</span>
-      <span class="cta-short">Organisateurs</span>
-    </a>
-    <a href="#nous-contacter" class="nav-cta">
-      <span class="cta-full">Demander des infos</span>
-      <span class="cta-short">Contact</span>
-    </a>
+    <a href="/activites" class="nav-link">Voir toutes les activités</a>
+    <a href="partenaires.html" class="nav-link active" aria-current="page">Pour les organisateurs</a>
+    <a href="#nous-contacter" class="nav-cta">Demander des infos</a>
   </div>
 </nav>
 </div>
+<script>
+(function(){
+  var toggle = document.getElementById('navToggle');
+  var links = document.getElementById('navLinks');
+  if(!toggle || !links) return;
+  toggle.addEventListener('click', function(){
+    var isOpen = links.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    toggle.textContent = isOpen ? '✕' : '☰';
+  });
+  links.querySelectorAll('a').forEach(function(link){
+    link.addEventListener('click', function(){
+      links.classList.remove('open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.textContent = '☰';
+    });
+  });
+})();
+</script>
 
 <header class="band band-header">
   <div class="blob blob1"></div>
