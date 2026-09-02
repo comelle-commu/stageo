@@ -159,6 +159,7 @@ un socle mutualisé pour cette famille de sites (voir
 | Le Fagotin (organisme privé, parc nature Stoumont) | WordPress/Gutenberg | HTML statique, blocs `h5` "Titre \| âge" groupés par semaine, lien de réservation individuel par stage (bookwhen.com) | `fagotin.py` |
 | Le Point d'Eau (piscine privée, La Louvière) | Site sur-mesure | HTML statique, `<li>` par stage sous `.divAquademy ul` - piège : certaines cartes contiennent un `<p hidden>` imbriqué (activité pas encore annoncée officiellement, contenu volontairement masqué côté public) qui casse la structure HTML ; retiré explicitement avant extraction (même principe que `check_legal()` : ne lire que le texte visible). Stages "à définir" (thème non choisi) exclus | `pointdeau.py` |
 | Parc Sportif des 3 Tilleuls (organisme privé, piscine Calypso, Watermael-Boitsfort) | Plateforme MyiClub (même famille que Royal Léopold Club/Royal Racing Club/Sport Fun Activ') | Simple ajout à `iclub.py` (`CLUBS`, `ClubID=28` sur `www.iclub.be`) - structure de carte identique aux autres clubs iClub, aucun nouveau parseur nécessaire | `iclub.py` |
+| Neptune Ans Natation (école de natation privée, piscine d'Ans) | WordPress | HTML statique, `<li>` par période (dont une sous-liste de 5 semaines d'été sans préfixe) - piège : la page affiche encore le cycle 2025-2026 (entièrement passé) au 02/09/2026, pas encore mise à jour pour 2026-2027 ; parseur volontairement générique (aucune saison/année en dur, même logique que Forest/Uccle plus bas) pour capter la mise à jour automatiquement, sans changement de code | `neptune_ans.py` |
 
 ### Sites 100% JavaScript : `common.fetch_rendered_html()`
 
@@ -341,6 +342,10 @@ approximatives) :
   sans nouveau code de parsing. Watermael-Boitsfort ajoutée à `PROVINCE_OF`
   (activites.html + `functions/province/[province].js`) qui ne la
   connaissait pas encore.
+- **Neptune Ans Natation** (piscine d'Ans, sur demande spécifique) - nouveau
+  scraper dédié, 10 stages extraits (Toussaint/2x Carnaval/2x Pâques/5
+  semaines d'été) - voir `neptune_ans.py` ci-dessus pour le piège rencontré
+  (page pas encore mise à jour pour 2026-2027 au moment du ratissage).
 
 **Candidates identifiées mais pas encore construites** (à reprendre avant de
 repartir de zéro sur une future session piscines) :
@@ -359,6 +364,13 @@ repartir de zéro sur une future session piscines) :
   re-investiguer (vérifier `robots.txt`, essayer un User-Agent de
   navigateur complet, ou `fetch_rendered_html()`) avant d'écrire un
   parseur.
+- **Triton Ans Natation** (piscine d'Ans, sur demande spécifique, deuxième
+  club au côté de Neptune) - robots.txt clair, mais aucune page "stages"
+  structurée trouvée sur son propre site (`tritonansnatation.be/Agenda.html`
+  ne liste rien, `/Telechargement.html` ne contient que des attestations
+  mutuelle et de vieux documents de compétition 2022-2023). Des dates 2026
+  circulent sur des sites tiers (quefaire.be...) mais pas sur le site du
+  club lui-même - rien à scraper à la source pour l'instant.
 
 D'autres pistes générales à explorer plus tard : les piscines communales des
 grandes villes déjà couvertes indirectement (Liège, Charleroi, Mons...) ont

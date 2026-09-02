@@ -58,6 +58,7 @@ import meix_devant_virton
 import mestempslibres
 import mons
 import namur
+import neptune_ans
 import neupre
 import nivelles
 import oupeye
@@ -134,6 +135,7 @@ SCRAPERS = [
     ("La Roche-en-Ardenne", la_roche_en_ardenne),
     ("Vaux-sur-Sûre", vaux_sur_sure),
     ("Le Point d'Eau (La Louvière)", pointdeau),
+    ("Neptune Ans Natation", neptune_ans),
 ]
 
 # Modules "en attente" : n'effectuent aucune requête réseau (voir chaque
