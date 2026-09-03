@@ -356,18 +356,7 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   .premium-search-wrap input, .premium-email-wrap input{
     flex:1;min-width:0;border:none;background:transparent;padding:12px 0;
   }
-  .premium-search-wrap input:disabled{color:var(--ink-faint);}
-  .premium-suggestions{
-    position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:5;
-    background:var(--paper);border:1px solid var(--line);border-radius:12px;
-    box-shadow:0 14px 34px -18px rgba(1,83,128,0.35);max-height:220px;overflow-y:auto;
-  }
-  .premium-suggestion-item{
-    display:block;width:100%;text-align:left;border:none;background:none;cursor:pointer;
-    padding:10px 14px;font-size:13.5px;font-family:'Work Sans',sans-serif;color:var(--ink);
-  }
-  .premium-suggestion-item:hover, .premium-suggestion-item:focus{background:var(--mint);}
-  .premium-suggestion-item .sug-sub{display:block;font-size:12px;color:var(--ink-soft);}
+  .field-hint{font-size:12px;color:var(--ink-faint);line-height:1.5;padding-left:2px;margin:2px 0 0;}
   .lost-link-section{margin-top:20px;padding-top:16px;border-top:1px dashed var(--line);}
   .lost-link-toggle{margin:0;font-size:12.5px;}
   .lost-link-toggle a{color:var(--ink-faint);text-decoration:underline;}
@@ -704,28 +693,27 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
       </div>
       <div class="form-card" id="booster-partenaire">
         <h3 id="premiumTitle">Booster une activité ou devenir partenaire</h3>
-        <p id="premiumIntro">Intéressé·e par Boost (29€) ou Partenaire (240€/an) ? Choisissez d'abord une offre ci-dessus, puis payez en ligne - c'est activé immédiatement.</p>
+        <p id="premiumIntro">Indiquez le nom de votre organisme et votre email professionnel : on vérifie que ça correspond bien à vous, puis vous accédez à votre espace pour choisir précisément quoi booster ou mettre en avant.</p>
         <form class="contact-form premium-form" id="premiumForm" novalidate>
           <input type="hidden" name="offre" id="premiumOffre" value="">
-          <input type="hidden" name="activite_id" id="premiumActiviteId" value="">
           <div class="field-block">
-            <span class="field-label" id="premiumSearchLabel">Quelle activité ou quel organisme ?</span>
+            <span class="field-label" id="premiumSearchLabel">Nom de votre organisme</span>
             <label class="premium-search-wrap">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              <input type="text" id="premiumSearchInput" placeholder="Choisissez d'abord Boost ou Partenaire ci-dessus" autocomplete="off" disabled aria-label="Votre activité (Boost) ou votre organisme (Partenaire)">
-              <div class="premium-suggestions" id="premiumSuggestions" hidden></div>
+              <input type="text" id="premiumSearchInput" placeholder="Nom de votre organisme…" autocomplete="off" aria-label="Nom de votre organisme">
             </label>
           </div>
           <div class="field-block">
-            <span class="field-label">Votre email</span>
+            <span class="field-label">Votre email professionnel</span>
             <label class="premium-email-wrap">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="1.8"/><path d="m4 6.5 8 6 8-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <input type="email" name="email" id="premiumEmail" placeholder="votre@email.be" required aria-label="Votre email">
             </label>
+            <p class="field-hint">C'est le nom de domaine de votre email qui donne accès : il doit correspondre au site de votre activité (ex. contact@votre-site.be pour votre-site.be).</p>
           </div>
-          <button type="submit" id="premiumSubmitBtn" disabled>Choisissez une offre ci-dessus</button>
+          <button type="submit" id="premiumSubmitBtn">Vérifier et accéder →</button>
         </form>
-        <div class="form-confirm" id="premiumConfirm" role="status">Redirection vers le paiement…</div>
+        <div class="form-confirm" id="premiumConfirm" role="status">Vérification en cours…</div>
         <div class="form-error" id="premiumError" role="alert"></div>
         <div class="lost-link-section">
           <p class="lost-link-toggle"><a href="#" id="lostLinkToggle">Déjà invité·e mais lien perdu ?</a></p>
@@ -873,25 +861,19 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   handleContactForm({ formId: 'organismeForm', confirmId: 'organismeConfirm', errorId: 'organismeError', type: 'organisme' });
 
   // Les CTA "Booster une activité" / "Devenir partenaire" mènent à ce même
-  // formulaire, qui paie directement en ligne (Stripe Checkout) au lieu de
-  // "être recontacté·e" - on préremplit le contexte (offre + titre + intro
-  // + libellé du bouton) pour que la personne n'ait pas à le repréciser.
-  //
-  // La recherche (activité pour Boost, organisme pour Partenaire) réutilise
-  // les mêmes données publiques que le compteur d'activités ci-dessus
-  // (clé anon) - filtrage client, pas de nouvel endpoint : le catalogue
-  // (~2000 lignes) reste largement gérable en mémoire pour ce cas d'usage
-  // ponctuel (pas la recherche principale de /activites, bien plus lourde).
+  // formulaire, qui ne fait QUE vérifier l'affiliation (organisme + email)
+  // puis redirige vers l'espace organisateur (organisateur.html) - c'est là
+  // que la personne choisit précisément quoi booster/mettre en avant et
+  // paie, jamais ici à l'aveugle pour une activité devinée par recherche.
+  // Même logique de vérification que activites.html ("C'est votre
+  // activité ?") et organisateur-claim.js : email pro dont le domaine
+  // correspond au site de l'organisme, ou déjà connu comme contact.
   (function(){
-    var SUPABASE_URL = "https://oitmxxrurvutazuqsjbl.supabase.co";
-    var SUPABASE_KEY = "sb_publishable_BO_qv6_PsRrAP6VoVXYq7w_YoT2CfLG";
     var form = document.getElementById('premiumForm');
     var offreEl = document.getElementById('premiumOffre');
-    var activiteIdEl = document.getElementById('premiumActiviteId');
     var titleEl = document.getElementById('premiumTitle');
     var introEl = document.getElementById('premiumIntro');
     var searchEl = document.getElementById('premiumSearchInput');
-    var suggestionsEl = document.getElementById('premiumSuggestions');
     var emailEl = document.getElementById('premiumEmail');
     var submitBtn = document.getElementById('premiumSubmitBtn');
     var confirmEl = document.getElementById('premiumConfirm');
@@ -901,87 +883,16 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     var labels = {
       boost: {
         title: 'Booster une activité',
-        intro: "Trouvez votre activité ci-dessous, indiquez votre email, et payez 29€ (4 semaines) - c'est activé immédiatement après paiement.",
-        fieldLabel: 'Quelle activité ?',
-        placeholder: 'Nom de votre activité…',
-        button: 'Payer 29€ maintenant'
+        intro: "Indiquez le nom de votre organisme et votre email professionnel : on vérifie que ça correspond bien à vous, puis vous choisissez l'activité à booster depuis votre espace.",
+        fieldLabel: 'Nom de votre organisme'
       },
       partenaire: {
         title: 'Devenir partenaire',
-        intro: "Indiquez le nom de votre organisme, votre email, et payez 240€/an - c'est activé immédiatement après paiement.",
-        fieldLabel: 'Quel organisme ?',
-        placeholder: 'Nom de votre organisme…',
-        button: 'Payer 240€ maintenant'
+        intro: "Indiquez le nom de votre organisme et votre email professionnel : on vérifie que ça correspond bien à vous, puis vous activez Partenaire depuis votre espace.",
+        fieldLabel: 'Nom de votre organisme'
       }
     };
     var searchLabelEl = document.getElementById('premiumSearchLabel');
-
-    var activites = null; // chargées une seule fois, à la première utilisation
-    function loadActivites(){
-      if (activites) return Promise.resolve(activites);
-      return fetch(SUPABASE_URL + '/rest/v1/activites?select=id,nom_activite,organisateur,commune', {
-        headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
-      }).then(function(res){ return res.json(); }).then(function(rows){
-        activites = Array.isArray(rows) ? rows : [];
-        return activites;
-      }).catch(function(){ activites = []; return activites; });
-    }
-
-    function organismeNames(){
-      var seen = {};
-      var names = [];
-      activites.forEach(function(a){
-        var name = (a.organisateur || a.commune || '').trim();
-        if (name && !seen[name]){ seen[name] = true; names.push(name); }
-      });
-      return names;
-    }
-
-    function renderSuggestions(items){
-      if (!items.length){ suggestionsEl.hidden = true; suggestionsEl.innerHTML = ''; return; }
-      suggestionsEl.innerHTML = items.map(function(item){
-        return '<button type="button" class="premium-suggestion-item" data-id="' + (item.id != null ? item.id : '') + '" data-name="' + esc(item.name) + '">' +
-          esc(item.name) + (item.sub ? '<span class="sug-sub">' + esc(item.sub) + '</span>' : '') + '</button>';
-      }).join('');
-      suggestionsEl.hidden = false;
-    }
-
-    function esc(s){ return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
-
-    searchEl.addEventListener('input', function(){
-      activiteIdEl.value = ''; // toute frappe invalide la sélection précédente
-      var q = searchEl.value.trim().toLowerCase();
-      if (!q || !activites){ renderSuggestions([]); return; }
-      var offre = offreEl.value;
-      if (offre === 'boost'){
-        var matches = activites.filter(function(a){
-          return (a.nom_activite || '').toLowerCase().indexOf(q) !== -1;
-        }).slice(0, 8).map(function(a){
-          return { id: a.id, name: a.nom_activite, sub: a.organisateur || a.commune || '' };
-        });
-        renderSuggestions(matches);
-      } else if (offre === 'partenaire'){
-        var names = organismeNames().filter(function(n){
-          return n.toLowerCase().indexOf(q) !== -1;
-        }).slice(0, 8).map(function(n){ return { id: null, name: n, sub: '' }; });
-        renderSuggestions(names);
-      }
-    });
-
-    suggestionsEl.addEventListener('click', function(e){
-      var btn = e.target.closest('.premium-suggestion-item');
-      if (!btn) return;
-      searchEl.value = btn.getAttribute('data-name');
-      activiteIdEl.value = btn.getAttribute('data-id') || '';
-      renderSuggestions([]);
-    });
-
-    // Cache les suggestions au clic ailleurs sur la page (pas seulement à
-    // la perte de focus du champ, sinon cliquer une suggestion la referme
-    // avant que le clic n'atteigne le bouton).
-    document.addEventListener('click', function(e){
-      if (!e.target.closest('.premium-search-wrap')) renderSuggestions([]);
-    });
 
     document.querySelectorAll('[data-offre]').forEach(function(btn){
       btn.addEventListener('click', function(){
@@ -989,17 +900,9 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
         var label = labels[offre];
         if (!label) return;
         offreEl.value = offre;
-        activiteIdEl.value = '';
         titleEl.textContent = label.title;
         introEl.textContent = label.intro;
-        searchEl.placeholder = label.placeholder;
         searchLabelEl.textContent = label.fieldLabel;
-        searchEl.disabled = false;
-        searchEl.value = '';
-        submitBtn.disabled = false;
-        submitBtn.textContent = label.button;
-        renderSuggestions([]);
-        loadActivites();
         if (window.trouveoTrack) window.trouveoTrack('BOOST_CTA_CLICKED', { source_page: 'partenaires', offre: offre });
       });
     });
@@ -1008,11 +911,12 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
       e.preventDefault();
       errorEl.style.display = 'none';
 
-      var offre = offreEl.value;
+      var organisme = searchEl.value.trim();
       var email = emailEl.value.trim();
-      if (offre !== 'boost' && offre !== 'partenaire'){
-        errorEl.textContent = "Merci de choisir d'abord Boost ou Partenaire ci-dessus.";
+      if (!organisme){
+        errorEl.textContent = "Merci d'indiquer le nom de votre organisme.";
         errorEl.style.display = 'block';
+        searchEl.focus();
         return;
       }
       if (!emailRe.test(email)){
@@ -1021,47 +925,29 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
         emailEl.focus();
         return;
       }
-      var payload = { offre: offre, email: email };
-      if (offre === 'boost'){
-        if (!activiteIdEl.value){
-          errorEl.textContent = 'Merci de sélectionner votre activité dans la liste proposée.';
-          errorEl.style.display = 'block';
-          searchEl.focus();
-          return;
-        }
-        payload.activite_id = Number(activiteIdEl.value);
-      } else {
-        var organisme = searchEl.value.trim();
-        if (!organisme){
-          errorEl.textContent = "Merci d'indiquer le nom de votre organisme.";
-          errorEl.style.display = 'block';
-          searchEl.focus();
-          return;
-        }
-        payload.organisme = organisme;
-      }
 
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Redirection…';
+      submitBtn.textContent = 'Vérification…';
 
-      fetch('/api/create-checkout-session', {
+      fetch('/api/organisateur-claim', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ organisme: organisme, email: email })
       })
         .then(function(res){
           return res.json().catch(function(){ return {}; }).then(function(data){ return { ok: res.ok, data: data }; });
         })
         .then(function(result){
-          if (!result.ok || !result.data.url) throw new Error((result.data && result.data.error) || "Le paiement n'a pas pu être initié.");
+          if (!result.ok || !result.data.token) throw new Error((result.data && result.data.error) || "La vérification a échoué.");
+          confirmEl.textContent = 'Vérifié, redirection vers votre espace…';
           confirmEl.style.display = 'block';
-          window.location.href = result.data.url;
+          window.location.href = '/organisateur.html?token=' + encodeURIComponent(result.data.token);
         })
         .catch(function(err){
-          errorEl.textContent = err.message || "Le paiement n'a pas pu être initié, réessayez dans un instant.";
+          errorEl.textContent = err.message || "La vérification a échoué, réessayez dans un instant.";
           errorEl.style.display = 'block';
           submitBtn.disabled = false;
-          submitBtn.textContent = labels[offre].button;
+          submitBtn.textContent = 'Vérifier et accéder →';
         });
     });
   })();

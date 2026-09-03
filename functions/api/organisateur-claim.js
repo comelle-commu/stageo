@@ -1,16 +1,22 @@
-// "C'est votre activité ? Gérez-la" (bouton sur une carte de activites.html)
-// - contrairement à partenaires.html (recherche par nom, pour quelqu'un
-// qui ne part d'aucune fiche précise), ici l'activité est déjà connue
-// (activite_id vient de la carte cliquée) : il ne reste qu'à vérifier que
-// la personne est bien affiliée avant de lui donner accès à l'espace
-// organisateur.
+// Vérifie qu'une personne est bien affiliée à un organisme et lui donne
+// accès à l'espace organisateur (jeton) si oui - deux points d'entrée
+// possibles, mêmes règles de vérification pour les deux :
+//   - depuis une carte de activites.html ("C'est votre activité ?") :
+//     {activite_id, email} - l'organisme se déduit de cette activité précise.
+//   - depuis partenaires.html ("Accéder à mon espace") : {organisme, email}
+//     - la personne tape elle-même le nom de son organisme (plus simple
+//     qu'une recherche par nom d'activité, qui échoue si le libellé exact
+//     scrapé diffère de ce qu'elle devine, ex. "CCJV" vs "centre communal
+//     des jeux de vacances").
 //
 // Vérification : même logique que metadata.verifie dans
 // create-checkout-session.js - l'email doit correspondre au contact déjà
 // connu pour cet organisme (organisateurs_contact) OU au domaine du site
-// source (lien_source) de l'activité. Si ça correspond : jeton généré
-// (ou réutilisé s'il existe déjà) et renvoyé directement, la personne
-// atterrit dans organisateur.html sans attendre un email. Si ça ne
+// source (lien_source) d'une de ses activités. Si ça correspond : jeton
+// généré (ou réutilisé s'il existe déjà) et renvoyé directement, la
+// personne atterrit dans organisateur.html sans attendre un email - elle
+// choisit ensuite elle-même quoi booster/mettre en avant depuis sa propre
+// liste, jamais en payant à l'aveugle pour une activité devinée. Si ça ne
 // correspond pas : accès refusé, mais pas silencieusement - une
 // notification part immédiatement pour que Muriel vérifie à la main
 // plutôt que de laisser la personne dans une impasse.
@@ -38,12 +44,8 @@ export async function onRequestPost(context) {
   } catch {
     return jsonResponse(400, { error: "Requête invalide." });
   }
-  const { activite_id: activiteIdRaw, email } = body || {};
+  const { activite_id: activiteIdRaw, organisme: organismeRaw, email } = body || {};
 
-  const activiteId = Number(activiteIdRaw);
-  if (!Number.isInteger(activiteId) || activiteId <= 0) {
-    return jsonResponse(400, { error: "Activité invalide." });
-  }
   if (typeof email !== "string" || !EMAIL_RE.test(email)) {
     return jsonResponse(400, { error: "Adresse email invalide." });
   }
@@ -51,18 +53,40 @@ export async function onRequestPost(context) {
 
   const headers = { apikey: secretKey, Authorization: `Bearer ${secretKey}` };
 
-  const activiteRes = await fetch(
-    `${supabaseUrl}/rest/v1/activites?select=id,nom_activite,organisateur,commune,lien_source&id=eq.${activiteId}`,
-    { headers }
-  );
-  const activiteRows = await activiteRes.json();
-  const activite = Array.isArray(activiteRows) ? activiteRows[0] : null;
-  if (!activite) {
-    return jsonResponse(404, { error: "Activité introuvable." });
-  }
-  const sourceKey = activite.organisateur || activite.commune;
-  if (!sourceKey) {
-    return jsonResponse(404, { error: "Cette activité n'est rattachée à aucun organisme identifiable." });
+  let sourceKey, refActivite, lienSource;
+
+  const activiteId = Number(activiteIdRaw);
+  if (Number.isInteger(activiteId) && activiteId > 0) {
+    const activiteRes = await fetch(
+      `${supabaseUrl}/rest/v1/activites?select=id,nom_activite,organisateur,commune,lien_source&id=eq.${activiteId}`,
+      { headers }
+    );
+    const activiteRows = await activiteRes.json();
+    const activite = Array.isArray(activiteRows) ? activiteRows[0] : null;
+    if (!activite) {
+      return jsonResponse(404, { error: "Activité introuvable." });
+    }
+    sourceKey = activite.organisateur || activite.commune;
+    refActivite = activite;
+    lienSource = activite.lien_source;
+    if (!sourceKey) {
+      return jsonResponse(404, { error: "Cette activité n'est rattachée à aucun organisme identifiable." });
+    }
+  } else {
+    const organisme = typeof organismeRaw === "string" ? organismeRaw.trim() : "";
+    if (!organisme || organisme.length > 200) {
+      return jsonResponse(400, { error: "Merci d'indiquer le nom de votre organisme." });
+    }
+    sourceKey = organisme;
+    // Une activité de cet organisme suffit pour récupérer un domaine
+    // source à comparer (voir create-checkout-session.js, même logique).
+    const actRes = await fetch(
+      `${supabaseUrl}/rest/v1/activites?select=id,nom_activite,lien_source&or=(organisateur.eq.${encodeURIComponent(organisme)},commune.eq.${encodeURIComponent(organisme)})&lien_source=not.is.null&limit=1`,
+      { headers }
+    );
+    const actRows = await actRes.json();
+    refActivite = Array.isArray(actRows) && actRows[0] ? actRows[0] : { nom_activite: null, id: null };
+    lienSource = refActivite.lien_source;
   }
 
   const contactRes = await fetch(
@@ -72,11 +96,11 @@ export async function onRequestPost(context) {
   const contactRows = await contactRes.json();
   const existingContact = Array.isArray(contactRows) && contactRows[0] ? contactRows[0] : null;
 
-  const verified = isAffiliated(emailNorm, [existingContact && existingContact.contact_email, activite.lien_source]);
+  const verified = isAffiliated(emailNorm, [existingContact && existingContact.contact_email, lienSource]);
 
   if (!verified) {
     context.waitUntil(
-      notifyUnverifiedClaim(env, supabaseUrl, secretKey, sourceKey, activite, emailNorm).catch((err) => {
+      notifyUnverifiedClaim(env, supabaseUrl, secretKey, sourceKey, refActivite, emailNorm).catch((err) => {
         console.error("Notification de demande d'accès impossible", err);
       })
     );
@@ -116,6 +140,7 @@ export async function onRequest() {
 }
 
 async function notifyUnverifiedClaim(env, supabaseUrl, secretKey, sourceKey, activite, email) {
+  const via = activite && activite.id != null ? ` via l'activité "${activite.nom_activite}" (id ${activite.id})` : "";
   // Trace dans contact_requests (voir migration 20260903) même si la
   // notification email échoue ou n'est pas configurée - ne jamais perdre
   // une demande d'accès.
@@ -131,7 +156,7 @@ async function notifyUnverifiedClaim(env, supabaseUrl, secretKey, sourceKey, act
       {
         type: "claim",
         email,
-        message: `Demande d'accès non vérifiée pour "${sourceKey}" via l'activité "${activite.nom_activite}" (id ${activite.id}).`,
+        message: `Demande d'accès non vérifiée pour "${sourceKey}"${via}.`,
       },
     ]),
   }).catch((err) => console.error("Écriture contact_requests impossible", err));
@@ -150,8 +175,8 @@ async function notifyUnverifiedClaim(env, supabaseUrl, secretKey, sourceKey, act
       to: [{ email: notifyEmail }],
       subject: `Trouvéo — demande d'accès à vérifier (${sourceKey})`,
       htmlContent:
-        `<p><strong>${esc(email)}</strong> demande l'accès à l'espace organisateur de <strong>${esc(sourceKey)}</strong>, ` +
-        `via l'activité "${esc(activite.nom_activite)}" (id ${activite.id}).</p>` +
+        `<p><strong>${esc(email)}</strong> demande l'accès à l'espace organisateur de <strong>${esc(sourceKey)}</strong>` +
+        (activite && activite.id != null ? `, via l'activité "${esc(activite.nom_activite)}" (id ${activite.id}).</p>` : ".</p>") +
         `<p>Son email ne correspond à aucun contact ou domaine déjà connu pour cet organisme - vérifie que c'est légitime avant d'agir.</p>` +
         `<p>Si oui : ajoute/mets à jour la ligne dans <code>organisateurs_contact</code> (source_key = "${esc(sourceKey)}", contact_email = "${esc(email)}"), puis invite via /api/admin-invite-organizer.</p>`,
     }),
