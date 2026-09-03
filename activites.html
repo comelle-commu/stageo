@@ -279,6 +279,44 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   .pill.p-neutral{background:var(--pill-bg);color:var(--pill-ink);}
   .card-link{font-size:12.5px;font-weight:700;color:var(--teal-deep);text-decoration:none;white-space:nowrap;}
   .card-link:hover{text-decoration:underline;}
+  .claim-link{
+    display:block;width:100%;border:none;border-top:1px solid var(--line-soft);background:transparent;
+    color:var(--ink-faint);font-family:'Work Sans',sans-serif;font-size:11px;text-align:center;
+    padding:7px 12px;cursor:pointer;
+  }
+  .claim-link:hover{color:var(--teal-deep);text-decoration:underline;}
+  .claim-modal{
+    position:fixed;inset:0;z-index:50;background:rgba(1,83,128,0.35);padding:20px;
+  }
+  /* [hidden] doit garder la main (display:none) tant que l'attribut est
+     présent - sans ce :not(), cette règle l'emporterait sur le défaut du
+     navigateur et le voile couvrirait toute la page dès le chargement. */
+  .claim-modal:not([hidden]){display:flex;align-items:center;justify-content:center;}
+  .claim-modal-inner{
+    position:relative;background:var(--paper);border-radius:20px;padding:28px 26px;
+    max-width:420px;width:100%;box-shadow:0 24px 60px -20px rgba(1,83,128,0.5);
+  }
+  .claim-modal-inner h3{font-size:18px;margin:0 0 10px;}
+  .claim-modal-inner p{color:var(--ink-soft);font-size:13.5px;line-height:1.6;margin:0 0 16px;}
+  .claim-modal-inner input{
+    width:100%;border:1.5px solid var(--line);background:var(--cream);border-radius:12px;
+    padding:12px 14px;font-size:14.5px;font-family:'Work Sans',sans-serif;color:var(--ink);
+    outline:none;margin-bottom:12px;
+  }
+  .claim-modal-inner input:focus{border-color:var(--teal);}
+  .claim-modal-inner button#claimSubmit{
+    width:100%;border:none;background:var(--teal);color:#fff;font-family:'Work Sans',sans-serif;
+    font-weight:700;font-size:14.5px;padding:12px 20px;border-radius:100px;cursor:pointer;
+  }
+  .claim-modal-inner button#claimSubmit:hover{background:var(--teal-deep);}
+  .claim-modal-inner button#claimSubmit:disabled{opacity:.7;cursor:default;}
+  .claim-close{
+    position:absolute;top:14px;right:16px;border:none;background:none;font-size:22px;
+    line-height:1;color:var(--ink-faint);cursor:pointer;padding:4px;
+  }
+  .claim-msg{font-size:13px;margin-top:12px;line-height:1.5;}
+  .claim-msg.ok{color:var(--teal-deep);font-weight:600;}
+  .claim-msg.err{color:var(--pink);}
 
   /* ---- Mise en avant / organisme vérifié (voir partenaires.html) ---- */
   .card.is-featured{border-color:rgba(226,162,14,0.55);box-shadow:0 14px 30px -18px rgba(226,162,14,0.55);}
@@ -440,6 +478,17 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
   <p class="status-line" id="statusLine">Chargement des activités…</p>
   <div id="results"></div>
   <button class="load-more" id="loadMore" type="button" style="display:none;"></button>
+</div>
+
+<div class="claim-modal" id="claimModal" hidden>
+  <div class="claim-modal-inner">
+    <button type="button" class="claim-close" id="claimClose" aria-label="Fermer">×</button>
+    <h3>C'est votre activité ?</h3>
+    <p id="claimModalText">Indiquez l'email professionnel de votre organisme pour accéder à votre espace (voir vos activités, les corriger, les mettre en avant).</p>
+    <input type="email" id="claimEmail" placeholder="votre@email.be" aria-label="Votre email">
+    <button type="button" id="claimSubmit">Vérifier et accéder →</button>
+    <div class="claim-msg" id="claimMsg"></div>
+  </div>
 </div>
 
 <section class="final wrap">
@@ -1016,6 +1065,82 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
     }, { activiteId: Number(card.dataset.aid) || null, organizerId: card.dataset.org || null });
   });
 
+  // "C'est votre activité ?" - un seul modal partagé (pas un par carte,
+  // les cartes sont régénérées à chaque rendu) - voir
+  // functions/api/organisateur-claim.js pour la vérification côté serveur
+  // (email affilié = accès immédiat, sinon demande transmise à Muriel).
+  (function(){
+    const modal = document.getElementById('claimModal');
+    const modalText = document.getElementById('claimModalText');
+    const emailEl = document.getElementById('claimEmail');
+    const submitBtn = document.getElementById('claimSubmit');
+    const msgEl = document.getElementById('claimMsg');
+    const closeBtn = document.getElementById('claimClose');
+    const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const defaultText = modalText.textContent;
+    let currentActiviteId = null;
+
+    function openModal(activiteId){
+      currentActiviteId = activiteId;
+      emailEl.value = '';
+      msgEl.textContent = '';
+      msgEl.className = 'claim-msg';
+      modalText.textContent = defaultText;
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Vérifier et accéder →';
+      modal.hidden = false;
+      emailEl.focus();
+    }
+    function closeModal(){ modal.hidden = true; currentActiviteId = null; }
+
+    resultsEl.addEventListener('click', function(e){
+      const btn = e.target.closest('.claim-link');
+      if (!btn) return;
+      openModal(Number(btn.dataset.aid));
+    });
+    closeBtn.addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e){ if (e.target === modal) closeModal(); });
+
+    submitBtn.addEventListener('click', function(){
+      msgEl.textContent = '';
+      msgEl.className = 'claim-msg';
+      const email = emailEl.value.trim();
+      if (!emailRe.test(email)){
+        msgEl.textContent = "Merci d'indiquer une adresse email valide.";
+        msgEl.className = 'claim-msg err';
+        return;
+      }
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Vérification…';
+      fetch('/api/organisateur-claim', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ activite_id: currentActiviteId, email: email })
+      })
+        .then(function(res){
+          return res.json().catch(function(){ return {}; }).then(function(data){ return { ok: res.ok, data: data }; });
+        })
+        .then(function(result){
+          if (result.ok && result.data.token){
+            msgEl.textContent = 'Vérifié, redirection…';
+            msgEl.className = 'claim-msg ok';
+            window.location.href = '/organisateur.html?token=' + encodeURIComponent(result.data.token);
+            return;
+          }
+          msgEl.textContent = (result.data && result.data.error) || "La vérification a échoué, réessayez dans un instant.";
+          msgEl.className = 'claim-msg err';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Vérifier et accéder →';
+        })
+        .catch(function(){
+          msgEl.textContent = "La vérification a échoué, réessayez dans un instant.";
+          msgEl.className = 'claim-msg err';
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Vérifier et accéder →';
+        });
+    });
+  })();
+
   function render(){
     updateProximityState();
     const q = searchEl.value.trim().toLowerCase();
@@ -1145,7 +1270,9 @@ window.trouveoConsent.initMetaPixelIfConsented(loadMetaPixel);
         html += '<div class="card-foot"><span class="pill ' + dispo.cls + '">' + esc(dispo.label) + '</span>';
         if (verified && premium.lien_inscription) html += '<a class="card-link" href="' + esc(premium.lien_inscription) + '" target="_blank" rel="noopener noreferrer">S\'inscrire ↗</a>';
         else if (r.lien_source) html += '<a class="card-link" href="' + esc(r.lien_source) + '" target="_blank" rel="noopener noreferrer">Voir la source →</a>';
-        html += '</div></article>';
+        html += '</div>';
+        html += '<button type="button" class="claim-link" data-aid="' + r.id + '">C\'est votre activité ? →</button>';
+        html += '</article>';
       });
       html += '</div>';
       resultsEl.innerHTML = html;
