@@ -12,6 +12,7 @@ ne dit que si Brevo a accepté le message.
 Usage :
   venv/bin/python3 email_stats.py                          # tous les évènements récents (30 jours)
   venv/bin/python3 email_stats.py --email x@example.com     # restreint à un destinataire
+  venv/bin/python3 email_stats.py --email x@example.com,y@example.com  # plusieurs, un appel API par adresse
   venv/bin/python3 email_stats.py --days 14
 """
 from __future__ import annotations
@@ -42,7 +43,11 @@ def fetch_events(email: str | None, days: int) -> list[dict]:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--email", default=None, help="Ne montrer que les évènements pour ce destinataire")
+    parser.add_argument(
+        "--email", default=None,
+        help="Ne montrer que les évènements pour ce(s) destinataire(s) (séparés par une virgule) - "
+        "sinon Brevo renvoie tous les évènements du compte, mélangés avec ceux de Novani (même compte)",
+    )
     parser.add_argument("--days", type=int, default=30, help="Fenêtre en jours (défaut 30)")
     args = parser.parse_args()
 
@@ -50,9 +55,17 @@ def main() -> int:
         print("BREVO_API_KEY manquant - impossible d'interroger les statistiques.")
         return 1
 
-    events = fetch_events(args.email, args.days)
+    # Un appel par adresse (l'API Brevo ne filtre que sur UN destinataire à
+    # la fois) plutôt qu'un seul appel non filtré + tri côté script : sur un
+    # compte partagé avec Novani (bien plus actif), les évènements Trouvéo
+    # se retrouvent hors des `limit=500` plus récents et disparaissent
+    # silencieusement - voir la note du 31/08 dans le plan d'exécution.
+    emails = [e.strip() for e in args.email.split(",")] if args.email else [None]
+    events: list[dict] = []
+    for e in emails:
+        events.extend(fetch_events(e, args.days))
     print(f"{len(events)} évènement(s) sur les {args.days} derniers jours"
-          f"{' pour ' + args.email if args.email else ''}.\n")
+          f"{' pour ' + ', '.join(emails) if args.email else ''}.\n")
 
     by_recipient: dict[str, Counter] = defaultdict(Counter)
     for ev in events:
